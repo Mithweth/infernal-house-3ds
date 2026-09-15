@@ -2,11 +2,15 @@
 #include <3ds.h>
 #include "room_hall.h"
 #include "game.h"
+#include "lang.h"
 
 int main(int argc, char **argv)
 {
     gfxInitDefault();
-
+    romfsInit();
+    if (!lang_init("fr")) {
+    	return 1;
+    }
     C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
     C2D_Init(C2D_DEFAULT_MAX_OBJECTS);
     C2D_Prepare();
@@ -33,6 +37,8 @@ int main(int argc, char **argv)
 
     C2D_Fini();
     C3D_Fini();
+    lang_close();
+	romfsExit();
     gfxExit();
 
     return 0;

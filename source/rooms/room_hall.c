@@ -6,7 +6,7 @@
 #include "hall.h"
 #include "hall_t3x.h"
 
-static bool closet_open = false;
+static bool closet_opened = false;
 static bool carpet_moved = false;
 static bool message_taken = false;
 
@@ -17,16 +17,21 @@ static C2D_Image img_closet_empty;
 static C2D_Image img_carpet_moved;
 static C2D_Image img_message;
 
-static void action_closet(void) {
-    closet_open = !closet_open;
+static void closet_action(void) {
+    closet_opened = !closet_opened;
 }
 
-static void action_carpet(void) {
+static void carpet_action(void) {
     carpet_moved = !carpet_moved;
 }
 
-static void action_message(void) {
-    message_taken = !message_taken;
+static void message_action(void) {
+    message_taken = true;
+}
+
+static bool message_is_active(void)
+{
+    return carpet_moved && !message_taken;
 }
 
 static Hotspot hotspots[] = {
@@ -35,27 +40,27 @@ static Hotspot hotspots[] = {
         .y = 108,
         .width = 65,
         .height = 90,
-        .description = "C'est un vieux buffet en bois.",
+        .text_id = "HALL_CLOSET",
         .is_active = NULL,
-        .action = action_closet
+        .action = closet_action
     },
     {
         .x = 124,
         .y = 200,
         .width = 28,
         .height = 20,
-        .description = "Un message caché.",
-        .is_active = NULL,
-        .action = action_message
+        .text_id = "HALL_MESSAGE",
+        .is_active = message_is_active,
+        .action = message_action
     },
     {
         .x = 46,
         .y = 175,
         .width = 200,
         .height = 65,
-        .description = "Un grand tapis.",
+        .text_id = "HALL_CARPET",
         .is_active = NULL,
-        .action = action_carpet
+        .action = carpet_action
     }
 };
 
@@ -72,7 +77,7 @@ static void hall_init(void) {
 static void hall_draw(void) {
     C2D_DrawImageAt(img_background, 0.0f, 0.0f, 0.0f, NULL, 1.0f, 1.0f);
 
-    if (closet_open) {
+    if (closet_opened) {
         C2D_DrawImageAt(img_closet_opened, 39.0f, 129.0f, 0.1f, NULL, 1.0f, 1.0f);
     }
     if (carpet_moved) {

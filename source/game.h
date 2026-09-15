@@ -11,7 +11,7 @@ typedef struct {
     int y;
     int width;
     int height;
-    const char *description;
+    const char *text_id;
     bool (*is_active)(void);
     void (*action)(void);
 } Hotspot;

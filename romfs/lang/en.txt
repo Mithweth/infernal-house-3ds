@@ -1,0 +1,3 @@
+HALL_CLOSET=It's an old wooden cabinet.
+HALL_CARPET=It's a carpet.
+HALL_MESSAGE=A message is hidden under the carpet.

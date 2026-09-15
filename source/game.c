@@ -1,13 +1,20 @@
 // game.c
 #include <3ds.h>
 #include "game.h"
+#include "lang.h"
 
 static Room *current_room = NULL;
 static GameMode game_mode = GAME_NORMAL;
 static Hotspot *last_hotspot = NULL;
 static const char *examine_text = NULL;
+static C2D_TextBuf text_buf;
+static C2D_Text text;
 
 void game_set_room(Room *room) {
+
+	if (!text_buf)
+        text_buf = C2D_TextBufNew(4096);
+
     if (current_room && current_room->close)
         current_room->close();
 
@@ -26,11 +33,10 @@ void game_close(void) {
         current_room->close();
 
     current_room = NULL;
-}
 
-void game_draw(void) {
-    if (current_room && current_room->draw) {
-        current_room->draw();
+    if (text_buf) {
+        C2D_TextBufDelete(text_buf);
+        text_buf = NULL;
     }
 }
 
@@ -55,9 +61,8 @@ static Hotspot *find_hotspot(int x, int y) {
 }
 
 void game_update(u32 keys) {
-    if (!(keys & KEY_TOUCH)) {
+    if (!(keys & KEY_TOUCH))
         return;
-    }
 
     if (game_mode == GAME_EXAMINE) {
         game_mode = GAME_NORMAL;
@@ -70,35 +75,32 @@ void game_update(u32 keys) {
     Hotspot *hotspot = find_hotspot(touch.px, touch.py);
 
     if (!hotspot) {
-        last_hotspot = NULL;
         return;
     }
 
     if (hotspot == last_hotspot) {
         if (hotspot->action)
             hotspot->action();
-
-        last_hotspot = NULL;
         return;
     }
 
     last_hotspot = hotspot;
-    examine_text = hotspot->description;
-    game_mode = GAME_NORMAL;
+    examine_text = lang_get(hotspot->text_id);
+    game_mode = GAME_EXAMINE;
 }
 
-// void game_draw(void)
-// {
-//     if (!current_room)
-//         return;
+void game_draw(void) {
+    if (!current_room)
+        return;
 
-//     if (current_room->draw)
-//         current_room->draw();
+    if (current_room->draw)
+        current_room->draw();
 
-//     /*
-//      * Plus tard :
-//      *
-//      * if (game_mode == GAME_EXAMINE)
-//      *     draw_examine_text(examine_text);
-//      */
-// }
+    if (game_mode == GAME_EXAMINE) {
+	    C2D_TextBufClear(text_buf);
+	    C2D_TextParse(&text, text_buf, examine_text);
+	    C2D_TextOptimize(&text);
+	    C2D_DrawRectSolid(10.0f, 185.0f, 0.8f, 300.0f, 45.0f, C2D_Color32(0, 0, 0, 180));
+	    C2D_DrawText(&text, C2D_WithColor, 20.0f, 197.0f, 0.9f, 0.5f, 0.5f, C2D_Color32(255, 255, 255, 255));
+	}
+}
