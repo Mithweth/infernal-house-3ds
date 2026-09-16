@@ -12,11 +12,13 @@ static C2D_Text text;
 
 void game_set_room(Room *room) {
 
-	if (!text_buf)
+	if (!text_buf) {
         text_buf = C2D_TextBufNew(4096);
+	}
 
-    if (current_room && current_room->close)
+    if (current_room && current_room->close) {
         current_room->close();
+    }
 
     current_room = room;
 
@@ -24,8 +26,9 @@ void game_set_room(Room *room) {
     game_mode = GAME_NORMAL;
     examine_text = NULL;
 
-    if (current_room && current_room->init)
+    if (current_room && current_room->init) {
         current_room->init();
+    }
 }
 
 void game_close(void) {

@@ -1,0 +1,4 @@
+--atlas -f rgba8888 -z auto
+item_magnify_glass.png
+item_screwdriver.png
+item_flashlight.png
