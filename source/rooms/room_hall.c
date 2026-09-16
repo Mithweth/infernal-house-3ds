@@ -173,13 +173,13 @@ static Hotspot hotspots[] = {
 
 static void hall_init(void) {
     hall_scene = C2D_SpriteSheetLoadFromMem(hall_gfx_t3x, hall_gfx_t3x_size);
-    img_background = C2D_SpriteSheetGetImage(hall_scene, hall_gfx_1_bg_idx);
-    img_right_closet_opened = C2D_SpriteSheetGetImage(hall_scene, hall_gfx_1_right_closet_opened_idx);
-    img_right_closet_empty = C2D_SpriteSheetGetImage(hall_scene, hall_gfx_1_right_closet_empty_idx);
-    img_left_closet_opened = C2D_SpriteSheetGetImage(hall_scene, hall_gfx_1_left_closet_opened_idx);
-    img_left_closet_empty = C2D_SpriteSheetGetImage(hall_scene, hall_gfx_1_left_closet_empty_idx);
-    img_carpet_moved = C2D_SpriteSheetGetImage(hall_scene, hall_gfx_1_carpet_moved_idx);
-    img_message = C2D_SpriteSheetGetImage(hall_scene, hall_gfx_1_message_idx);
+    img_background = C2D_SpriteSheetGetImage(hall_scene, hall_gfx_bg_idx);
+    img_right_closet_opened = C2D_SpriteSheetGetImage(hall_scene, hall_gfx_right_closet_opened_idx);
+    img_right_closet_empty = C2D_SpriteSheetGetImage(hall_scene, hall_gfx_right_closet_empty_idx);
+    img_left_closet_opened = C2D_SpriteSheetGetImage(hall_scene, hall_gfx_left_closet_opened_idx);
+    img_left_closet_empty = C2D_SpriteSheetGetImage(hall_scene, hall_gfx_left_closet_empty_idx);
+    img_carpet_moved = C2D_SpriteSheetGetImage(hall_scene, hall_gfx_carpet_moved_idx);
+    img_message = C2D_SpriteSheetGetImage(hall_scene, hall_gfx_message_idx);
 }
 
 static void hall_draw(void) {

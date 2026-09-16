@@ -51,35 +51,35 @@ void inventory_init(void) {
     items[ITEM_MESSAGE] = (Item) {
         .id = ITEM_MESSAGE,
         .name_id = "ITEM_MESSAGE",
-        .image = C2D_SpriteSheetGetImage(inventory_scene, inventory_gfx_item_message_idx),
+        .image = C2D_SpriteSheetGetImage(inventory_scene, inventory_gfx_message_idx),
         .draw_action = message_draw_action
     };
 
     items[ITEM_MAGNIFYING_GLASS] = (Item) {
         .id = ITEM_MAGNIFYING_GLASS,
         .name_id = "ITEM_MAGNIFYING_GLASS",
-        .image = C2D_SpriteSheetGetImage(inventory_scene, inventory_gfx_item_magnify_glass_idx),
+        .image = C2D_SpriteSheetGetImage(inventory_scene, inventory_gfx_magnify_glass_idx),
         .action = NULL
     };
 
     items[ITEM_SCREWDRIVER] = (Item) {
         .id = ITEM_SCREWDRIVER,
         .name_id = "ITEM_SCREWDRIVER",
-        .image = C2D_SpriteSheetGetImage(inventory_scene, inventory_gfx_item_screwdriver_idx),
+        .image = C2D_SpriteSheetGetImage(inventory_scene, inventory_gfx_screwdriver_idx),
         .action = NULL
     };
 
     items[ITEM_BINOCULARS] = (Item) {
         .id = ITEM_BINOCULARS,
         .name_id = "ITEM_BINOCULARS",
-        .image = C2D_SpriteSheetGetImage(inventory_scene, inventory_gfx_item_binoculars_idx),
+        .image = C2D_SpriteSheetGetImage(inventory_scene, inventory_gfx_binoculars_idx),
         .action = NULL
     };
 
     items[ITEM_FLASHLIGHT] = (Item) {
         .id = ITEM_FLASHLIGHT,
         .name_id = "ITEM_FLASHLIGHT",
-        .image = C2D_SpriteSheetGetImage(inventory_scene, inventory_gfx_item_flashlight_idx),
+        .image = C2D_SpriteSheetGetImage(inventory_scene, inventory_gfx_flashlight_idx),
         .action = NULL
     };
 

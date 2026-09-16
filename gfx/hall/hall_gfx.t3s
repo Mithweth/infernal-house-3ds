@@ -1,0 +1,8 @@
+--atlas -f rgba8888 -z auto
+bg.png
+right_closet_opened.png
+right_closet_empty.png
+left_closet_opened.png
+left_closet_empty.png
+carpet_moved.png
+message.png
