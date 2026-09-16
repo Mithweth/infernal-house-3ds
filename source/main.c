@@ -28,8 +28,9 @@ int main(int argc, char **argv)
 	    if (keys & KEY_START)
 	        break;
 
-	    game_update(keys);
-    	inventory_update(keys);
+    	if (!inventory_update(keys)) {
+	    	game_update(keys);
+		}
 	    C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
 
 	    C2D_TargetClear(bottom, C2D_Color32(0, 0, 0, 255));

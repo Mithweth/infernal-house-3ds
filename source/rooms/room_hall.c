@@ -11,7 +11,6 @@
 static bool left_closet_opened = false;
 static bool right_closet_opened = false;
 static bool carpet_moved = false;
-static bool message_taken = false;
 
 static C2D_SpriteSheet hall_scene;
 static C2D_Image img_background;
@@ -35,11 +34,11 @@ static void carpet_action(void) {
 }
 
 static void message_action(void) {
-    message_taken = true;
+    inventory_add(ITEM_MESSAGE);
 }
 
 static bool message_is_active(void) {
-    return carpet_moved && !message_taken;
+    return carpet_moved && !inventory_has(ITEM_MESSAGE);
 }
 
 static bool left_closet_contents_is_active(void) {
@@ -57,6 +56,7 @@ static void left_closet_contents_action(void) {
 
 static void right_closet_contents_action(void) {
     inventory_add(ITEM_FLASHLIGHT);
+    inventory_add(ITEM_BINOCULARS);
 }
 
 static Hotspot hotspots[] = {
@@ -201,7 +201,7 @@ static void hall_draw(void) {
     }
     if (carpet_moved) {
         C2D_DrawImageAt(img_carpet_moved, 22.0f, 169.0f, 0.2f, NULL, 1.0f, 1.0f);
-        if (!message_taken) {
+        if (!inventory_has(ITEM_MESSAGE)) {
             C2D_DrawImageAt(img_message, 124.0f, 200.0f, 0.3f, NULL, 1.0f, 1.0f);
         }
     }

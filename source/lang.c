@@ -18,6 +18,24 @@ static Translation translations[MAX_TRANSLATIONS];
 static size_t translation_count = 0;
 
 
+static void unescape(char *str)
+{
+    char *src = str;
+    char *dst = str;
+
+    while (*src) {
+        if (src[0] == '\\' && src[1] == 'n') {
+            *dst++ = '\n';
+            src += 2;
+        } else {
+            *dst++ = *src++;
+        }
+    }
+
+    *dst = '\0';
+}
+
+
 void lang_close(void) {
     for (size_t i = 0; i < translation_count; i++) {
         free(translations[i].key);
@@ -67,6 +85,7 @@ bool lang_init(const char *language) {
             break;
         }
 
+        unescape(value);
         translations[translation_count].key = strdup(key);
         translations[translation_count].value = strdup(value);
 

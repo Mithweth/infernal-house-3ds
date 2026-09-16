@@ -18,7 +18,13 @@ typedef struct Item {
     const char *name_id;
     C2D_Image image;
     void (*action)(struct Item *item);
+    void (*draw_action)(struct Item *item);
 } Item;
+
+typedef enum {
+    INVENTORY_NORMAL,
+    INVENTORY_ACTION
+} InventoryMode;
 
 void inventory_init(void);
 void inventory_close(void);
@@ -26,5 +32,6 @@ void inventory_close(void);
 void inventory_add(ItemId item);
 bool inventory_has(ItemId item);
 
-void inventory_update(u32 keys);
+bool inventory_update(u32 keys);
 void inventory_draw(void);
+bool inventory_is_active(void);

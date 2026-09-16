@@ -2,6 +2,8 @@
 #include <3ds.h>
 #include "game.h"
 #include "lang.h"
+#include "inventory.h"
+
 
 static Room *current_room = NULL;
 static GameMode game_mode = GAME_NORMAL;
@@ -64,8 +66,13 @@ static Hotspot *find_hotspot(int x, int y) {
 }
 
 void game_update(u32 keys) {
-    if (!(keys & KEY_TOUCH))
+    if (inventory_is_active()) {
         return;
+    }
+
+    if (!(keys & KEY_TOUCH)) {
+        return;
+    }
 
     if (game_mode == GAME_EXAMINE) {
         game_mode = GAME_NORMAL;
