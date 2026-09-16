@@ -4,6 +4,7 @@
 #include "game.h"
 #include "lang.h"
 #include "inventory.h"
+#include "hud.h"
 
 int main(int argc, char **argv)
 {
@@ -17,7 +18,7 @@ int main(int argc, char **argv)
     C2D_Prepare();
     C3D_RenderTarget *top = C2D_CreateScreenTarget(GFX_TOP, GFX_LEFT);
     C3D_RenderTarget *bottom = C2D_CreateScreenTarget(GFX_BOTTOM, GFX_LEFT);
-    inventory_init();
+    hud_init();
     game_set_room(&hall);
 
 	while (aptMainLoop())
@@ -25,11 +26,18 @@ int main(int argc, char **argv)
 	    hidScanInput();
 	    u32 keys = hidKeysDown();
 
-	    if (keys & KEY_START)
+		circlePosition analog;
+		hidCircleRead(&analog);
+
+    	touchPosition touch;
+    	hidTouchRead(&touch);
+
+	    if (keys & KEY_START) {
 	        break;
+	    }
 
     	if (!inventory_update(keys)) {
-	    	game_update(keys);
+	    	game_update(keys, analog, touch);
 		}
 	    C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
 
@@ -39,13 +47,13 @@ int main(int argc, char **argv)
 
 	    C2D_TargetClear(top, C2D_Color32(0, 0, 0, 255));
 	    C2D_SceneBegin(top);
-	    inventory_draw();
+	    hud_draw();
 
 	    C3D_FrameEnd(0);
 	}
 
     game_close();
-    inventory_close();
+    hud_close();
     C2D_Fini();
     C3D_Fini();
     lang_close();

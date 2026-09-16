@@ -2,4 +2,4 @@
 
 #include "game.h"
 
-extern Room diningroom;
+extern Room dining_room;

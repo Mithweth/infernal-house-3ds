@@ -168,18 +168,6 @@ bool inventory_update(u32 keys) {
 }
 
 void inventory_draw(void) {
-    u32 background = C2D_Color32(8, 12, 30, 255);
-    u32 border     = C2D_Color32(190, 145, 40, 255);
-    u32 panel      = C2D_Color32(18, 28, 55, 255);
-
-    C2D_DrawRectSolid(0.0f, 0.0f, 0.0f, 400.0f, 240.0f, background);
-    C2D_DrawRectSolid(5.0f, 5.0f, 0.1f, 390.0f, 160.0f, border);
-    C2D_DrawRectSolid(7.0f, 7.0f, 0.2f, 386.0f, 156.0f, panel);
-    C2D_DrawRectSolid(5.0f, 170.0f, 0.1f, 190.0f, 65.0f, border);
-    C2D_DrawRectSolid(7.0f, 172.0f, 0.2f, 186.0f, 61.0f, panel);
-    C2D_DrawRectSolid(205.0f, 170.0f, 0.1f, 190.0f, 65.0f, border);
-    C2D_DrawRectSolid(207.0f, 172.0f, 0.2f, 186.0f, 61.0f, panel);
-
     if (inventory_count == 0) {
         return;
     }

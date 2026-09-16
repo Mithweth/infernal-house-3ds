@@ -2,7 +2,7 @@
 
 #include "game.h"
 #include "room_hall.h"
-
+#include "room_diningroom.h"
 #include "hall_gfx.h"
 #include "hall_gfx_t3x.h"
 #include "inventory.h"
@@ -12,7 +12,7 @@ static bool left_closet_opened = false;
 static bool right_closet_opened = false;
 static bool carpet_moved = false;
 
-static C2D_SpriteSheet hall_scene;
+static C2D_SpriteSheet room_scene;
 static C2D_Image img_background;
 static C2D_Image img_left_closet_opened;
 static C2D_Image img_left_closet_empty;
@@ -171,18 +171,18 @@ static Hotspot hotspots[] = {
 };
 
 
-static void hall_init(void) {
-    hall_scene = C2D_SpriteSheetLoadFromMem(hall_gfx_t3x, hall_gfx_t3x_size);
-    img_background = C2D_SpriteSheetGetImage(hall_scene, hall_gfx_bg_idx);
-    img_right_closet_opened = C2D_SpriteSheetGetImage(hall_scene, hall_gfx_right_closet_opened_idx);
-    img_right_closet_empty = C2D_SpriteSheetGetImage(hall_scene, hall_gfx_right_closet_empty_idx);
-    img_left_closet_opened = C2D_SpriteSheetGetImage(hall_scene, hall_gfx_left_closet_opened_idx);
-    img_left_closet_empty = C2D_SpriteSheetGetImage(hall_scene, hall_gfx_left_closet_empty_idx);
-    img_carpet_moved = C2D_SpriteSheetGetImage(hall_scene, hall_gfx_carpet_moved_idx);
-    img_message = C2D_SpriteSheetGetImage(hall_scene, hall_gfx_message_idx);
+static void room_init(void) {
+    room_scene = C2D_SpriteSheetLoadFromMem(hall_gfx_t3x, hall_gfx_t3x_size);
+    img_background = C2D_SpriteSheetGetImage(room_scene, hall_gfx_bg_idx);
+    img_right_closet_opened = C2D_SpriteSheetGetImage(room_scene, hall_gfx_right_closet_opened_idx);
+    img_right_closet_empty = C2D_SpriteSheetGetImage(room_scene, hall_gfx_right_closet_empty_idx);
+    img_left_closet_opened = C2D_SpriteSheetGetImage(room_scene, hall_gfx_left_closet_opened_idx);
+    img_left_closet_empty = C2D_SpriteSheetGetImage(room_scene, hall_gfx_left_closet_empty_idx);
+    img_carpet_moved = C2D_SpriteSheetGetImage(room_scene, hall_gfx_carpet_moved_idx);
+    img_message = C2D_SpriteSheetGetImage(room_scene, hall_gfx_message_idx);
 }
 
-static void hall_draw(void) {
+static void room_draw(void) {
     C2D_DrawImageAt(img_background, 0.0f, 0.0f, 0.0f, NULL, 1.0f, 1.0f);
 
     if (right_closet_opened) {
@@ -207,14 +207,18 @@ static void hall_draw(void) {
     }
 }
 
-static void hall_close(void) {
-    C2D_SpriteSheetFree(hall_scene);
+static void room_close(void) {
+    C2D_SpriteSheetFree(room_scene);
 }
 
 Room hall = {
     .hotspots = hotspots,
     .hotspot_count = sizeof(hotspots) / sizeof(hotspots[0]),
-    .init = hall_init,
-    .draw = hall_draw,
-    .close = hall_close
+    .up = &dining_room,
+    .down = NULL,
+    .left = NULL,
+    .right = NULL,
+    .init = room_init,
+    .draw = room_draw,
+    .close = room_close
 };

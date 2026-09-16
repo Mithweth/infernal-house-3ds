@@ -4,9 +4,10 @@
 #include "lang.h"
 #include "inventory.h"
 
-
+const int THRESHOLD = 80;
 static Room *current_room = NULL;
 static GameMode game_mode = GAME_NORMAL;
+static bool circle_ready = true;
 static Hotspot *last_hotspot = NULL;
 static const char *examine_text = NULL;
 static C2D_TextBuf text_buf;
@@ -65,22 +66,55 @@ static Hotspot *find_hotspot(int x, int y) {
     return NULL;
 }
 
-void game_update(u32 keys) {
-    if (inventory_is_active()) {
+bool game_can_move_up(void) {
+    return current_room && current_room->up;
+}
+
+bool game_can_move_down(void) {
+    return current_room && current_room->down;
+}
+
+bool game_can_move_left(void) {
+    return current_room && current_room->left;
+}
+
+bool game_can_move_right(void) {
+    return current_room && current_room->right;
+}
+
+static void update_movement(circlePosition analog) {
+	bool neutral = analog.dx > -THRESHOLD && analog.dx < THRESHOLD && analog.dy > -THRESHOLD && analog.dy < THRESHOLD;
+
+    printf("circle: dx=%d dy=%d neutral=%d\n", analog.dx, analog.dy, neutral);
+    if (neutral) {
+        circle_ready = true;
         return;
     }
 
-    if (!(keys & KEY_TOUCH)) {
+    if (!circle_ready) {
         return;
     }
 
+    if (analog.dy > THRESHOLD && current_room->up) {
+        circle_ready = false;
+        game_set_room(current_room->up);
+    } else if (analog.dy < -THRESHOLD && current_room->down) {
+        circle_ready = false;
+        game_set_room(current_room->down);
+    } else if (analog.dx < -THRESHOLD && current_room->left) {
+        circle_ready = false;
+        game_set_room(current_room->left);
+    } else if (analog.dx > THRESHOLD && current_room->right) {
+        circle_ready = false;
+        game_set_room(current_room->right);
+    }
+}
+
+static void update_touch(touchPosition touch) {
     if (game_mode == GAME_EXAMINE) {
         game_mode = GAME_NORMAL;
         return;
     }
-
-    touchPosition touch;
-    hidTouchRead(&touch);
 
     Hotspot *hotspot = find_hotspot(touch.px, touch.py);
 
@@ -97,6 +131,18 @@ void game_update(u32 keys) {
     last_hotspot = hotspot;
     examine_text = lang_get(hotspot->text_id);
     game_mode = GAME_EXAMINE;
+}
+
+void game_update(u32 keys, circlePosition analog, touchPosition touch) {
+    if (inventory_is_active()) {
+        return;
+    }
+
+    update_movement(analog);
+
+    if (keys & KEY_TOUCH) {
+        update_touch(touch);
+    }
 }
 
 void game_draw(void) {

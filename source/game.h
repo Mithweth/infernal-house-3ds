@@ -16,10 +16,14 @@ typedef struct {
     void (*action)(void);
 } Hotspot;
 
-typedef struct {
+typedef struct Room {
     C2D_Image background;
     Hotspot *hotspots;
     size_t hotspot_count;
+    struct Room *up;
+    struct Room *down;
+    struct Room *left;
+    struct Room *right;
     void (*init)(void);
     void (*draw)(void);
     void (*close)(void);
@@ -30,7 +34,11 @@ typedef enum {
     GAME_EXAMINE
 } GameMode;
 
-void game_update(u32 keys);
+void game_update(u32 keys, circlePosition analog, touchPosition touch);
 void game_draw(void);
 void game_close(void);
 void game_set_room(Room *room);
+bool game_can_move_up(void);
+bool game_can_move_down(void);
+bool game_can_move_left(void);
+bool game_can_move_right(void);
