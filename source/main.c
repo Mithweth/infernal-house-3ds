@@ -3,8 +3,15 @@
 #include "room_hall.h"
 #include "game.h"
 #include "lang.h"
-#include "inventory.h"
 #include "hud.h"
+
+static aptHookCookie apt_cookie;
+
+static void apt_callback(APT_HookType hook, void *param) {
+    if (hook == APTHOOK_ONRESTORE) {
+        timer_resume();
+    }
+}
 
 int main(int argc, char **argv)
 {
@@ -19,6 +26,8 @@ int main(int argc, char **argv)
     C3D_RenderTarget *top = C2D_CreateScreenTarget(GFX_TOP, GFX_LEFT);
     C3D_RenderTarget *bottom = C2D_CreateScreenTarget(GFX_BOTTOM, GFX_LEFT);
     hud_init();
+    gameover_init();
+    aptHook(&apt_cookie, apt_callback, NULL);
     game_set_room(&hall);
 
 	while (aptMainLoop())
@@ -36,9 +45,8 @@ int main(int argc, char **argv)
 	        break;
 	    }
 
-    	if (!inventory_update(keys)) {
-	    	game_update(keys, analog, touch);
-		}
+	    hud_update();
+    	game_update(keys, analog, touch);
 	    C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
 
 	    C2D_TargetClear(bottom, C2D_Color32(0, 0, 0, 255));
@@ -52,6 +60,7 @@ int main(int argc, char **argv)
 	    C3D_FrameEnd(0);
 	}
 
+	aptUnhook(&apt_cookie);
     game_close();
     hud_close();
     C2D_Fini();

@@ -3,6 +3,10 @@
 #include "game.h"
 #include "lang.h"
 #include "inventory.h"
+#include "gamestate.h"
+#include "room_hall.h"
+#include "gameover.h"
+#include "hud.h"
 
 const int THRESHOLD = 80;
 static Room *current_room = NULL;
@@ -13,8 +17,8 @@ static const char *examine_text = NULL;
 static C2D_TextBuf text_buf;
 static C2D_Text text;
 
-void game_set_room(Room *room) {
 
+void game_set_room(Room *room) {
 	if (!text_buf) {
         text_buf = C2D_TextBufNew(4096);
 	}
@@ -44,6 +48,21 @@ void game_close(void) {
         C2D_TextBufDelete(text_buf);
         text_buf = NULL;
     }
+}
+
+void game_over(GameOverId id) {
+	game_mode = GAME_OVER;
+	gameover_set(id);
+}
+
+void game_reset(void) {
+    inventory_reset();
+    gamestate_reset();
+    hud_reset();
+    game_mode = GAME_NORMAL;
+    examine_text = NULL;
+    last_hotspot = NULL;
+    game_set_room(&hall);
 }
 
 static Hotspot *find_hotspot(int x, int y) {
@@ -84,8 +103,6 @@ bool game_can_move_right(void) {
 
 static void update_movement(circlePosition analog) {
 	bool neutral = analog.dx > -THRESHOLD && analog.dx < THRESHOLD && analog.dy > -THRESHOLD && analog.dy < THRESHOLD;
-
-    printf("circle: dx=%d dy=%d neutral=%d\n", analog.dx, analog.dy, neutral);
     if (neutral) {
         circle_ready = true;
         return;
@@ -97,16 +114,16 @@ static void update_movement(circlePosition analog) {
 
     if (analog.dy > THRESHOLD && current_room->up) {
         circle_ready = false;
-        game_set_room(current_room->up);
+        current_room->up();
     } else if (analog.dy < -THRESHOLD && current_room->down) {
         circle_ready = false;
-        game_set_room(current_room->down);
+        current_room->down();
     } else if (analog.dx < -THRESHOLD && current_room->left) {
         circle_ready = false;
-        game_set_room(current_room->left);
+        current_room->left();
     } else if (analog.dx > THRESHOLD && current_room->right) {
         circle_ready = false;
-        game_set_room(current_room->right);
+        current_room->right();
     }
 }
 
@@ -134,7 +151,14 @@ static void update_touch(touchPosition touch) {
 }
 
 void game_update(u32 keys, circlePosition analog, touchPosition touch) {
-    if (inventory_is_active()) {
+    if (game_mode == GAME_OVER) {
+        if (keys & KEY_A) {
+            game_reset();
+        }
+        return;
+    }
+
+    if ((inventory_is_active()) || (inventory_update(keys))) {
         return;
     }
 
@@ -146,6 +170,10 @@ void game_update(u32 keys, circlePosition analog, touchPosition touch) {
 }
 
 void game_draw(void) {
+    if (game_mode == GAME_OVER) {
+        gameover_draw();
+        return;
+    }
     if (!current_room)
         return;
 

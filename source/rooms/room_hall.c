@@ -3,14 +3,9 @@
 #include "game.h"
 #include "room_hall.h"
 #include "room_diningroom.h"
-#include "hall_gfx.h"
-#include "hall_gfx_t3x.h"
+#include "gfx_hall.h"
 #include "inventory.h"
-
-
-static bool left_closet_opened = false;
-static bool right_closet_opened = false;
-static bool carpet_moved = false;
+#include "gamestate.h"
 
 static C2D_SpriteSheet room_scene;
 static C2D_Image img_background;
@@ -21,16 +16,17 @@ static C2D_Image img_right_closet_empty;
 static C2D_Image img_carpet_moved;
 static C2D_Image img_message;
 
+
 static void left_closet_action(void) {
-    left_closet_opened = !left_closet_opened;
+    gamestate_open_hall_left_closet(!gamestate_is_hall_left_closet_opened());
 }
 
 static void right_closet_action(void) {
-    right_closet_opened = !right_closet_opened;
+    gamestate_open_hall_right_closet(!gamestate_is_hall_right_closet_opened());
 }
 
 static void carpet_action(void) {
-    carpet_moved = !carpet_moved;
+    gamestate_move_hall_carpet(!gamestate_is_hall_carpet_moved());
 }
 
 static void message_action(void) {
@@ -38,15 +34,15 @@ static void message_action(void) {
 }
 
 static bool message_is_active(void) {
-    return carpet_moved && !inventory_has(ITEM_MESSAGE);
+    return gamestate_is_hall_carpet_moved() && !inventory_has(ITEM_MESSAGE);
 }
 
 static bool left_closet_contents_is_active(void) {
-    return left_closet_opened && !inventory_has(ITEM_SCREWDRIVER);
+    return gamestate_is_hall_left_closet_opened() && !inventory_has(ITEM_SCREWDRIVER);
 }
 
 static bool right_closet_contents_is_active(void) {
-    return right_closet_opened && !inventory_has(ITEM_FLASHLIGHT);
+    return gamestate_is_hall_right_closet_opened() && !inventory_has(ITEM_FLASHLIGHT);
 }
 
 static void left_closet_contents_action(void) {
@@ -58,6 +54,7 @@ static void right_closet_contents_action(void) {
     inventory_add(ITEM_FLASHLIGHT);
     inventory_add(ITEM_BINOCULARS);
 }
+
 
 static Hotspot hotspots[] = {
     {
@@ -170,36 +167,35 @@ static Hotspot hotspots[] = {
     }
 };
 
-
 static void room_init(void) {
-    room_scene = C2D_SpriteSheetLoadFromMem(hall_gfx_t3x, hall_gfx_t3x_size);
-    img_background = C2D_SpriteSheetGetImage(room_scene, hall_gfx_bg_idx);
-    img_right_closet_opened = C2D_SpriteSheetGetImage(room_scene, hall_gfx_right_closet_opened_idx);
-    img_right_closet_empty = C2D_SpriteSheetGetImage(room_scene, hall_gfx_right_closet_empty_idx);
-    img_left_closet_opened = C2D_SpriteSheetGetImage(room_scene, hall_gfx_left_closet_opened_idx);
-    img_left_closet_empty = C2D_SpriteSheetGetImage(room_scene, hall_gfx_left_closet_empty_idx);
-    img_carpet_moved = C2D_SpriteSheetGetImage(room_scene, hall_gfx_carpet_moved_idx);
-    img_message = C2D_SpriteSheetGetImage(room_scene, hall_gfx_message_idx);
+    room_scene = C2D_SpriteSheetLoad("romfs:/gfx/gfx_hall.t3x");
+    img_background = C2D_SpriteSheetGetImage(room_scene, gfx_hall_bg_idx);
+    img_right_closet_opened = C2D_SpriteSheetGetImage(room_scene, gfx_hall_right_closet_opened_idx);
+    img_right_closet_empty = C2D_SpriteSheetGetImage(room_scene, gfx_hall_right_closet_empty_idx);
+    img_left_closet_opened = C2D_SpriteSheetGetImage(room_scene, gfx_hall_left_closet_opened_idx);
+    img_left_closet_empty = C2D_SpriteSheetGetImage(room_scene, gfx_hall_left_closet_empty_idx);
+    img_carpet_moved = C2D_SpriteSheetGetImage(room_scene, gfx_hall_carpet_moved_idx);
+    img_message = C2D_SpriteSheetGetImage(room_scene, gfx_hall_message_idx);
 }
 
 static void room_draw(void) {
     C2D_DrawImageAt(img_background, 0.0f, 0.0f, 0.0f, NULL, 1.0f, 1.0f);
 
-    if (right_closet_opened) {
+    if (gamestate_is_hall_right_closet_opened()) {
         if (inventory_has(ITEM_FLASHLIGHT)) {
             C2D_DrawImageAt(img_right_closet_empty, 39.0f, 130.0f, 0.1f, NULL, 1.0f, 1.0f);
         } else {
             C2D_DrawImageAt(img_right_closet_opened, 39.0f, 129.0f, 0.1f, NULL, 1.0f, 1.0f);
         }
     }
-    if (left_closet_opened) {
+    if (gamestate_is_hall_left_closet_opened()) {
         if (inventory_has(ITEM_SCREWDRIVER)) {
             C2D_DrawImageAt(img_left_closet_empty, 0.0f, 144.0f, 0.1f, NULL, 1.0f, 1.0f);
         } else {
             C2D_DrawImageAt(img_left_closet_opened, 0.0f, 144.0f, 0.1f, NULL, 1.0f, 1.0f);
         }
     }
-    if (carpet_moved) {
+    if (gamestate_is_hall_carpet_moved()) {
         C2D_DrawImageAt(img_carpet_moved, 22.0f, 169.0f, 0.2f, NULL, 1.0f, 1.0f);
         if (!inventory_has(ITEM_MESSAGE)) {
             C2D_DrawImageAt(img_message, 124.0f, 200.0f, 0.3f, NULL, 1.0f, 1.0f);
@@ -207,14 +203,19 @@ static void room_draw(void) {
     }
 }
 
+
 static void room_close(void) {
     C2D_SpriteSheetFree(room_scene);
+}
+
+static void up_action(void) {
+    game_set_room(&dining_room);
 }
 
 Room hall = {
     .hotspots = hotspots,
     .hotspot_count = sizeof(hotspots) / sizeof(hotspots[0]),
-    .up = &dining_room,
+    .up = up_action,
     .down = NULL,
     .left = NULL,
     .right = NULL,

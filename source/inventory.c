@@ -4,8 +4,8 @@
 
 #include "lang.h"
 #include "inventory.h"
-#include "inventory_gfx.h"
-#include "inventory_gfx_t3x.h"
+#include "gfx_inventory.h"
+#include "gfx_inventory_t3x.h"
 
 #define ITEM_SIZE       48.0f
 #define ITEM_SPACING    15.0f
@@ -38,7 +38,7 @@ bool inventory_is_active(void) {
 }
 
 void inventory_init(void) {
-    inventory_scene = C2D_SpriteSheetLoadFromMem(inventory_gfx_t3x, inventory_gfx_t3x_size);
+    inventory_scene = C2D_SpriteSheetLoadFromMem(gfx_inventory_t3x, gfx_inventory_t3x_size);
 
     if (!inventory_scene) {
         return;
@@ -51,35 +51,35 @@ void inventory_init(void) {
     items[ITEM_MESSAGE] = (Item) {
         .id = ITEM_MESSAGE,
         .name_id = "ITEM_MESSAGE",
-        .image = C2D_SpriteSheetGetImage(inventory_scene, inventory_gfx_message_idx),
+        .image = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_message_idx),
         .draw_action = message_draw_action
     };
 
     items[ITEM_MAGNIFYING_GLASS] = (Item) {
         .id = ITEM_MAGNIFYING_GLASS,
         .name_id = "ITEM_MAGNIFYING_GLASS",
-        .image = C2D_SpriteSheetGetImage(inventory_scene, inventory_gfx_magnify_glass_idx),
+        .image = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_magnify_glass_idx),
         .action = NULL
     };
 
     items[ITEM_SCREWDRIVER] = (Item) {
         .id = ITEM_SCREWDRIVER,
         .name_id = "ITEM_SCREWDRIVER",
-        .image = C2D_SpriteSheetGetImage(inventory_scene, inventory_gfx_screwdriver_idx),
+        .image = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_screwdriver_idx),
         .action = NULL
     };
 
     items[ITEM_BINOCULARS] = (Item) {
         .id = ITEM_BINOCULARS,
         .name_id = "ITEM_BINOCULARS",
-        .image = C2D_SpriteSheetGetImage(inventory_scene, inventory_gfx_binoculars_idx),
+        .image = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_binoculars_idx),
         .action = NULL
     };
 
     items[ITEM_FLASHLIGHT] = (Item) {
         .id = ITEM_FLASHLIGHT,
         .name_id = "ITEM_FLASHLIGHT",
-        .image = C2D_SpriteSheetGetImage(inventory_scene, inventory_gfx_flashlight_idx),
+        .image = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_flashlight_idx),
         .action = NULL
     };
 
@@ -99,6 +99,12 @@ void inventory_close(void) {
 
     inventory_count = 0;
     selected = 0;
+}
+
+void inventory_reset(void) {
+	inventory_count = 0;
+    selected = 0;
+    inventory_mode = INVENTORY_NORMAL;
 }
 
 
@@ -137,7 +143,7 @@ bool inventory_update(u32 keys) {
         return false;
     }
 
-    if (keys & KEY_LEFT) {
+    if (keys & KEY_DLEFT) {
         if (selected == 0) {
             selected = inventory_count - 1;
         } else {
@@ -146,7 +152,7 @@ bool inventory_update(u32 keys) {
         return true;
     }
 
-    if (keys & KEY_RIGHT) {
+    if (keys & KEY_DRIGHT) {
         selected++;
         if (selected >= inventory_count) {
             selected = 0;
@@ -197,6 +203,6 @@ void inventory_draw(void) {
 	C2D_TextBufClear(text_buf);
 	C2D_TextParse(&text, text_buf, lang_get(item->name_id));
 	C2D_TextOptimize(&text);
-	C2D_DrawRectSolid(100.0f, 120.0f, 0.4f, 200.0f, 20.0f, C2D_Color32(0, 0, 0, 180));
-	C2D_DrawText(&text, C2D_WithColor | C2D_AlignCenter, 200.0f, 120.0f, 0.5f, 0.5f, 0.5f, C2D_Color32(255, 255, 255, 255));
+	//C2D_DrawRectSolid(100.0f, 120.0f, 0.4f, 200.0f, 20.0f, C2D_Color32(0, 0, 0, 180));
+	C2D_DrawText(&text, C2D_WithColor | C2D_AlignCenter, 200.0f, 195.0f, 0.5f, 0.5f, 0.5f, C2D_Color32(255, 255, 255, 255));
 }

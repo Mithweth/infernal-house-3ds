@@ -35,3 +35,4 @@ bool inventory_has(ItemId item);
 bool inventory_update(u32 keys);
 void inventory_draw(void);
 bool inventory_is_active(void);
+void inventory_reset(void);
