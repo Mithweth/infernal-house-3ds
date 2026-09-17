@@ -163,7 +163,7 @@ void game_update(u32 keys, circlePosition analog, touchPosition touch) {
         return;
     }
 
-    if ((inventory_is_active()) || (inventory_update(keys))) {
+    if ((inventory_is_active()) | (inventory_update(keys))) {
         return;
     }
 
