@@ -15,3 +15,4 @@ ITEM_FLASHLIGHT=Lampe-torche
 ITEM_MESSAGE=Post-it froisé
 ITEM_BINOCULARS=Une paire de jumelles
 ITEM_MESSAGE_CONTENT=Il est écrit :\n'C'est à 3.08m du point X que\nj'ai enterré la carte magnétique.\nR.G.'
+GAMEOVER_LASERS=Peu de temps après le déclenchement\nde l'alarme,la police vous arrête\npour infraction. Votre peine sera\nlégère mais elle vous empêchera de\nretrouver Sophie à tout jamais.

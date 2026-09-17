@@ -7,9 +7,11 @@
 #include "inventory.h"
 #include "gfx_hud.h"
 #include "gfx_hud_t3x.h"
+#include "gameover.h"
 
 static C2D_SpriteSheet hud_assets;
 static C2D_Image arrow;
+static C2D_Image timer;
 static u64 elapsed_time;
 static u64 last_time;
 
@@ -66,18 +68,18 @@ static void draw_arrow(float x, float y, float degrees) {
 }
 
 static void timer_draw() {
-    const float cx = 365.0f;
-    const float cy = 205.0f;
+    const float cx = 363.0f;
+    const float cy = 203.0f;
     const float radius = 17.0f;
 
-    // C2D_DrawImageAt(clock, cx - 20, cy - 20, 0.0f, NULL, 1.0f, 1.0f);
+    C2D_DrawImageAt(timer, cx - 28, cy - 28, 0.5f, NULL, 1.0f, 1.0f);
     int minutes = elapsed_time / 60000;
     float angle = (minutes / 60.0f) * 2.0f * M_PI;
 
     float x = cx + sinf(angle) * radius;
     float y = cy - cosf(angle) * radius;
 
-    C2D_DrawLine(cx, cy, C2D_Color32(255, 255, 255, 255), x,  y,  C2D_Color32(255, 255, 255, 255), 2.0f, 0.7f);
+    C2D_DrawLine(cx, cy, C2D_Color32(0, 0, 0, 255), x,  y,  C2D_Color32(0, 0, 0, 255), 1.5f, 0.7f);
 }
 
 static void movement_draw(void) {
@@ -102,6 +104,7 @@ void hud_init(void) {
 	inventory_init();
 	hud_assets = C2D_SpriteSheetLoadFromMem(gfx_hud_t3x, gfx_hud_t3x_size);
     arrow = C2D_SpriteSheetGetImage(hud_assets, gfx_hud_arrow_idx);
+    timer = C2D_SpriteSheetGetImage(hud_assets, gfx_hud_clock_idx);
     timer_start();
 }
 
@@ -111,6 +114,9 @@ void hud_reset(void) {
 
 void hud_update(void) {
 	timer_update();
+	if (elapsed_time / 60000 > 60) {
+		game_over(GAMEOVER_TIMEUP);
+	}
 }
 
 void hud_close(void) {

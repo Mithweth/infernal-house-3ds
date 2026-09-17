@@ -38,6 +38,7 @@ typedef enum {
 
 void game_update(u32 keys, circlePosition analog, touchPosition touch);
 void game_draw(void);
+bool game_is_over(void);
 void game_over(GameOverId id);
 void game_close(void);
 void game_reset(void);

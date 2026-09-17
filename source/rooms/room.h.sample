@@ -2,4 +2,4 @@
 
 #include "game.h"
 
-extern Room room; // update room name
+extern Room <room_name>; // Replace <room_name>

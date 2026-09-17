@@ -6,6 +6,7 @@
 #include "gfx_diningroom.h"
 #include "inventory.h"
 #include "room_hall.h"
+#include "room_corridor.h"
 #include "gamestate.h"
 #include "gameover.h"
 
@@ -40,6 +41,10 @@ static void right_action(void) {
 	game_set_room(&hall);
 }
 
+static void left_action(void) {
+    game_set_room(&corridor);
+}
+
 static void up_action(void) {
 	if (!gamestate_are_diningroom_lasers_disabled()) {
 		game_over(GAMEOVER_LASERS);
@@ -51,7 +56,7 @@ Room dining_room = {
     .hotspot_count = sizeof(hotspots) / sizeof(hotspots[0]),
     .up = up_action,
     .down = NULL,
-    .left = NULL,
+    .left = left_action,
     .right = right_action,
     .init = room_init,
     .draw = room_draw,

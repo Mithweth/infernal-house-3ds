@@ -1,11 +1,9 @@
 #include <citro2d.h>
-
-// Replace <room_name>
-
 #include "game.h"
-#include "room_<room_name>.h"
-#include "gfx_<room_name>.h"
+#include "room_corridor.h"
+#include "gfx_corridor.h"
 #include "inventory.h"
+#include "room_diningroom.h"
 
 static C2D_SpriteSheet room_scene;
 static C2D_Image img_background;
@@ -13,8 +11,8 @@ static C2D_Image img_background;
 static Hotspot hotspots[] = {};
 
 static void room_init(void) {
-    room_scene = C2D_SpriteSheetLoad("romfs:/gfx/gfx_<room_name>.t3x");
-    img_background = C2D_SpriteSheetGetImage(room_scene, gfx_<room_name>_bg_idx);
+    room_scene = C2D_SpriteSheetLoad("romfs:/gfx/gfx_corridor.t3x");
+    img_background = C2D_SpriteSheetGetImage(room_scene, gfx_corridor_bg_idx);
 }
 
 static void room_draw(void) {
@@ -25,11 +23,15 @@ static void room_close(void) {
     C2D_SpriteSheetFree(room_scene);
 }
 
-Room <room_name> = {
+static void down_action(void) {
+    game_set_room(&dining_room);
+}
+
+Room corridor = {
     .hotspots = hotspots,
     .hotspot_count = sizeof(hotspots) / sizeof(hotspots[0]),
     .up = NULL,
-    .down = NULL,
+    .down = down_action,
     .left = NULL,
     .right = NULL,
     .init = room_init,

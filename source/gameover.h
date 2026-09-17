@@ -3,10 +3,10 @@
 
 typedef enum {
     GAMEOVER_LASERS,
-    GAMEOVER_WHATEVER
+    GAMEOVER_TIMEUP
 } GameOverId;
 
-void gameover_init(void);
-void gameover_set(GameOverId id);
-void gameover_draw(void);
+void gameover_init(GameOverId id);
+void gameover_draw_top(void);
+void gameover_draw_bottom(void);
 void gameover_close(void);

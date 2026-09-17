@@ -50,14 +50,19 @@ void game_close(void) {
     }
 }
 
+bool game_is_over(void) {
+	return game_mode == GAME_OVER;
+}
+
 void game_over(GameOverId id) {
 	game_mode = GAME_OVER;
-	gameover_set(id);
+	gameover_init(id);
 }
 
 void game_reset(void) {
     inventory_reset();
     gamestate_reset();
+    gameover_close();
     hud_reset();
     game_mode = GAME_NORMAL;
     examine_text = NULL;
@@ -170,10 +175,6 @@ void game_update(u32 keys, circlePosition analog, touchPosition touch) {
 }
 
 void game_draw(void) {
-    if (game_mode == GAME_OVER) {
-        gameover_draw();
-        return;
-    }
     if (!current_room)
         return;
 

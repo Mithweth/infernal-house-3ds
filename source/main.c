@@ -2,6 +2,7 @@
 #include <3ds.h>
 #include "room_hall.h"
 #include "game.h"
+#include "gameover.h"
 #include "lang.h"
 #include "hud.h"
 
@@ -26,7 +27,6 @@ int main(int argc, char **argv)
     C3D_RenderTarget *top = C2D_CreateScreenTarget(GFX_TOP, GFX_LEFT);
     C3D_RenderTarget *bottom = C2D_CreateScreenTarget(GFX_BOTTOM, GFX_LEFT);
     hud_init();
-    gameover_init();
     aptHook(&apt_cookie, apt_callback, NULL);
     game_set_room(&hall);
 
@@ -48,14 +48,21 @@ int main(int argc, char **argv)
 	    hud_update();
     	game_update(keys, analog, touch);
 	    C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
-
-	    C2D_TargetClear(bottom, C2D_Color32(0, 0, 0, 255));
-	    C2D_SceneBegin(bottom);
-	    game_draw();
-
-	    C2D_TargetClear(top, C2D_Color32(0, 0, 0, 255));
-	    C2D_SceneBegin(top);
-	    hud_draw();
+	    
+		C2D_TargetClear(top, C2D_Color32(0, 0, 0, 255));
+		C2D_SceneBegin(top);
+		if (game_is_over()) {
+		    gameover_draw_top();
+		} else {
+			hud_draw();
+		}
+		C2D_TargetClear(bottom, C2D_Color32(0, 0, 0, 255));
+		C2D_SceneBegin(bottom);
+		if (game_is_over()) {
+		    gameover_draw_bottom();
+		} else {
+		    game_draw();
+		}
 
 	    C3D_FrameEnd(0);
 	}
