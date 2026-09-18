@@ -5,6 +5,9 @@
 
 typedef struct {
     bool diningroom_lasers_disabled;
+    bool diningroom_right_cabinet_door_opened;
+    bool diningroom_left_cabinet_door_opened;
+    bool diningroom_soup_opened;
     bool hall_left_closet_opened;
 	bool hall_right_closet_opened;
 	bool hall_carpet_moved;
@@ -42,6 +45,31 @@ bool gamestate_is_hall_right_closet_opened(void) {
 
 bool gamestate_is_hall_carpet_moved(void) {
 	return game_state.hall_carpet_moved;
+}
+
+
+bool gamestate_is_diningroom_right_cabinet_door_opened(void) {
+	return game_state.diningroom_right_cabinet_door_opened;
+}
+
+void gamestate_open_diningroom_right_cabinet_door(bool value) {
+	game_state.diningroom_right_cabinet_door_opened = value;
+}
+
+bool gamestate_is_diningroom_left_cabinet_door_opened(void) {
+	return game_state.diningroom_left_cabinet_door_opened;
+}
+
+void gamestate_open_diningroom_left_cabinet_door(bool value) {
+	game_state.diningroom_left_cabinet_door_opened = value;
+}
+
+bool gamestate_is_diningroom_soup_opened(void) {
+	return game_state.diningroom_soup_opened;
+}
+
+void gamestate_move_diningroom_soup(bool value) {
+	game_state.diningroom_soup_opened = value;
 }
 
 void gamestate_reset(void) {

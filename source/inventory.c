@@ -21,6 +21,7 @@ static C2D_TextBuf text_buf;
 static C2D_Text text;
 static C2D_SpriteSheet inventory_scene = NULL;
 static InventoryMode inventory_mode = INVENTORY_NORMAL;
+static C2D_Image object_details;
 
 static void message_draw_action(Item *item) {
     u32 background = C2D_Color32(8, 12, 30, 255);
@@ -31,6 +32,11 @@ static void message_draw_action(Item *item) {
     C2D_TextParse(&text, text_buf, lang_get("ITEM_MESSAGE_CONTENT"));
     C2D_TextOptimize(&text);
     C2D_DrawText(&text, C2D_WithColor, 20.0f, 30.0f, 0.5f, 0.55f, 0.55f, text_color);
+}
+
+static void score_draw_action(Item *item) {
+	object_details = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_partition_details_idx);
+	C2D_DrawImageAt(object_details, 50, 20, 0.5f, NULL, 1.0f, 1.0f);
 }
 
 bool inventory_is_active(void) {
@@ -83,6 +89,12 @@ void inventory_init(void) {
         .action = NULL
     };
 
+    items[ITEM_SCORE] = (Item) {
+        .id = ITEM_SCORE,
+        .name_id = "ITEM_SCORE",
+        .image = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_partition_idx),
+        .draw_action = score_draw_action
+    };
     inventory_count = 0;
     selected = 0;
 }

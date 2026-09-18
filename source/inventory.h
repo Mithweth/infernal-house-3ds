@@ -10,6 +10,7 @@ typedef enum {
     ITEM_SCREWDRIVER,
     ITEM_BINOCULARS,
     ITEM_FLASHLIGHT,
+    ITEM_SCORE,
     ITEM_COUNT
 } ItemId;
 
