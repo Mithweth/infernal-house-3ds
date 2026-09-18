@@ -30,8 +30,8 @@ int main(int argc, char **argv)
     hud_init();
     aptHook(&apt_cookie, apt_callback, NULL);
     audio_init();
-    music_play("romfs:/audio/background.ogg");
-    game_set_room(&hall);
+    //game_set_room(&hall);
+    game_init();
     while (aptMainLoop()) {
 	    hidScanInput();
 	    u32 keys = hidKeysDown();
@@ -46,25 +46,10 @@ int main(int argc, char **argv)
 	        break;
 	    }
 
-	    hud_update();
 	    audio_update();
-    	game_update(keys, analog, touch);
+	    game_update(keys, analog, touch);
 	    C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
-	    
-		C2D_TargetClear(top, C2D_Color32(0, 0, 0, 255));
-		C2D_SceneBegin(top);
-		if (game_is_over()) {
-		    gameover_draw_top();
-		} else {
-			hud_draw();
-		}
-		C2D_TargetClear(bottom, C2D_Color32(0, 0, 0, 255));
-		C2D_SceneBegin(bottom);
-		if (game_is_over()) {
-		    gameover_draw_bottom();
-		} else {
-		    game_draw();
-		}
+	    game_draw(top, bottom);
 	    C3D_FrameEnd(0);
 	}
 

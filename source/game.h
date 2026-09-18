@@ -34,15 +34,18 @@ typedef enum {
     GAME_NORMAL,
     GAME_EXAMINE,
     GAME_BUSY,
-    GAME_OVER
+    GAME_OVER,
+    GAME_TITLE,
+    GAME_INTRO,
+    GAME_ENDING
 } GameMode;
 
 void game_update(u32 keys, circlePosition analog, touchPosition touch);
-void game_draw(void);
-bool game_is_over(void);
+void game_draw(C3D_RenderTarget *top, C3D_RenderTarget *bottom);
 void game_over(GameOverId id);
 void game_close(void);
-void game_reset(void);
+void game_init(void);
+void game_start(void);
 void game_set_room(Room *room);
 bool game_can_move_up(void);
 bool game_can_move_down(void);

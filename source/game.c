@@ -8,6 +8,7 @@
 #include "gameover.h"
 #include "hud.h"
 #include "audio.h"
+#include "title.h"
 
 const int THRESHOLD = 80;
 static Room *current_room = NULL;
@@ -53,16 +54,18 @@ void game_close(void) {
     }
 }
 
-bool game_is_over(void) {
-	return game_mode == GAME_OVER;
-}
-
 void game_over(GameOverId id) {
 	game_mode = GAME_OVER;
 	gameover_init(id);
 }
 
-void game_reset(void) {
+void game_init(void) {
+	game_mode = GAME_TITLE;
+	title_init();
+}
+
+void game_start(void) {
+	title_close();
     inventory_reset();
     gamestate_reset();
     gameover_close();
@@ -165,39 +168,7 @@ static void update_touch(touchPosition touch) {
     game_mode = GAME_EXAMINE;
 }
 
-void game_update(u32 keys, circlePosition analog, touchPosition touch) {
-    if (game_mode == GAME_OVER) {
-        if (keys & KEY_A) {
-            game_reset();
-        }
-        return;
-    }
-
-	if ((game_mode == GAME_BUSY) && (game_busy_sfx_channel > -1)) {
-	    if (!sfx_is_playing(game_busy_sfx_channel)) {
-	        game_mode = GAME_NORMAL;
-	        if (game_busy_callback) {
-	            void (*callback)(void) = game_busy_callback;
-	            game_busy_callback = NULL;
-	            game_busy_sfx_channel = -1;
-	            callback();
-	        }
-	    }
-	    return;
-	}
-
-    if ((inventory_is_active()) | (inventory_update(keys))) {
-        return;
-    }
-
-    update_movement(analog);
-
-    if (keys & KEY_TOUCH) {
-        update_touch(touch);
-    }
-}
-
-void game_draw(void) {
+static void room_draw(void) {
     if (!current_room)
         return;
 
@@ -211,4 +182,86 @@ void game_draw(void) {
 	    C2D_DrawRectSolid(10.0f, 185.0f, 0.8f, 300.0f, 45.0f, C2D_Color32(0, 0, 0, 180));
 	    C2D_DrawText(&text, C2D_WithColor, 20.0f, 197.0f, 0.9f, 0.5f, 0.5f, C2D_Color32(255, 255, 255, 255));
 	}
+}
+
+void game_update(u32 keys, circlePosition analog, touchPosition touch) {
+    switch (game_mode) {
+        case GAME_TITLE:
+            title_update(keys);
+            return;
+
+        case GAME_INTRO:
+            //intro_update(keys);
+            return;
+
+        case GAME_OVER:
+            if (keys & KEY_A) {
+                game_start();
+            }
+            return;
+
+        case GAME_BUSY:
+            hud_update();
+            if (game_busy_sfx_channel > -1) {
+			    if (!sfx_is_playing(game_busy_sfx_channel)) {
+			        game_mode = GAME_NORMAL;
+			        if (game_busy_callback) {
+			            void (*callback)(void) = game_busy_callback;
+			            game_busy_callback = NULL;
+			            game_busy_sfx_channel = -1;
+			            callback();
+			        }
+			    }
+			}
+	    	return;
+
+        default:
+        	hud_update();
+            break;
+    }
+
+    if ((inventory_is_active()) | (inventory_update(keys))) {
+        return;
+    }
+
+    update_movement(analog);
+
+    if (keys & KEY_TOUCH) {
+        update_touch(touch);
+    }
+}
+
+void game_draw(C3D_RenderTarget *top, C3D_RenderTarget *bottom) {
+	C2D_TargetClear(top, C2D_Color32(0, 0, 0, 255));
+	C2D_TargetClear(bottom, C2D_Color32(0, 0, 0, 255));
+    switch (game_mode) {
+        case GAME_TITLE:
+            C2D_SceneBegin(top);
+            title_draw_top();
+            C2D_SceneBegin(bottom);
+            title_draw_bottom();
+            break;
+
+        case GAME_INTRO:
+            C2D_SceneBegin(top);
+            //intro_draw_top();
+
+            C2D_SceneBegin(bottom);
+            //intro_draw_bottom();
+            break;
+
+        case GAME_OVER:
+            C2D_SceneBegin(top);
+            gameover_draw_top();
+            C2D_SceneBegin(bottom);
+            gameover_draw_bottom();
+            break;
+
+        default:
+            C2D_SceneBegin(bottom);
+            room_draw();
+            C2D_SceneBegin(top);
+            hud_draw();
+            break;
+    }
 }

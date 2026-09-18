@@ -1,3 +1,7 @@
+TITLE_INTRO=Introduction
+TITLE_GAME=Jouer
+TITLE_CONTROLS=Commandes
+TITLE_CREDITS=Crédits
 HALL_CLOSET=C'est un vieux buffet en bois
 HALL_CARPET=Un tapis du Moyen-Orient
 HALL_MESSAGE=Un message est caché sous le tapis
@@ -28,4 +32,4 @@ ITEM_MESSAGE=Post-it froisé
 ITEM_BINOCULARS=Une paire de jumelles
 ITEM_SCORE=Un morceau de musique
 ITEM_MESSAGE_CONTENT=Il est écrit :\n'C'est à 3.08m du point X que\nj'ai enterré la carte magnétique.\nR.G.'
-GAMEOVER_LASERS=Peu de temps après le déclenchement\nde l'alarme,la police vous arrête\npour infraction. Votre peine sera\nlégère mais elle vous empêchera de\nretrouver Sophie à tout jamais.
+GAMEOVER_LASERS=Peu de temps après le déclenchement\nde l'alarme, la police vous arrête\npour infraction. Votre peine sera\nlégère mais elle vous empêchera de\nretrouver Sophie à tout jamais.
