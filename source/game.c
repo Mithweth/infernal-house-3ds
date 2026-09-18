@@ -7,6 +7,7 @@
 #include "room_hall.h"
 #include "gameover.h"
 #include "hud.h"
+#include "audio.h"
 
 const int THRESHOLD = 80;
 static Room *current_room = NULL;
@@ -16,6 +17,8 @@ static Hotspot *last_hotspot = NULL;
 static const char *examine_text = NULL;
 static C2D_TextBuf text_buf;
 static C2D_Text text;
+static void (*game_busy_callback)(void) = NULL;
+static int game_busy_sfx_channel = -1;
 
 
 void game_set_room(Room *room) {
@@ -67,7 +70,14 @@ void game_reset(void) {
     game_mode = GAME_NORMAL;
     examine_text = NULL;
     last_hotspot = NULL;
+    music_play("romfs:/audio/background.ogg");
     game_set_room(&hall);
+}
+
+void game_lock_with_sfx(const char *sfx, void (*callback)(void)) {
+    game_busy_sfx_channel = sfx_play(sfx);
+    game_busy_callback = callback;
+    game_mode = GAME_BUSY;
 }
 
 static Hotspot *find_hotspot(int x, int y) {
@@ -162,6 +172,19 @@ void game_update(u32 keys, circlePosition analog, touchPosition touch) {
         }
         return;
     }
+
+	if ((game_mode == GAME_BUSY) && (game_busy_sfx_channel > -1)) {
+	    if (!sfx_is_playing(game_busy_sfx_channel)) {
+	        game_mode = GAME_NORMAL;
+	        if (game_busy_callback) {
+	            void (*callback)(void) = game_busy_callback;
+	            game_busy_callback = NULL;
+	            game_busy_sfx_channel = -1;
+	            callback();
+	        }
+	    }
+	    return;
+	}
 
     if ((inventory_is_active()) | (inventory_update(keys))) {
         return;

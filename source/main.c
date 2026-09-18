@@ -5,7 +5,7 @@
 #include "gameover.h"
 #include "lang.h"
 #include "hud.h"
-#include "music.h"
+#include "audio.h"
 
 static aptHookCookie apt_cookie;
 
@@ -29,6 +29,7 @@ int main(int argc, char **argv)
     C3D_RenderTarget *bottom = C2D_CreateScreenTarget(GFX_BOTTOM, GFX_LEFT);
     hud_init();
     aptHook(&apt_cookie, apt_callback, NULL);
+    audio_init();
     music_play("romfs:/audio/background.ogg");
     game_set_room(&hall);
     while (aptMainLoop()) {
@@ -46,7 +47,7 @@ int main(int argc, char **argv)
 	    }
 
 	    hud_update();
-	    music_update();
+	    audio_update();
     	game_update(keys, analog, touch);
 	    C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
 	    
@@ -68,7 +69,7 @@ int main(int argc, char **argv)
 	}
 
 	aptUnhook(&apt_cookie);
-	music_stop();
+	audio_close();
     game_close();
     hud_close();
     C2D_Fini();

@@ -1,6 +1,7 @@
 #include <citro2d.h>
 
 #include "game.h"
+#include "audio.h"
 #include "room_hall.h"
 #include "room_diningroom.h"
 #include "gfx_hall.h"
@@ -18,10 +19,20 @@ static C2D_Image img_message;
 
 
 static void left_closet_action(void) {
+    if (gamestate_is_hall_left_closet_opened()) {
+        sfx_play("romfs:/audio/closet_close.raw");
+    } else {
+        sfx_play("romfs:/audio/closet_open.raw");
+    }
     gamestate_open_hall_left_closet(!gamestate_is_hall_left_closet_opened());
 }
 
 static void right_closet_action(void) {
+    if (gamestate_is_hall_right_closet_opened()) {
+        sfx_play("romfs:/audio/closet_close.raw");
+    } else {
+        sfx_play("romfs:/audio/closet_open.raw");
+    }
     gamestate_open_hall_right_closet(!gamestate_is_hall_right_closet_opened());
 }
 
@@ -203,13 +214,16 @@ static void room_draw(void) {
     }
 }
 
-
 static void room_close(void) {
     C2D_SpriteSheetFree(room_scene);
 }
 
-static void up_action(void) {
+static void move_up(void) {
     game_set_room(&dining_room);
+}
+
+static void up_action(void) {
+    game_lock_with_sfx("romfs:/audio/door_open.raw", move_up);
 }
 
 Room hall = {

@@ -5,6 +5,7 @@
 #include "game.h"
 #include "lang.h"
 #include "gfx_gameover.h"
+#include "audio.h"
 
 static GameOverId gameover_id;
 static C2D_SpriteSheet gameover_assets = NULL;
@@ -27,6 +28,7 @@ void gameover_init(GameOverId id) {
         case GAMEOVER_TIMEUP:
         	break;
     }
+    music_play("romfs:/audio/gameover_sad.ogg");
 }
 
 void gameover_draw_top(void) {

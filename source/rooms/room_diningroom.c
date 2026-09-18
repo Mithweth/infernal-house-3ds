@@ -1,6 +1,7 @@
 #include <citro2d.h>
 
 #include "game.h"
+#include "audio.h"
 #include "room_diningroom.h"
 
 #include "gfx_diningroom.h"
@@ -37,18 +38,26 @@ static void room_close(void) {
     C2D_SpriteSheetFree(room_scene);
 }
 
+static void move_right(void) {
+    game_set_room(&hall);
+}
+
 static void right_action(void) {
-	game_set_room(&hall);
+    game_lock_with_sfx("romfs:/audio/door_open.raw", move_right);
 }
 
 static void left_action(void) {
     game_set_room(&corridor);
 }
 
+static void lasers_gameover(void) {
+	game_over(GAMEOVER_LASERS);
+}
+
 static void up_action(void) {
-	if (!gamestate_are_diningroom_lasers_disabled()) {
-		game_over(GAMEOVER_LASERS);
-	}
+    if (!gamestate_are_diningroom_lasers_disabled()) {
+        game_lock_with_sfx("romfs:/audio/police_siren.raw", lasers_gameover);
+    }
 }
 
 Room dining_room = {
