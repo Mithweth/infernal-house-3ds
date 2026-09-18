@@ -74,7 +74,7 @@ void game_reset(void) {
     game_set_room(&hall);
 }
 
-void game_lock_with_sfx(const char *sfx, void (*callback)(void)) {
+void game_wait_for_sfx(const char *sfx, void (*callback)(void)) {
     game_busy_sfx_channel = sfx_play(sfx);
     game_busy_callback = callback;
     game_mode = GAME_BUSY;

@@ -48,4 +48,4 @@ bool game_can_move_up(void);
 bool game_can_move_down(void);
 bool game_can_move_left(void);
 bool game_can_move_right(void);
-void game_lock_with_sfx(const char *sfx, void (*callback)(void));
+void game_wait_for_sfx(const char *sfx, void (*callback)(void));

@@ -43,7 +43,7 @@ static void move_right(void) {
 }
 
 static void right_action(void) {
-    game_lock_with_sfx("romfs:/audio/door_open.raw", move_right);
+    game_wait_for_sfx("romfs:/audio/door_open.raw", move_right);
 }
 
 static void left_action(void) {
@@ -56,7 +56,7 @@ static void lasers_gameover(void) {
 
 static void up_action(void) {
     if (!gamestate_are_diningroom_lasers_disabled()) {
-        game_lock_with_sfx("romfs:/audio/police_siren.raw", lasers_gameover);
+        game_wait_for_sfx("romfs:/audio/police_siren.raw", lasers_gameover);
     }
 }
 

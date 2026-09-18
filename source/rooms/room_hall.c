@@ -223,7 +223,7 @@ static void move_up(void) {
 }
 
 static void up_action(void) {
-    game_lock_with_sfx("romfs:/audio/door_open.raw", move_up);
+    game_wait_for_sfx("romfs:/audio/door_open.raw", move_up);
 }
 
 Room hall = {
