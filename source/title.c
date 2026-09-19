@@ -35,7 +35,10 @@ static C2D_Text text[TITLE_COUNT];
 static C2D_SpriteSheet title_assets;
 static C2D_Image img_background;
 static C2D_Image img_lankhor;
-static C2D_Image img_3ds;
+static C2D_Image img_abutton;
+static C2D_Image img_analogpad;
+static C2D_Image img_dpad;
+static C2D_Image img_touch;
 
 static const char *choices[] = {
     "TITLE_INTRO",
@@ -77,9 +80,12 @@ void title_init(void) {
     title_assets = C2D_SpriteSheetLoad("romfs:/gfx/gfx_title.t3x");
     img_background = C2D_SpriteSheetGetImage(title_assets, gfx_title_background_idx);
     img_lankhor = C2D_SpriteSheetGetImage(title_assets, gfx_title_lankhor_idx);
-    img_3ds = C2D_SpriteSheetGetImage(title_assets, gfx_title_3ds_idx);
+    img_abutton = C2D_SpriteSheetGetImage(title_assets, gfx_title_abutton_idx);
+    img_analogpad = C2D_SpriteSheetGetImage(title_assets, gfx_title_analogpad_idx);
+    img_dpad = C2D_SpriteSheetGetImage(title_assets, gfx_title_dpad_idx);
+    img_touch = C2D_SpriteSheetGetImage(title_assets, gfx_title_touch_idx);
     selected = TITLE_INTRO;
-    text_buf = C2D_TextBufNew(256);
+    text_buf = C2D_TextBufNew(1024);
     for (int i = 0; i < TITLE_COUNT; i++) {
         C2D_TextParse(&text[i], text_buf, lang_get(choices[i]));
         C2D_TextOptimize(&text[i]);
@@ -91,9 +97,9 @@ void title_init(void) {
         C2D_TextOptimize(&credits[i].person);
     }
 
-    C2D_TextParse(&controls_text[0], text_buf, lang_get("TITLE_CONTROLS_MOVE"));
-    C2D_TextParse(&controls_text[1], text_buf, lang_get("TITLE_CONTROLS_OBJECT"));
-    C2D_TextParse(&controls_text[2], text_buf, lang_get("TITLE_CONTROLS_INVENTORY"));
+    C2D_TextParse(&controls_text[0], text_buf, lang_get("TITLE_CONTROLS_INVENTORY"));
+    C2D_TextParse(&controls_text[1], text_buf, lang_get("TITLE_CONTROLS_MOVE"));
+    C2D_TextParse(&controls_text[2], text_buf, lang_get("TITLE_CONTROLS_OBJECT"));
     C2D_TextParse(&controls_text[3], text_buf, lang_get("TITLE_CONTROLS_EXAMINE"));
     C2D_TextParse(&controls_text[4], text_buf, lang_get("TITLE_CONTROLS_ACTION"));
     C2D_TextOptimize(&controls_text[0]);
@@ -171,12 +177,15 @@ static void title_draw_credits(void) {
 }
 
 static void title_draw_controls(void) {
-    C2D_DrawImageAt(img_3ds, 50.0f, 10.0f, 0.3f, NULL, 1.0f, 1.0f);
-    C2D_DrawText(&controls_text[0], C2D_WithColor, 0.0f, 150.0f, 0.5f, 0.35f, 0.35f, C2D_Color32(164, 32, 32, 255));
-    C2D_DrawText(&controls_text[1], C2D_WithColor, 250.0f, 170.0f, 0.5f, 0.35f, 0.35f, C2D_Color32(164, 32, 32, 255));
-    C2D_DrawText(&controls_text[2], C2D_WithColor, 0.0f, 185.0f, 0.5f, 0.35f, 0.35f, C2D_Color32(164, 32, 32, 255));
-    C2D_DrawText(&controls_text[3], C2D_WithColor, 220.0f, 200.0f, 0.5f, 0.35f, 0.35f, C2D_Color32(164, 32, 32, 255));
-    C2D_DrawText(&controls_text[4], C2D_WithColor, 220.0f, 220.0f, 0.5f, 0.35f, 0.35f, C2D_Color32(164, 32, 32, 255));
+    C2D_DrawImageAt(img_analogpad, 10.0f, 10.0f, 0.3f, NULL, 1.0f, 1.0f);
+    C2D_DrawImageAt(img_dpad, 10.0f, 70.0f, 0.3f, NULL, 1.0f, 1.0f);
+    C2D_DrawImageAt(img_abutton, 18.0f, 130.0f, 0.3f, NULL, 1.0f, 1.0f);
+    C2D_DrawImageAt(img_touch, 10.0f, 176.0f, 0.3f, NULL, 1.0f, 1.0f);
+    C2D_DrawText(&controls_text[0], C2D_WithColor, 90.0f, 25.0f, 0.5f, 0.55f, 0.55f, C2D_Color32(224, 224, 224, 255));
+    C2D_DrawText(&controls_text[1], C2D_WithColor, 90.0f, 85.0f, 0.5f, 0.55f, 0.55f, C2D_Color32(224, 224, 224, 255));
+    C2D_DrawText(&controls_text[2], C2D_WithColor, 90.0f, 135.0f, 0.5f, 0.55f, 0.55f, C2D_Color32(224, 224, 224, 255));
+    C2D_DrawText(&controls_text[3], C2D_WithColor, 90.0f, 190.0f, 0.5f, 0.55f, 0.55f, C2D_Color32(224, 224, 224, 255));
+    C2D_DrawText(&controls_text[4], C2D_WithColor, 90.0f, 210.0f, 0.5f, 0.55f, 0.55f, C2D_Color32(224, 224, 224, 255));
 }
 
 static void title_draw_menu(void) {

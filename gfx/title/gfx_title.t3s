@@ -1,4 +1,7 @@
 --atlas -f rgba8888 -z auto
+abutton.png
+analogpad.png
 background.png
+dpad.png
 lankhor.png
-3ds.png
+touch.png
