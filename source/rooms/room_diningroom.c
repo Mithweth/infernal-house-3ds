@@ -184,19 +184,19 @@ static void move_right(void) {
     game_set_room(&hall);
 }
 
-static void right_action(void) {
+static void east_action(void) {
     game_wait_for_sfx("romfs:/audio/door_open.raw", move_right);
 }
 
-static void left_action(void) {
+static void west_action(void) {
     game_set_room(&corridor);
 }
 
 static void lasers_gameover(void) {
-	game_over(GAMEOVER_LASERS);
+    game_over(GAMEOVER_LASERS);
 }
 
-static void up_action(void) {
+static void north_action(void) {
     if (!gamestate_are_diningroom_lasers_disabled()) {
         game_wait_for_sfx("romfs:/audio/police_siren.raw", lasers_gameover);
     }
@@ -205,10 +205,9 @@ static void up_action(void) {
 Room dining_room = {
     .hotspots = hotspots,
     .hotspot_count = sizeof(hotspots) / sizeof(hotspots[0]),
-    .up = up_action,
-    .down = NULL,
-    .left = left_action,
-    .right = right_action,
+    .north = north_action,
+    .west = west_action,
+    .east = east_action,
     .init = room_init,
     .draw = room_draw,
     .close = room_close

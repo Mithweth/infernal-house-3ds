@@ -35,12 +35,12 @@ static void message_draw_action(Item *item) {
 }
 
 static void score_draw_action(Item *item) {
-	object_details = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_partition_details_idx);
-	C2D_DrawImageAt(object_details, 50, 20, 0.5f, NULL, 1.0f, 1.0f);
+    object_details = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_partition_details_idx);
+    C2D_DrawImageAt(object_details, 50, 20, 0.5f, NULL, 1.0f, 1.0f);
 }
 
 bool inventory_is_active(void) {
-	return inventory_mode == INVENTORY_ACTION;
+    return inventory_mode == INVENTORY_ACTION;
 }
 
 void inventory_init(void) {
@@ -52,7 +52,7 @@ void inventory_init(void) {
 
     if (!text_buf) {
         text_buf = C2D_TextBufNew(4096);
-	}
+    }
 
     items[ITEM_MESSAGE] = (Item) {
         .id = ITEM_MESSAGE,
@@ -104,17 +104,17 @@ void inventory_close(void) {
         C2D_SpriteSheetFree(inventory_scene);
         inventory_scene = NULL;
     }
-	if (text_buf) {
-    	C2D_TextBufDelete(text_buf);
-    	text_buf = NULL;
-	}
+    if (text_buf) {
+        C2D_TextBufDelete(text_buf);
+        text_buf = NULL;
+    }
 
     inventory_count = 0;
     selected = 0;
 }
 
 void inventory_reset(void) {
-	inventory_count = 0;
+    inventory_count = 0;
     selected = 0;
     inventory_mode = INVENTORY_NORMAL;
 }
@@ -210,11 +210,11 @@ void inventory_draw(void) {
         C2D_DrawImageAt(inventory[i]->image, x, ITEM_Y, 0.4f, NULL, 1.0f, 1.0f);
     }
 
-	Item *item = inventory[selected];
+    Item *item = inventory[selected];
 
-	C2D_TextBufClear(text_buf);
-	C2D_TextParse(&text, text_buf, lang_get(item->name_id));
-	C2D_TextOptimize(&text);
-	//C2D_DrawRectSolid(100.0f, 120.0f, 0.4f, 200.0f, 20.0f, C2D_Color32(0, 0, 0, 180));
-	C2D_DrawText(&text, C2D_WithColor | C2D_AlignCenter, 200.0f, 195.0f, 0.5f, 0.5f, 0.5f, C2D_Color32(255, 255, 255, 255));
+    C2D_TextBufClear(text_buf);
+    C2D_TextParse(&text, text_buf, lang_get(item->name_id));
+    C2D_TextOptimize(&text);
+    //C2D_DrawRectSolid(100.0f, 120.0f, 0.4f, 200.0f, 20.0f, C2D_Color32(0, 0, 0, 180));
+    C2D_DrawText(&text, C2D_WithColor | C2D_AlignCenter, 200.0f, 195.0f, 0.5f, 0.5f, 0.5f, C2D_Color32(255, 255, 255, 255));
 }

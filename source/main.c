@@ -20,7 +20,7 @@ int main(int argc, char **argv)
     gfxInitDefault();
     romfsInit();
     if (!lang_init("fr")) {
-    	return 1;
+        return 1;
     }
     C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
     C2D_Init(C2D_DEFAULT_MAX_OBJECTS);
@@ -33,34 +33,34 @@ int main(int argc, char **argv)
     //game_set_room(&hall);
     game_init();
     while (aptMainLoop()) {
-	    hidScanInput();
-	    u32 keys = hidKeysDown();
+        hidScanInput();
+        u32 keys = hidKeysDown();
 
-		circlePosition analog;
-		hidCircleRead(&analog);
+        circlePosition analog;
+        hidCircleRead(&analog);
 
-    	touchPosition touch;
-    	hidTouchRead(&touch);
+        touchPosition touch;
+        hidTouchRead(&touch);
 
-	    if (keys & KEY_START) {
-	        break;
-	    }
+        if (keys & KEY_START) {
+            break;
+        }
 
-	    audio_update();
-	    game_update(keys, analog, touch);
-	    C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
-	    game_draw(top, bottom);
-	    C3D_FrameEnd(0);
-	}
+        audio_update();
+        game_update(keys, analog, touch);
+        C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
+        game_draw(top, bottom);
+        C3D_FrameEnd(0);
+    }
 
-	aptUnhook(&apt_cookie);
-	audio_close();
+    aptUnhook(&apt_cookie);
+    audio_close();
     game_close();
     hud_close();
     C2D_Fini();
     C3D_Fini();
     lang_close();
-	romfsExit();
+    romfsExit();
     gfxExit();
 
     return 0;

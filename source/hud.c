@@ -20,9 +20,9 @@ static C2D_TextBuf debug_buf;
 static C2D_Text debug_text;
 static void debug_draw(void)
 {
-	if (!debug_buf) {
-		debug_buf = C2D_TextBufNew(256);
-	}
+    if (!debug_buf) {
+        debug_buf = C2D_TextBufNew(256);
+    }
     char str[64];
     snprintf(str, sizeof(str), "elapsed: %llu", elapsed_time);
     C2D_TextBufClear(debug_buf);
@@ -63,8 +63,8 @@ static void background_draw(void) {
     C2D_DrawRectSolid(332.0f, 172.0f, 0.2f, 61.0f, 61.0f, panel);
 }
 
-static void draw_arrow(float x, float y, float degrees) {
-    C2D_DrawImageAtRotated(arrow, x, y, 0.7f, C3D_AngleFromDegrees(degrees), NULL, 1.0f, 1.0f);
+static void draw_arrow(float x, float y, float degrees, float size) {
+    C2D_DrawImageAtRotated(arrow, x, y, 0.7f, C3D_AngleFromDegrees(degrees), NULL, size, size);
 }
 
 static void timer_draw() {
@@ -83,52 +83,68 @@ static void timer_draw() {
 }
 
 static void movement_draw(void) {
-	if (game_can_move_up()) {
-        draw_arrow(37, 185, 0);
+    if (game_can_move_north()) {
+        draw_arrow(37, 185, 0, 1.0f);
     }
 
-    if (game_can_move_down()) {
-        draw_arrow(37, 219, 180);
+    if (game_can_move_northeast()) {
+        draw_arrow(55, 184, 45, 0.8f);
     }
 
-    if (game_can_move_left()) {
-        draw_arrow(20, 202, 270);
+    if (game_can_move_east()) {
+        draw_arrow(54, 202, 90, 1.0f);
     }
 
-    if (game_can_move_right()) {
-        draw_arrow(54, 202, 90);
+    if (game_can_move_southeast()) {
+        draw_arrow(55, 220, 135, 0.8f);
+    }
+
+    if (game_can_move_south()) {
+        draw_arrow(37, 219, 180, 1.0f);
+    }
+
+    if (game_can_move_southwest()) {
+        draw_arrow(20, 220, 225, 0.8f);
+    }
+
+    if (game_can_move_west()) {
+        draw_arrow(20, 202, 270, 1.0f);
+    }
+
+    if (game_can_move_northwest()) {
+        draw_arrow(21, 184, 315, 0.8f);
     }
 }
 
 void hud_init(void) {
-	inventory_init();
-	hud_assets = C2D_SpriteSheetLoadFromMem(gfx_hud_t3x, gfx_hud_t3x_size);
+    inventory_init();
+    hud_assets = C2D_SpriteSheetLoadFromMem(gfx_hud_t3x, gfx_hud_t3x_size);
     arrow = C2D_SpriteSheetGetImage(hud_assets, gfx_hud_arrow_idx);
     timer = C2D_SpriteSheetGetImage(hud_assets, gfx_hud_clock_idx);
     timer_start();
 }
 
 void hud_reset(void) {
-	timer_start();
+    timer_start();
 }
 
 void hud_update(void) {
-	timer_update();
-	if (elapsed_time / 60000 > 60) {
-		game_over(GAMEOVER_TIMEUP);
-	}
+    timer_update();
+    if (elapsed_time / 60000 > 60) {
+        game_over(GAMEOVER_TIMEUP);
+    }
 }
 
 void hud_close(void) {
-	inventory_close();
-	C2D_SpriteSheetFree(hud_assets);
+    inventory_close();
+    C2D_SpriteSheetFree(hud_assets);
 }
 
 void hud_draw(void) {
-	background_draw();
-	inventory_draw();
-	movement_draw();
-	timer_draw();
+    background_draw();
+    inventory_draw();
+    movement_draw();
+    timer_draw();
 #ifdef DEBUG
     debug_draw();
 #endif

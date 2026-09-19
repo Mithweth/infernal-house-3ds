@@ -23,9 +23,9 @@ static int game_busy_sfx_channel = -1;
 
 
 void game_set_room(Room *room) {
-	if (!text_buf) {
+    if (!text_buf) {
         text_buf = C2D_TextBufNew(4096);
-	}
+    }
 
     if (current_room && current_room->close) {
         current_room->close();
@@ -55,17 +55,17 @@ void game_close(void) {
 }
 
 void game_over(GameOverId id) {
-	game_mode = GAME_OVER;
-	gameover_init(id);
+    game_mode = GAME_OVER;
+    gameover_init(id);
 }
 
 void game_init(void) {
-	game_mode = GAME_TITLE;
-	title_init();
+    game_mode = GAME_TITLE;
+    title_init();
 }
 
 void game_start(void) {
-	title_close();
+    title_close();
     inventory_reset();
     gamestate_reset();
     gameover_close();
@@ -103,24 +103,40 @@ static Hotspot *find_hotspot(int x, int y) {
     return NULL;
 }
 
-bool game_can_move_up(void) {
-    return current_room && current_room->up;
+bool game_can_move_north(void) {
+    return current_room && current_room->north;
 }
 
-bool game_can_move_down(void) {
-    return current_room && current_room->down;
+bool game_can_move_northeast(void) {
+    return current_room && current_room->northeast;
 }
 
-bool game_can_move_left(void) {
-    return current_room && current_room->left;
+bool game_can_move_east(void) {
+    return current_room && current_room->east;
 }
 
-bool game_can_move_right(void) {
-    return current_room && current_room->right;
+bool game_can_move_southeast(void) {
+    return current_room && current_room->southeast;
+}
+
+bool game_can_move_south(void) {
+    return current_room && current_room->south;
+}
+
+bool game_can_move_southwest(void) {
+    return current_room && current_room->southwest;
+}
+
+bool game_can_move_west(void) {
+    return current_room && current_room->west;
+}
+
+bool game_can_move_northwest(void) {
+    return current_room && current_room->northwest;
 }
 
 static void update_movement(circlePosition analog) {
-	bool neutral = analog.dx > -THRESHOLD && analog.dx < THRESHOLD && analog.dy > -THRESHOLD && analog.dy < THRESHOLD;
+    bool neutral = analog.dx > -THRESHOLD && analog.dx < THRESHOLD && analog.dy > -THRESHOLD && analog.dy < THRESHOLD;
     if (neutral) {
         circle_ready = true;
         return;
@@ -130,18 +146,30 @@ static void update_movement(circlePosition analog) {
         return;
     }
 
-    if (analog.dy > THRESHOLD && current_room->up) {
+    if (analog.dx > THRESHOLD && analog.dy > THRESHOLD && current_room->northeast) {
         circle_ready = false;
-        current_room->up();
-    } else if (analog.dy < -THRESHOLD && current_room->down) {
+        current_room->northeast();
+    } else if (analog.dx > THRESHOLD && analog.dy < -THRESHOLD && current_room->southeast) {
         circle_ready = false;
-        current_room->down();
-    } else if (analog.dx < -THRESHOLD && current_room->left) {
+        current_room->southeast();
+    } else if (analog.dx < -THRESHOLD && analog.dy > THRESHOLD && current_room->northwest) {
         circle_ready = false;
-        current_room->left();
-    } else if (analog.dx > THRESHOLD && current_room->right) {
+        current_room->northwest();
+    } else if (analog.dx < -THRESHOLD && analog.dy < -THRESHOLD && current_room->southwest) {
         circle_ready = false;
-        current_room->right();
+        current_room->southwest();
+    } else if (analog.dy > THRESHOLD && current_room->north) {
+        circle_ready = false;
+        current_room->north();
+    } else if (analog.dy < -THRESHOLD && current_room->south) {
+        circle_ready = false;
+        current_room->south();
+    } else if (analog.dx < -THRESHOLD && current_room->west) {
+        circle_ready = false;
+        current_room->west();
+    } else if (analog.dx > THRESHOLD && current_room->east) {
+        circle_ready = false;
+        current_room->east();
     }
 }
 
@@ -176,12 +204,12 @@ static void room_draw(void) {
         current_room->draw();
 
     if (game_mode == GAME_EXAMINE) {
-	    C2D_TextBufClear(text_buf);
-	    C2D_TextParse(&text, text_buf, examine_text);
-	    C2D_TextOptimize(&text);
-	    C2D_DrawRectSolid(10.0f, 185.0f, 0.8f, 300.0f, 45.0f, C2D_Color32(0, 0, 0, 180));
-	    C2D_DrawText(&text, C2D_WithColor, 20.0f, 197.0f, 0.9f, 0.5f, 0.5f, C2D_Color32(255, 255, 255, 255));
-	}
+        C2D_TextBufClear(text_buf);
+        C2D_TextParse(&text, text_buf, examine_text);
+        C2D_TextOptimize(&text);
+        C2D_DrawRectSolid(10.0f, 185.0f, 0.8f, 300.0f, 45.0f, C2D_Color32(0, 0, 0, 180));
+        C2D_DrawText(&text, C2D_WithColor, 20.0f, 197.0f, 0.9f, 0.5f, 0.5f, C2D_Color32(255, 255, 255, 255));
+    }
 }
 
 void game_update(u32 keys, circlePosition analog, touchPosition touch) {
@@ -203,20 +231,20 @@ void game_update(u32 keys, circlePosition analog, touchPosition touch) {
         case GAME_BUSY:
             hud_update();
             if (game_busy_sfx_channel > -1) {
-			    if (!sfx_is_playing(game_busy_sfx_channel)) {
-			        game_mode = GAME_NORMAL;
-			        if (game_busy_callback) {
-			            void (*callback)(void) = game_busy_callback;
-			            game_busy_callback = NULL;
-			            game_busy_sfx_channel = -1;
-			            callback();
-			        }
-			    }
-			}
-	    	return;
+                if (!sfx_is_playing(game_busy_sfx_channel)) {
+                    game_mode = GAME_NORMAL;
+                    if (game_busy_callback) {
+                        void (*callback)(void) = game_busy_callback;
+                        game_busy_callback = NULL;
+                        game_busy_sfx_channel = -1;
+                        callback();
+                    }
+                }
+            }
+            return;
 
         default:
-        	hud_update();
+            hud_update();
             break;
     }
 
@@ -232,8 +260,8 @@ void game_update(u32 keys, circlePosition analog, touchPosition touch) {
 }
 
 void game_draw(C3D_RenderTarget *top, C3D_RenderTarget *bottom) {
-	C2D_TargetClear(top, C2D_Color32(0, 0, 0, 255));
-	C2D_TargetClear(bottom, C2D_Color32(0, 0, 0, 255));
+    C2D_TargetClear(top, C2D_Color32(0, 0, 0, 255));
+    C2D_TargetClear(bottom, C2D_Color32(0, 0, 0, 255));
     switch (game_mode) {
         case GAME_TITLE:
             C2D_SceneBegin(top);

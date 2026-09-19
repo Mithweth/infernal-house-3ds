@@ -222,17 +222,17 @@ static void move_up(void) {
     game_set_room(&dining_room);
 }
 
-static void up_action(void) {
+static void north_action(void) {
     game_wait_for_sfx("romfs:/audio/door_open.raw", move_up);
 }
 
 Room hall = {
     .hotspots = hotspots,
     .hotspot_count = sizeof(hotspots) / sizeof(hotspots[0]),
-    .up = up_action,
-    .down = NULL,
-    .left = NULL,
-    .right = NULL,
+    .north = north_action,
+    .south = NULL,
+    .west = NULL,
+    .east = NULL,
     .init = room_init,
     .draw = room_draw,
     .close = room_close
