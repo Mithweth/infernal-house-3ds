@@ -4,6 +4,7 @@
 #include "gfx_corridor.h"
 #include "inventory.h"
 #include "room_diningroom.h"
+#include "room_basement_access.h"
 
 static C2D_SpriteSheet room_scene;
 static C2D_Image img_background;
@@ -51,8 +52,12 @@ static void room_close(void) {
     C2D_SpriteSheetFree(room_scene);
 }
 
-static void north_action(void) {
+static void move_north(void) {
+    game_set_room(&basement_access);
+}
 
+static void north_action(void) {
+    game_wait_for_sfx("romfs:/audio/door_open.raw", move_north);
 }
 
 static void northeast_action(void) {

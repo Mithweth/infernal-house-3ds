@@ -218,12 +218,12 @@ static void room_close(void) {
     C2D_SpriteSheetFree(room_scene);
 }
 
-static void move_up(void) {
+static void move_north(void) {
     game_set_room(&dining_room);
 }
 
 static void north_action(void) {
-    game_wait_for_sfx("romfs:/audio/door_open.raw", move_up);
+    game_wait_for_sfx("romfs:/audio/door_open.raw", move_north);
 }
 
 Room hall = {
