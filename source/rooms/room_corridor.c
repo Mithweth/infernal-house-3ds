@@ -4,7 +4,7 @@
 #include "gfx_corridor.h"
 #include "inventory.h"
 #include "room_diningroom.h"
-#include "room_basement_access.h"
+#include "room_cellar.h"
 
 static C2D_SpriteSheet room_scene;
 static C2D_Image img_background;
@@ -53,7 +53,7 @@ static void room_close(void) {
 }
 
 static void move_north(void) {
-    game_set_room(&basement_access);
+    game_set_room(&cellar);
 }
 
 static void north_action(void) {

@@ -18,7 +18,6 @@ typedef struct Item {
     ItemId id;
     const char *name_id;
     C2D_Image image;
-    void (*action)(struct Item *item);
     void (*draw_action)(struct Item *item);
 } Item;
 

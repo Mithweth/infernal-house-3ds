@@ -15,7 +15,7 @@ static Room *current_room = NULL;
 static GameMode game_mode = GAME_NORMAL;
 static bool circle_ready = true;
 static Hotspot *last_hotspot = NULL;
-static const char *examine_text = NULL;
+static const char *message_text = NULL;
 static C2D_TextBuf text_buf;
 static C2D_Text text;
 static void (*game_busy_callback)(void) = NULL;
@@ -35,7 +35,7 @@ void game_set_room(Room *room) {
 
     last_hotspot = NULL;
     game_mode = GAME_NORMAL;
-    examine_text = NULL;
+    message_text = NULL;
 
     if (current_room && current_room->init) {
         current_room->init();
@@ -71,7 +71,7 @@ void game_start(void) {
     gameover_close();
     hud_reset();
     game_mode = GAME_NORMAL;
-    examine_text = NULL;
+    message_text = NULL;
     last_hotspot = NULL;
     music_play("romfs:/audio/background.ogg");
     game_set_room(&hall);
@@ -174,7 +174,7 @@ static void update_movement(circlePosition analog) {
 }
 
 static void update_touch(touchPosition touch) {
-    if (game_mode == GAME_EXAMINE) {
+    if (game_mode == GAME_MESSAGE) {
         game_mode = GAME_NORMAL;
         return;
     }
@@ -192,8 +192,7 @@ static void update_touch(touchPosition touch) {
     }
 
     last_hotspot = hotspot;
-    examine_text = lang_get(hotspot->text_id);
-    game_mode = GAME_EXAMINE;
+    game_show_message(hotspot->text_id);
 }
 
 static void room_draw(void) {
@@ -203,13 +202,32 @@ static void room_draw(void) {
     if (current_room->draw)
         current_room->draw();
 
-    if (game_mode == GAME_EXAMINE) {
+    if (game_mode == GAME_MESSAGE) {
         C2D_TextBufClear(text_buf);
-        C2D_TextParse(&text, text_buf, examine_text);
+        C2D_TextParse(&text, text_buf, message_text);
         C2D_TextOptimize(&text);
-        C2D_DrawRectSolid(10.0f, 185.0f, 0.8f, 300.0f, 45.0f, C2D_Color32(0, 0, 0, 180));
-        C2D_DrawText(&text, C2D_WithColor, 20.0f, 197.0f, 0.9f, 0.5f, 0.5f, C2D_Color32(255, 255, 255, 255));
+        float width, height;
+        C2D_TextGetDimensions(&text, 0.5f, 0.5f, &width, &height);
+        float box_height = height + 20.0f;
+        float box_y = 240.0f - box_height - 10.0f;
+        C2D_DrawRectSolid(10.0f, box_y, 0.8f, 300.0f, box_height, C2D_Color32(0, 0, 0, 180));
+        C2D_DrawText(&text, C2D_WithColor, 20.0f, box_y + 10.0f, 0.9f, 0.5f, 0.5f, C2D_Color32(255, 255, 255, 255));
     }
+}
+
+void game_use_item(ItemId item) {
+    if (!last_hotspot) {
+        return;
+    }
+
+    if (last_hotspot->use_item) {
+        last_hotspot->use_item(item);
+    }
+}
+
+void game_show_message(const char *message_id) {
+    message_text = lang_get(message_id);
+    game_mode = GAME_MESSAGE;
 }
 
 void game_update(u32 keys, circlePosition analog, touchPosition touch) {

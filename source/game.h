@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include "gameover.h"
+#include "inventory.h"
 
 typedef struct {
     int x;
@@ -15,6 +16,7 @@ typedef struct {
     const char *text_id;
     bool (*is_active)(void);
     void (*action)(void);
+    void (*use_item)(ItemId item);
 } Hotspot;
 
 typedef struct Room {
@@ -36,7 +38,7 @@ typedef struct Room {
 
 typedef enum {
     GAME_NORMAL,
-    GAME_EXAMINE,
+    GAME_MESSAGE,
     GAME_BUSY,
     GAME_OVER,
     GAME_TITLE,
@@ -59,4 +61,6 @@ bool game_can_move_south(void);
 bool game_can_move_southwest(void);
 bool game_can_move_west(void);
 bool game_can_move_northwest(void);
+void game_use_item(ItemId item);
+void game_show_message(const char *message_id);
 void game_wait_for_sfx(const char *sfx, void (*callback)(void));

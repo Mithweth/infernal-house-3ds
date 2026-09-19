@@ -4,12 +4,13 @@
 
 #include "lang.h"
 #include "inventory.h"
+#include "game.h"
 #include "gfx_inventory.h"
 #include "gfx_inventory_t3x.h"
 
 #define ITEM_SIZE       48.0f
 #define ITEM_SPACING    15.0f
-#define ITEM_Y          55.0f
+#define ITEM_Y          20.0f
 #define SELECT_RADIUS   27.0f
 
 
@@ -65,28 +66,24 @@ void inventory_init(void) {
         .id = ITEM_MAGNIFYING_GLASS,
         .name_id = "ITEM_MAGNIFYING_GLASS",
         .image = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_magnify_glass_idx),
-        .action = NULL
     };
 
     items[ITEM_SCREWDRIVER] = (Item) {
         .id = ITEM_SCREWDRIVER,
         .name_id = "ITEM_SCREWDRIVER",
         .image = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_screwdriver_idx),
-        .action = NULL
     };
 
     items[ITEM_BINOCULARS] = (Item) {
         .id = ITEM_BINOCULARS,
         .name_id = "ITEM_BINOCULARS",
         .image = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_binoculars_idx),
-        .action = NULL
     };
 
     items[ITEM_FLASHLIGHT] = (Item) {
         .id = ITEM_FLASHLIGHT,
         .name_id = "ITEM_FLASHLIGHT",
         .image = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_flashlight_idx),
-        .action = NULL
     };
 
     items[ITEM_SCORE] = (Item) {
@@ -174,11 +171,10 @@ bool inventory_update(u32 keys) {
 
     if (keys & KEY_A) {
         Item *item = inventory[selected];
-        if (item->action) {
-            item->action(item);
-        }
         if (item->draw_action) {
             inventory_mode = INVENTORY_ACTION;
+        } else {
+            game_use_item(item->id);
         }
         return true;
     }
@@ -215,6 +211,5 @@ void inventory_draw(void) {
     C2D_TextBufClear(text_buf);
     C2D_TextParse(&text, text_buf, lang_get(item->name_id));
     C2D_TextOptimize(&text);
-    //C2D_DrawRectSolid(100.0f, 120.0f, 0.4f, 200.0f, 20.0f, C2D_Color32(0, 0, 0, 180));
     C2D_DrawText(&text, C2D_WithColor | C2D_AlignCenter, 200.0f, 195.0f, 0.5f, 0.5f, 0.5f, C2D_Color32(255, 255, 255, 255));
 }
