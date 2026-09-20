@@ -11,6 +11,8 @@ typedef enum {
     ITEM_BINOCULARS,
     ITEM_FLASHLIGHT,
     ITEM_SCORE,
+    ITEM_LIGHTER,
+    ITEM_STATUE,
     ITEM_COUNT
 } ItemId;
 
@@ -29,9 +31,9 @@ typedef enum {
 void inventory_init(void);
 void inventory_close(void);
 
-void inventory_add(ItemId item);
-bool inventory_has(ItemId item);
-
+void inventory_add(ItemId id);
+bool inventory_has(ItemId id);
+void inventory_remove(ItemId id);
 bool inventory_update(u32 keys);
 void inventory_draw(void);
 bool inventory_is_active(void);

@@ -13,6 +13,10 @@ typedef struct {
     bool hall_carpet_moved;
     bool cellar_alarm_box_unscrewed;
     bool cellar_alarm_box_opened;
+    bool livingroom_piano_opened;
+    bool livingroom_fireplace_hearth_opened;
+    bool livingroom_golden_statue_placed;
+    bool livingroom_secret_passage;
 } GameState;
 
 static GameState game_state;
@@ -87,6 +91,38 @@ void gamestate_open_cellar_alarm_box(void) {
 
 bool gamestate_is_cellar_alarm_box_opened(void) {
     return game_state.cellar_alarm_box_opened;
+}
+
+void gamestate_open_livingroom_piano(bool value) {
+    game_state.livingroom_piano_opened = value;
+}
+
+bool gamestate_is_livingroom_piano_opened(void) {
+    return game_state.livingroom_piano_opened;
+}
+
+void gamestate_open_livingroom_fireplace_hearth(void) {
+    game_state.livingroom_fireplace_hearth_opened = true;
+}
+
+bool gamestate_is_livingroom_fireplace_hearth_opened(void) {
+    return game_state.livingroom_fireplace_hearth_opened;
+}
+
+void gamestate_set_livingroom_golden_statue_placed(void) {
+    game_state.livingroom_golden_statue_placed = true;
+}
+
+bool gamestate_is_livingroom_golden_statue_placed(void) {
+    return game_state.livingroom_golden_statue_placed;
+}
+
+void gamestate_open_livingroom_secret_passage(void) {
+    game_state.livingroom_secret_passage = true;
+}
+
+bool gamestate_is_livingroom_secret_passage_opened(void) {
+    return game_state.livingroom_secret_passage;
 }
 
 void gamestate_reset(void) {

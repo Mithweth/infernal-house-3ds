@@ -10,6 +10,7 @@
 #include "audio.h"
 #include "title.h"
 #include "simon.h"
+#include "piano.h"
 
 const int THRESHOLD = 80;
 static Room *current_room = NULL;
@@ -220,6 +221,20 @@ static void room_draw(void) {
 void game_start_simon(void) {
     simon_init();
     game_mode = GAME_SIMON;
+}
+
+void game_play_piano(void) {
+    piano_init();
+    game_mode = GAME_PIANO;
+}
+
+void game_stop_piano(bool success) {
+    piano_close();
+    game_mode = GAME_NORMAL;
+    if ((success) && (gamestate_is_livingroom_golden_statue_placed())) {
+        gamestate_open_livingroom_secret_passage();
+        game_show_message("LIVINGROOM_SECRET_PASSAGE_OPEN");
+    }
 }
 
 void game_end_simon(bool success) {

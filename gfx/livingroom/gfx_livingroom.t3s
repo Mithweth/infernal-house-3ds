@@ -1,0 +1,6 @@
+--atlas -f rgba8888 -z auto
+bg.png
+hearth_opened.png
+lighter.png
+piano_opened.png
+statue.png

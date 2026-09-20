@@ -92,6 +92,18 @@ void inventory_init(void) {
         .image = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_partition_idx),
         .draw_action = score_draw_action
     };
+
+    items[ITEM_LIGHTER] = (Item) {
+        .id = ITEM_LIGHTER,
+        .name_id = "ITEM_LIGHTER",
+        .image = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_lighter_idx),
+    };
+
+    items[ITEM_STATUE] = (Item) {
+        .id = ITEM_STATUE,
+        .name_id = "ITEM_STATUE",
+        .image = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_statue_idx),
+    };
     inventory_count = 0;
     selected = 0;
 }
@@ -126,19 +138,43 @@ bool inventory_has(ItemId id) {
 }
 
 void inventory_add(ItemId id) {
-    if (id < 0 || id >= ITEM_COUNT)
+    if (id < 0 || id >= ITEM_COUNT) {
         return;
+    }
 
-    if (inventory_count >= ITEM_COUNT)
+    if (inventory_count >= ITEM_COUNT) {
         return;
+    }
 
-    if (inventory_has(id))
+    if (inventory_has(id)) {
         return;
+    }
 
     inventory[inventory_count++] = &items[id];
     selected = inventory_count - 1;
 }
 
+void inventory_remove(ItemId id) {
+    for (size_t i = 0; i < inventory_count; i++) {
+        if (inventory[i]->id != id) {
+            continue;
+        }
+
+        for (size_t j = i; j < inventory_count - 1; j++) {
+            inventory[j] = inventory[j + 1];
+        }
+
+        inventory_count--;
+
+        if (inventory_count == 0) {
+            selected = 0;
+        } else if (selected >= inventory_count) {
+            selected = inventory_count - 1;
+        }
+
+        return;
+    }
+}
 
 bool inventory_update(u32 keys) {
     if (inventory_mode == INVENTORY_ACTION) {
