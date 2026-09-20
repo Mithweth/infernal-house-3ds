@@ -41,6 +41,7 @@ typedef enum {
     GAME_MESSAGE,
     GAME_BUSY,
     GAME_OVER,
+    GAME_SIMON,
     GAME_TITLE,
     GAME_INTRO,
     GAME_ENDING
@@ -61,6 +62,8 @@ bool game_can_move_south(void);
 bool game_can_move_southwest(void);
 bool game_can_move_west(void);
 bool game_can_move_northwest(void);
+void game_start_simon(void);
+void game_end_simon(bool success);
 void game_use_item(ItemId item);
 void game_show_message(const char *message_id);
 void game_wait_for_sfx(const char *sfx, void (*callback)(void));

@@ -9,6 +9,7 @@
 #include "hud.h"
 #include "audio.h"
 #include "title.h"
+#include "simon.h"
 
 const int THRESHOLD = 80;
 static Room *current_room = NULL;
@@ -60,6 +61,7 @@ void game_over(GameOverId id) {
 }
 
 void game_init(void) {
+    music_stop();
     game_mode = GAME_TITLE;
     title_init();
 }
@@ -215,6 +217,19 @@ static void room_draw(void) {
     }
 }
 
+void game_start_simon(void) {
+    simon_init();
+    game_mode = GAME_SIMON;
+}
+
+void game_end_simon(bool success) {
+    simon_close();
+    game_mode = GAME_NORMAL;
+    if (success) {
+        game_show_message("CELLAR_SIMON_WIN");
+    }
+}
+
 void game_use_item(ItemId item) {
     if (!last_hotspot) {
         return;
@@ -242,8 +257,12 @@ void game_update(u32 keys, circlePosition analog, touchPosition touch) {
 
         case GAME_OVER:
             if (keys & KEY_A) {
-                game_start();
+                game_init();
             }
+            return;
+
+        case GAME_SIMON:
+            simon_update(keys, touch);
             return;
 
         case GAME_BUSY:
@@ -294,6 +313,13 @@ void game_draw(C3D_RenderTarget *top, C3D_RenderTarget *bottom) {
 
             C2D_SceneBegin(bottom);
             //intro_draw_bottom();
+            break;
+
+        case GAME_SIMON:
+            C2D_SceneBegin(bottom);
+            simon_draw_bottom();
+            C2D_SceneBegin(top);
+            hud_draw();
             break;
 
         case GAME_OVER:

@@ -97,8 +97,8 @@ void title_init(void) {
         C2D_TextOptimize(&credits[i].person);
     }
 
-    C2D_TextParse(&controls_text[0], text_buf, lang_get("TITLE_CONTROLS_INVENTORY"));
-    C2D_TextParse(&controls_text[1], text_buf, lang_get("TITLE_CONTROLS_MOVE"));
+    C2D_TextParse(&controls_text[0], text_buf, lang_get("TITLE_CONTROLS_MOVE"));
+    C2D_TextParse(&controls_text[1], text_buf, lang_get("TITLE_CONTROLS_INVENTORY"));
     C2D_TextParse(&controls_text[2], text_buf, lang_get("TITLE_CONTROLS_OBJECT"));
     C2D_TextParse(&controls_text[3], text_buf, lang_get("TITLE_CONTROLS_EXAMINE"));
     C2D_TextParse(&controls_text[4], text_buf, lang_get("TITLE_CONTROLS_ACTION"));

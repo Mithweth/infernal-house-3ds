@@ -1,0 +1,6 @@
+--atlas -f rgba8888 -z auto
+background.png
+blue.png
+green.png
+red.png
+yellow.png

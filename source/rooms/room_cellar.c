@@ -33,6 +33,10 @@ static bool open_alarm_box_is_active(void) {
     return gamestate_is_cellar_alarm_box_opened();
 }
 
+static void simon_action(void) {
+    game_start_simon();
+}
+
 static Hotspot hotspots[] = {
     {
         .x = 129,
@@ -86,9 +90,9 @@ static Hotspot hotspots[] = {
         .y = 115,
         .width = 31,
         .height = 36,
-        .text_id = "CELLAR_GAME",
+        .text_id = "CELLAR_SIMON",
         .is_active = NULL,
-        .action = NULL
+        .action = simon_action
     },
 };
 
