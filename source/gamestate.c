@@ -81,8 +81,8 @@ bool gamestate_is_cellar_alarm_box_unscrewed(void) {
     return game_state.cellar_alarm_box_unscrewed;
 }
 
-void gamestate_open_cellar_alarm_box(bool value) {
-    game_state.cellar_alarm_box_opened = value;
+void gamestate_open_cellar_alarm_box(void) {
+    game_state.cellar_alarm_box_opened = true;
 }
 
 bool gamestate_is_cellar_alarm_box_opened(void) {

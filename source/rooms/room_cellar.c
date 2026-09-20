@@ -11,6 +11,8 @@
 
 static C2D_SpriteSheet room_scene;
 static C2D_Image img_background;
+static C2D_Image img_alarm_box_opened;
+static C2D_Image img_alarm_box_enabled;
 
 static void alarm_box_use_item(ItemId item) {
     if ((item == ITEM_SCREWDRIVER) && (!gamestate_is_cellar_alarm_box_unscrewed())) {
@@ -20,16 +22,20 @@ static void alarm_box_use_item(ItemId item) {
 }
 
 static void alarm_box_action(void) {
-    if (!gamestate_is_cellar_alarm_box_unscrewed()) {
-        gamestate_open_cellar_alarm_box(!gamestate_is_cellar_alarm_box_opened());
+    if (gamestate_is_cellar_alarm_box_unscrewed()) {
+        gamestate_open_cellar_alarm_box();
+    }}
+
+static void opened_alarm_box_action(void) {
+    gamestate_disable_diningroom_lasers(!gamestate_are_diningroom_lasers_disabled());
+    if (gamestate_are_diningroom_lasers_disabled()) {
+        game_show_message("CELLAR_DISABLE_ALARM_BOX");
+    } else {
+        game_show_message("CELLAR_ENABLE_ALARM_BOX");
     }
 }
 
-static void open_alarm_box_action(void) {
-    gamestate_disable_diningroom_lasers(!gamestate_are_diningroom_lasers_disabled());
-}
-
-static bool open_alarm_box_is_active(void) {
+static bool opened_alarm_box_is_active(void) {
     return gamestate_is_cellar_alarm_box_opened();
 }
 
@@ -43,9 +49,9 @@ static Hotspot hotspots[] = {
         .y = 24,
         .width = 40,
         .height = 45,
-        .text_id = "CELLAR_ALARM_BOX",
-        .is_active = open_alarm_box_is_active,
-        .action = open_alarm_box_action
+        .text_id = "CELLAR_OPENED_ALARM_BOX",
+        .is_active = opened_alarm_box_is_active,
+        .action = opened_alarm_box_action
     },
     {
         .x = 129,
@@ -53,7 +59,6 @@ static Hotspot hotspots[] = {
         .width = 40,
         .height = 45,
         .text_id = "CELLAR_ALARM_BOX",
-        .is_active = NULL,
         .action = alarm_box_action,
         .use_item = alarm_box_use_item
     },
@@ -99,10 +104,17 @@ static Hotspot hotspots[] = {
 static void room_init(void) {
     room_scene = C2D_SpriteSheetLoad("romfs:/gfx/gfx_cellar.t3x");
     img_background = C2D_SpriteSheetGetImage(room_scene, gfx_cellar_bg_idx);
+    img_alarm_box_opened = C2D_SpriteSheetGetImage(room_scene, gfx_cellar_alarm_box_opened_idx);
+    img_alarm_box_enabled = C2D_SpriteSheetGetImage(room_scene, gfx_cellar_alarm_box_enabled_idx);
 }
 
 static void room_draw(void) {
     C2D_DrawImageAt(img_background, 0.0f, 0.0f, 0.0f, NULL, 1.0f, 1.0f);
+    if (gamestate_are_diningroom_lasers_disabled()) {
+        C2D_DrawImageAt(img_alarm_box_enabled, 135.0f, 20.0f, 0.3f, NULL, 1.0f, 1.0f);
+    } else if (gamestate_is_cellar_alarm_box_opened()) {
+        C2D_DrawImageAt(img_alarm_box_opened, 135.0f, 20.0f, 0.3f, NULL, 1.0f, 1.0f);
+    }
 }
 
 static void room_close(void) {

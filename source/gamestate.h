@@ -18,7 +18,7 @@ void gamestate_move_diningroom_soup(bool value);
 bool gamestate_is_diningroom_soup_opened(void);
 void gamestate_unscrew_cellar_alarm_box(void);
 bool gamestate_is_cellar_alarm_box_unscrewed(void);
-void gamestate_open_cellar_alarm_box(bool value);
+void gamestate_open_cellar_alarm_box(void);
 bool gamestate_is_cellar_alarm_box_opened(void);
 void gamestate_disable_cellar_alarm_box(bool value);
 bool gamestate_is_cellar_alarm_box_disabled(void);
