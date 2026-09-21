@@ -18,6 +18,7 @@ install() {
 	fi
 }
 
+while [ $# -gt 0 ]; do
 	case "$1" in
 		clean) clean;;
 		build) build;;
@@ -26,3 +27,4 @@ install() {
                 *) clean && build && install;;
 	esac
 	shift
+done

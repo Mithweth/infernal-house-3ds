@@ -5,6 +5,7 @@
 #include "gfx_livingroom.h"
 #include "inventory.h"
 #include "gamestate.h"
+#include "audio.h"
 
 static C2D_SpriteSheet room_scene;
 static C2D_Image img_background;
@@ -22,6 +23,11 @@ static bool piano_is_opened(void) {
 }
 
 static void piano_action(void) {
+    if (gamestate_is_livingroom_piano_opened()) {
+        sfx_play("romfs:/audio/closet_close.raw");
+    } else {
+        sfx_play("romfs:/audio/closet_open.raw");
+    }
     gamestate_open_livingroom_piano(!gamestate_is_livingroom_piano_opened());
 }
 

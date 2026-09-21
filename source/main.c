@@ -27,7 +27,6 @@ int main(int argc, char **argv)
     C2D_Prepare();
     C3D_RenderTarget *top = C2D_CreateScreenTarget(GFX_TOP, GFX_LEFT);
     C3D_RenderTarget *bottom = C2D_CreateScreenTarget(GFX_BOTTOM, GFX_LEFT);
-    hud_init();
     aptHook(&apt_cookie, apt_callback, NULL);
     audio_init();
     //game_set_room(&hall);
@@ -56,7 +55,6 @@ int main(int argc, char **argv)
     aptUnhook(&apt_cookie);
     audio_close();
     game_close();
-    hud_close();
     C2D_Fini();
     C3D_Fini();
     lang_close();

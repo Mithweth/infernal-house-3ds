@@ -1,5 +1,6 @@
 // game.c
 #include <3ds.h>
+#include <stdlib.h>
 #include "game.h"
 #include "lang.h"
 #include "inventory.h"
@@ -12,7 +13,6 @@
 #include "simon.h"
 #include "piano.h"
 
-const int THRESHOLD = 80;
 static Room *current_room = NULL;
 static GameMode game_mode = GAME_NORMAL;
 static bool circle_ready = true;
@@ -54,6 +54,7 @@ void game_close(void) {
         C2D_TextBufDelete(text_buf);
         text_buf = NULL;
     }
+    hud_close();
 }
 
 void game_over(GameOverId id) {
@@ -62,6 +63,7 @@ void game_over(GameOverId id) {
 }
 
 void game_init(void) {
+    hud_init();
     music_stop();
     game_mode = GAME_TITLE;
     title_init();
@@ -138,9 +140,14 @@ bool game_can_move_northwest(void) {
     return current_room && current_room->northwest;
 }
 
-static void update_movement(circlePosition analog) {
-    bool neutral = analog.dx > -THRESHOLD && analog.dx < THRESHOLD && analog.dy > -THRESHOLD && analog.dy < THRESHOLD;
-    if (neutral) {
+static void update_movement(circlePosition analog)
+{
+    const int DEADZONE = 60;
+
+    int x = analog.dx;
+    int y = analog.dy;
+
+    if (abs(x) < DEADZONE && abs(y) < DEADZONE) {
         circle_ready = true;
         return;
     }
@@ -149,30 +156,39 @@ static void update_movement(circlePosition analog) {
         return;
     }
 
-    if (analog.dx > THRESHOLD && analog.dy > THRESHOLD && current_room->northeast) {
-        circle_ready = false;
-        current_room->northeast();
-    } else if (analog.dx > THRESHOLD && analog.dy < -THRESHOLD && current_room->southeast) {
-        circle_ready = false;
-        current_room->southeast();
-    } else if (analog.dx < -THRESHOLD && analog.dy > THRESHOLD && current_room->northwest) {
-        circle_ready = false;
-        current_room->northwest();
-    } else if (analog.dx < -THRESHOLD && analog.dy < -THRESHOLD && current_room->southwest) {
-        circle_ready = false;
-        current_room->southwest();
-    } else if (analog.dy > THRESHOLD && current_room->north) {
-        circle_ready = false;
-        current_room->north();
-    } else if (analog.dy < -THRESHOLD && current_room->south) {
-        circle_ready = false;
-        current_room->south();
-    } else if (analog.dx < -THRESHOLD && current_room->west) {
-        circle_ready = false;
-        current_room->west();
-    } else if (analog.dx > THRESHOLD && current_room->east) {
-        circle_ready = false;
-        current_room->east();
+    int ax = abs(x);
+    int ay = abs(y);
+
+    if (ay > ax * 2) {
+        if (y > 0 && current_room->north) {
+            circle_ready = false;
+            current_room->north();
+        } else if (y < 0 && current_room->south) {
+            circle_ready = false;
+            current_room->south();
+        }
+    } else if (ax > ay * 2) {
+        if (x > 0 && current_room->east) {
+            circle_ready = false;
+            current_room->east();
+        } else if (x < 0 && current_room->west) {
+            circle_ready = false;
+            current_room->west();
+        }
+    } else {
+        if (x > 0 && y > 0 && current_room->northeast) {
+            circle_ready = false;
+            current_room->northeast();
+        } else if (x < 0 && y > 0 && current_room->northwest) {
+            circle_ready = false;
+            current_room->northwest();
+        } else if (x > 0 && y < 0 && current_room->southeast) {
+            circle_ready = false;
+            current_room->southeast();
+        } else if (x < 0 && y < 0 && current_room->southwest) {
+            circle_ready = false;
+            current_room->southwest();
+        }
     }
 }
 
@@ -224,14 +240,16 @@ void game_start_simon(void) {
 }
 
 void game_play_piano(void) {
+    music_stop();
     piano_init();
     game_mode = GAME_PIANO;
 }
 
 void game_stop_piano(bool success) {
     piano_close();
+    music_play("romfs:/audio/background.ogg");
     game_mode = GAME_NORMAL;
-    if ((success) && (gamestate_is_livingroom_golden_statue_placed())) {
+    if (success) {
         gamestate_open_livingroom_secret_passage();
         game_show_message("LIVINGROOM_SECRET_PASSAGE_OPEN");
     }
@@ -245,14 +263,16 @@ void game_end_simon(bool success) {
     }
 }
 
-void game_use_item(ItemId item) {
+bool game_use_item(ItemId item) {
     if (!last_hotspot) {
-        return;
+        return false;
     }
 
     if (last_hotspot->use_item) {
         last_hotspot->use_item(item);
+        return true;
     }
+    return false;
 }
 
 void game_show_message(const char *message_id) {
@@ -277,7 +297,13 @@ void game_update(u32 keys, circlePosition analog, touchPosition touch) {
             return;
 
         case GAME_SIMON:
+            hud_update();
             simon_update(keys, touch);
+            return;
+
+        case GAME_PIANO:
+            hud_update();
+            piano_update(keys, touch);
             return;
 
         case GAME_BUSY:
@@ -333,6 +359,13 @@ void game_draw(C3D_RenderTarget *top, C3D_RenderTarget *bottom) {
         case GAME_SIMON:
             C2D_SceneBegin(bottom);
             simon_draw_bottom();
+            C2D_SceneBegin(top);
+            hud_draw();
+            break;
+
+        case GAME_PIANO:
+            C2D_SceneBegin(bottom);
+            piano_draw_bottom();
             C2D_SceneBegin(top);
             hud_draw();
             break;

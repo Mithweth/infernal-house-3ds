@@ -8,9 +8,11 @@
 #include "gfx_inventory.h"
 #include "gfx_inventory_t3x.h"
 
+#define ITEM_PER_LINE   6
 #define ITEM_SIZE       48.0f
 #define ITEM_SPACING    15.0f
 #define ITEM_Y          20.0f
+#define ITEM_X          20.0f
 #define SELECT_RADIUS   27.0f
 
 
@@ -30,7 +32,18 @@ static void message_draw_action(Item *item) {
 
     C2D_DrawRectSolid(0.0f, 0.0f, 0.0f, 400.0f, 240.0f, background);
     C2D_TextBufClear(text_buf);
-    C2D_TextParse(&text, text_buf, lang_get("ITEM_MESSAGE_CONTENT"));
+    C2D_TextParse(&text, text_buf, lang_get("ITEM_MESSAGE_EXAMINE"));
+    C2D_TextOptimize(&text);
+    C2D_DrawText(&text, C2D_WithColor, 20.0f, 30.0f, 0.5f, 0.55f, 0.55f, text_color);
+}
+
+static void statue_draw_action(Item *item) {
+    u32 background = C2D_Color32(8, 12, 30, 255);
+    u32 text_color = C2D_Color32(255, 255, 255, 255);
+
+    C2D_DrawRectSolid(0.0f, 0.0f, 0.0f, 400.0f, 240.0f, background);
+    C2D_TextBufClear(text_buf);
+    C2D_TextParse(&text, text_buf, lang_get("ITEM_STATUE_EXAMINE"));
     C2D_TextOptimize(&text);
     C2D_DrawText(&text, C2D_WithColor, 20.0f, 30.0f, 0.5f, 0.55f, 0.55f, text_color);
 }
@@ -103,6 +116,7 @@ void inventory_init(void) {
         .id = ITEM_STATUE,
         .name_id = "ITEM_STATUE",
         .image = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_statue_idx),
+        .draw_action = statue_draw_action
     };
     inventory_count = 0;
     selected = 0;
@@ -205,12 +219,34 @@ bool inventory_update(u32 keys) {
         return true;
     }
 
+
+    if (keys & KEY_DUP) {
+        if (selected < ITEM_PER_LINE) {
+            selected = inventory_count - 1;
+        } else {
+            selected -= ITEM_PER_LINE;
+        }
+        return true;
+    }
+
+    if (keys & KEY_DDOWN) {
+        selected += ITEM_PER_LINE;
+        if (selected >= inventory_count) {
+            if (selected < ITEM_PER_LINE * 2) {
+                selected = inventory_count - 1;
+            } else {
+                selected = 0;
+            }
+        }
+        return true;
+    }
+
     if (keys & KEY_A) {
         Item *item = inventory[selected];
-        if (item->draw_action) {
-            inventory_mode = INVENTORY_ACTION;
-        } else {
-            game_use_item(item->id);
+        if (!game_use_item(item->id)) {
+            if (item->draw_action) {
+                inventory_mode = INVENTORY_ACTION;
+            }
         }
         return true;
     }
@@ -231,16 +267,16 @@ void inventory_draw(void) {
         return;
     }
 
-    float total_width = inventory_count * ITEM_SIZE + (inventory_count - 1) * ITEM_SPACING;
-    float start_x = (400.0f - total_width) / 2.0f;
-
-    for (size_t i = 0; i < inventory_count; i++) {
-        float x = start_x + i * (ITEM_SIZE + ITEM_SPACING);
-        if (i == selected) {
-            C2D_DrawCircleSolid(x + ITEM_SIZE / 2.0f, ITEM_Y + ITEM_SIZE / 2.0f, 0.3f, SELECT_RADIUS, C2D_Color32(40, 65, 100, 255));
-        }
-        C2D_DrawImageAt(inventory[i]->image, x, ITEM_Y, 0.4f, NULL, 1.0f, 1.0f);
+for (size_t i = 0; i < inventory_count; i++) {
+    float x = ITEM_X + (i % ITEM_PER_LINE) * (ITEM_SIZE + ITEM_SPACING);
+    float y = ITEM_Y + (i / ITEM_PER_LINE) * (ITEM_SIZE + ITEM_SPACING);
+    
+    if (i == selected) {
+        C2D_DrawCircleSolid(x + ITEM_SIZE / 2.0f, y + ITEM_SIZE / 2.0f, 0.3f, SELECT_RADIUS, C2D_Color32(40, 65, 100, 255));
     }
+
+    C2D_DrawImageAt(inventory[i]->image, x, y, 0.4f, NULL, 1.0f, 1.0f);
+}
 
     Item *item = inventory[selected];
 
