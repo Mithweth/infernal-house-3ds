@@ -13,6 +13,8 @@ typedef enum {
     ITEM_SCORE,
     ITEM_LIGHTER,
     ITEM_STATUE,
+    ITEM_CUP,
+    ITEM_CLOCK,
     ITEM_COUNT
 } ItemId;
 

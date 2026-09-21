@@ -30,3 +30,7 @@ void gamestate_set_livingroom_golden_statue_placed(void);
 bool gamestate_is_livingroom_golden_statue_placed(void);
 void gamestate_open_livingroom_secret_passage(void);
 bool gamestate_is_livingroom_secret_passage_opened(void);
+void gamestate_bind_rope_used_in_livingroom_hearth(void);
+bool gamestate_is_rope_used_in_livingroom_hearth(void);
+void gamestate_open_library_secret_passage(void);
+bool gamestate_is_library_secret_passage_opened(void);

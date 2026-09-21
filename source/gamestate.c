@@ -17,6 +17,8 @@ typedef struct {
     bool livingroom_fireplace_hearth_opened;
     bool livingroom_golden_statue_placed;
     bool livingroom_secret_passage;
+    bool rope_used_in_livingroom_hearth;
+    bool library_secret_passage_opened;
 } GameState;
 
 static GameState game_state;
@@ -123,6 +125,22 @@ void gamestate_open_livingroom_secret_passage(void) {
 
 bool gamestate_is_livingroom_secret_passage_opened(void) {
     return game_state.livingroom_secret_passage;
+}
+
+void gamestate_bind_rope_used_in_livingroom_hearth(void) {
+    game_state.rope_used_in_livingroom_hearth = true;
+}
+
+bool gamestate_is_rope_used_in_livingroom_hearth(void) {
+    return game_state.rope_used_in_livingroom_hearth;
+}
+
+void gamestate_open_library_secret_passage(void) {
+    game_state.library_secret_passage_opened = true;
+}
+
+bool gamestate_is_library_secret_passage_opened(void) {
+    return game_state.library_secret_passage_opened;
 }
 
 void gamestate_reset(void) {

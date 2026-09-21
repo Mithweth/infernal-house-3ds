@@ -5,6 +5,7 @@
 #include "inventory.h"
 #include "room_diningroom.h"
 #include "room_livingroom.h"
+#include "room_library.h"
 #include "room_cellar.h"
 
 static C2D_SpriteSheet room_scene;
@@ -70,7 +71,6 @@ static void northeast_action(void) {
 }
 
 static void east_action(void) {
-
 }
 
 static void south_action(void) {
@@ -78,7 +78,7 @@ static void south_action(void) {
 }
 
 static void west_action(void) {
-
+    game_set_room(&library);
 }
 
 Room corridor = {

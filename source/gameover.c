@@ -25,6 +25,10 @@ void gameover_init(GameOverId id) {
             img_background = C2D_SpriteSheetGetImage(gameover_assets, gfx_gameover_prison_idx);
             message_id = "GAMEOVER_LASERS";
             break;
+        case GAMEOVER_FALL:
+            img_background = C2D_SpriteSheetGetImage(gameover_assets, gfx_gameover_fallendown_idx);
+            message_id = "GAMEOVER_FALLENDOWN";
+            break;
         case GAMEOVER_TIMEUP:
             break;
     }

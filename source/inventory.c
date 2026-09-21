@@ -48,6 +48,17 @@ static void statue_draw_action(Item *item) {
     C2D_DrawText(&text, C2D_WithColor, 20.0f, 30.0f, 0.5f, 0.55f, 0.55f, text_color);
 }
 
+static void cup_draw_action(Item *item) {
+    u32 background = C2D_Color32(8, 12, 30, 255);
+    u32 text_color = C2D_Color32(255, 255, 255, 255);
+
+    C2D_DrawRectSolid(0.0f, 0.0f, 0.0f, 400.0f, 240.0f, background);
+    C2D_TextBufClear(text_buf);
+    C2D_TextParse(&text, text_buf, lang_get("ITEM_CUP_EXAMINE"));
+    C2D_TextOptimize(&text);
+    C2D_DrawText(&text, C2D_WithColor, 20.0f, 30.0f, 0.5f, 0.55f, 0.55f, text_color);
+}
+
 static void score_draw_action(Item *item) {
     object_details = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_partition_details_idx);
     C2D_DrawImageAt(object_details, 50, 20, 0.5f, NULL, 1.0f, 1.0f);
@@ -117,6 +128,18 @@ void inventory_init(void) {
         .name_id = "ITEM_STATUE",
         .image = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_statue_idx),
         .draw_action = statue_draw_action
+    };
+
+    items[ITEM_CUP] = (Item) {
+        .id = ITEM_CUP,
+        .name_id = "ITEM_CUP",
+        .image = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_cup_idx),
+        .draw_action = cup_draw_action
+    };
+    items[ITEM_CLOCK] = (Item) {
+        .id = ITEM_CLOCK,
+        .name_id = "ITEM_CLOCK",
+        .image = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_clock_idx),
     };
     inventory_count = 0;
     selected = 0;

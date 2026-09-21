@@ -12,6 +12,7 @@ static C2D_Image img_background;
 static C2D_Image img_lighter;
 static C2D_Image img_hearth_opened;
 static C2D_Image img_piano_opened;
+static C2D_Image img_hearth_prepared;
 static C2D_Image img_statue;
 
 static void play_piano_action(void) {
@@ -39,12 +40,14 @@ static bool lighter_is_active(void) {
     return !inventory_has(ITEM_LIGHTER);
 }
 
-static bool secret_passage_is_active(void) {
-    return gamestate_is_livingroom_secret_passage_opened();
+static void fall_gameover(void) {
+    game_over(GAMEOVER_FALL);
 }
 
-static void secret_passage_action(void) {
-    // game_set_room(&secret_passage);
+static void north_action(void) {
+    if (!gamestate_is_rope_used_in_livingroom_hearth()) {
+        game_wait_for_sfx("romfs:/audio/falling_down.raw", fall_gameover);
+    }
 }
 
 static void fireplace_use_item(ItemId item) {
@@ -109,26 +112,27 @@ static Hotspot hotspots[] = {
         .y = 107,
         .width = 68,
         .height = 47,
-        .text_id = "LIVINGROOM_SECRET_PASSAGE",
-        .is_active = secret_passage_is_active,
-        .action = secret_passage_action
-    },
-    {
-        .x = 146,
-        .y = 107,
-        .width = 68,
-        .height = 47,
         .text_id = "LIVINGROOM_FIREPLACE_HEARTH"
     },
 };
+
+static void create_new_routes(void) {
+    if (gamestate_is_livingroom_secret_passage_opened()) {
+        livingroom.north = north_action;
+    } else {
+        livingroom.north = NULL;
+    }
+}
 
 static void room_init(void) {
     room_scene = C2D_SpriteSheetLoad("romfs:/gfx/gfx_livingroom.t3x");
     img_background = C2D_SpriteSheetGetImage(room_scene, gfx_livingroom_bg_idx);
     img_lighter = C2D_SpriteSheetGetImage(room_scene, gfx_livingroom_lighter_idx);
     img_hearth_opened = C2D_SpriteSheetGetImage(room_scene, gfx_livingroom_hearth_opened_idx);
+    img_hearth_prepared = C2D_SpriteSheetGetImage(room_scene, gfx_livingroom_hearth_prepared_idx);
     img_piano_opened = C2D_SpriteSheetGetImage(room_scene, gfx_livingroom_piano_opened_idx);
     img_statue = C2D_SpriteSheetGetImage(room_scene, gfx_livingroom_statue_idx);
+    create_new_routes();
 }
 
 static void room_draw(void) {
@@ -140,11 +144,15 @@ static void room_draw(void) {
         C2D_DrawImageAt(img_piano_opened, 2.0f, 102.0f, 0.1f, NULL, 1.0f, 1.0f); 
     }
     if (gamestate_is_livingroom_secret_passage_opened()) {
-        C2D_DrawImageAt(img_hearth_opened, 152.0f, 110.0f, 0.1f, NULL, 1.0f, 1.0f); 
+        C2D_DrawImageAt(img_hearth_opened, 150.0f, 108.0f, 0.1f, NULL, 1.0f, 1.0f);
+    }
+    if (gamestate_is_rope_used_in_livingroom_hearth()) {
+        C2D_DrawImageAt(img_hearth_prepared, 152.0f, 110.0f, 0.1f, NULL, 1.0f, 1.0f); 
     }
     if (gamestate_is_livingroom_golden_statue_placed()) {
         C2D_DrawImageAt(img_statue, 162.0f, 54.0f, 0.1f, NULL, 1.0f, 1.0f); 
     }
+    create_new_routes();
 }
 
 static void room_close(void) {

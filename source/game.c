@@ -215,11 +215,13 @@ static void update_touch(touchPosition touch) {
 }
 
 static void room_draw(void) {
-    if (!current_room)
+    if (!current_room) {
         return;
+    }
 
-    if (current_room->draw)
+    if (current_room->draw) {
         current_room->draw();
+    }
 
     if (game_mode == GAME_MESSAGE) {
         C2D_TextBufClear(text_buf);

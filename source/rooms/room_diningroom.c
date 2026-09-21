@@ -49,6 +49,10 @@ static bool soup_message_is_active(void) {
     return gamestate_is_diningroom_soup_opened() && !inventory_has(ITEM_SCORE);
 }
 
+static bool lasers_are_active(void) {
+    return !gamestate_are_diningroom_lasers_disabled();
+}
+
 static void soup_contents_action(void) {
     inventory_add(ITEM_SCORE);
 }
@@ -60,7 +64,7 @@ static Hotspot hotspots[] = {
         .width = 100,
         .height = 168,
         .text_id = "DINING_LASERS",
-        .is_active = NULL,
+        .is_active = lasers_are_active,
         .action = NULL
     },
     {

@@ -3,6 +3,7 @@
 
 typedef enum {
     GAMEOVER_LASERS,
+    GAMEOVER_FALL,
     GAMEOVER_TIMEUP
 } GameOverId;
 

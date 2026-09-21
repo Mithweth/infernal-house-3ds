@@ -1,6 +1,7 @@
 --atlas -f rgba8888 -z auto
 bg.png
 hearth_opened.png
+hearth_prepared.png
 lighter.png
 piano_opened.png
 statue.png
