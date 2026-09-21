@@ -6,6 +6,7 @@
 #include "room_diningroom.h"
 #include "room_livingroom.h"
 #include "room_library.h"
+#include "room_kitchen.h"
 #include "room_cellar.h"
 
 static C2D_SpriteSheet room_scene;
@@ -70,7 +71,12 @@ static void northeast_action(void) {
     game_wait_for_sfx("romfs:/audio/door_open.raw", move_northeast);
 }
 
+static void move_east(void) {
+    game_set_room(&kitchen);
+}
+
 static void east_action(void) {
+    game_wait_for_sfx("romfs:/audio/door_open.raw", move_east);
 }
 
 static void south_action(void) {

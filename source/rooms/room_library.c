@@ -7,6 +7,7 @@
 #include "gfx_library.h"
 #include "inventory.h"
 #include "gamestate.h"
+#include "audio.h"
 
 static C2D_SpriteSheet room_scene;
 static C2D_Image img_background;
@@ -46,6 +47,7 @@ static bool book_is_active(void) {
 
 static void book_action(void) {
     gamestate_open_library_secret_passage();
+    sfx_play("romfs:/audio/book_pushed.raw");
     game_show_message("LIBRARY_SECRET_PASSAGE");
 }
 
@@ -162,6 +164,27 @@ static Hotspot hotspots[] = {
         .width = 33,
         .height = 18,
         .text_id = "LIBRARY_EASTEREGGS"
+    },
+    {
+        .x = 0,
+        .y = 196,
+        .width = 40,
+        .height = 26,
+        .text_id = "LIBRARY_CLONE_BOOK"
+    },
+    {
+        .x = 238,
+        .y = 152,
+        .width = 40,
+        .height = 17,
+        .text_id = "LIBRARY_ROBOT_BOOK"
+    },
+    {
+        .x = 296,
+        .y = 40,
+        .width = 24,
+        .height = 57,
+        .text_id = "LIBRARY_PAINTING"
     },
 };
 

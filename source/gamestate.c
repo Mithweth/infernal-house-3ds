@@ -19,6 +19,11 @@ typedef struct {
     bool livingroom_secret_passage;
     bool rope_used_in_livingroom_hearth;
     bool library_secret_passage_opened;
+    bool kitchen_refrigerator_opened;
+    bool kitchen_below_closet_opened;
+    bool kitchen_oven_opened;
+    bool kitchen_right_closet_opened;
+    bool kitchen_drawer_opened;
 } GameState;
 
 static GameState game_state;
@@ -141,6 +146,46 @@ void gamestate_open_library_secret_passage(void) {
 
 bool gamestate_is_library_secret_passage_opened(void) {
     return game_state.library_secret_passage_opened;
+}
+
+void gamestate_open_kitchen_refrigerator(bool value) {
+    game_state.kitchen_refrigerator_opened = value;
+}
+
+bool gamestate_is_kitchen_refrigerator_opened(void) {
+    return game_state.kitchen_refrigerator_opened;
+}
+
+void gamestate_open_kitchen_below_closet(bool value) {
+    game_state.kitchen_below_closet_opened = value;
+}
+
+bool gamestate_is_kitchen_below_closet_opened(void) {
+    return game_state.kitchen_below_closet_opened;
+}
+
+void gamestate_open_kitchen_oven(bool value) {
+    game_state.kitchen_oven_opened = value;
+}
+
+bool gamestate_is_kitchen_oven_opened(void) {
+    return game_state.kitchen_oven_opened;
+}
+
+void gamestate_open_kitchen_right_closet(bool value) {
+    game_state.kitchen_right_closet_opened = value;
+}
+
+bool gamestate_is_kitchen_right_closet_opened(void) {
+    return game_state.kitchen_right_closet_opened;
+}
+
+void gamestate_open_kitchen_drawer(bool value) {
+    game_state.kitchen_drawer_opened = value;
+}
+
+bool gamestate_is_kitchen_drawer_opened(void) {
+    return game_state.kitchen_drawer_opened;
 }
 
 void gamestate_reset(void) {

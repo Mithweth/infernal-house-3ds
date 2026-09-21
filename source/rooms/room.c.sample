@@ -1,7 +1,6 @@
+// <room_name.c
+
 #include <citro2d.h>
-
-// Replace <room_name>
-
 #include "game.h"
 #include "room_<room_name>.h"
 #include "gfx_<room_name>.h"
