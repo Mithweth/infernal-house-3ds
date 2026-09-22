@@ -22,8 +22,10 @@ typedef struct {
     bool kitchen_refrigerator_opened;
     bool kitchen_below_closet_opened;
     bool kitchen_oven_opened;
-    bool kitchen_right_closet_opened;
+    bool kitchen_top_closet_opened;
+    bool kitchen_bottom_closet_opened;
     bool kitchen_drawer_opened;
+    bool kitchen_dishwasher_opened;
 } GameState;
 
 static GameState game_state;
@@ -172,12 +174,28 @@ bool gamestate_is_kitchen_oven_opened(void) {
     return game_state.kitchen_oven_opened;
 }
 
-void gamestate_open_kitchen_right_closet(bool value) {
-    game_state.kitchen_right_closet_opened = value;
+void gamestate_open_kitchen_top_closet(bool value) {
+    game_state.kitchen_top_closet_opened = value;
 }
 
-bool gamestate_is_kitchen_right_closet_opened(void) {
-    return game_state.kitchen_right_closet_opened;
+bool gamestate_is_kitchen_top_closet_opened(void) {
+    return game_state.kitchen_top_closet_opened;
+}
+
+void gamestate_open_kitchen_bottom_closet(bool value) {
+    game_state.kitchen_bottom_closet_opened = value;
+}
+
+bool gamestate_is_kitchen_bottom_closet_opened(void) {
+    return game_state.kitchen_bottom_closet_opened;
+}
+
+void gamestate_open_kitchen_dishwasher(bool value) {
+    game_state.kitchen_dishwasher_opened = value;
+}
+
+bool gamestate_is_kitchen_dishwasher_opened(void) {
+    return game_state.kitchen_dishwasher_opened;
 }
 
 void gamestate_open_kitchen_drawer(bool value) {
