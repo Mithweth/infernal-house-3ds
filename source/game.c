@@ -42,6 +42,9 @@ void game_set_room(Room *room) {
     if (current_room && current_room->init) {
         current_room->init();
     }
+    for (size_t i = 0; i < current_room->hotspot_count; i++) {
+        current_room->hotspots[i].examined = false;
+    }
 }
 
 void game_close(void) {
@@ -204,14 +207,21 @@ static void update_touch(touchPosition touch) {
         return;
     }
 
-    if (hotspot == last_hotspot) {
-        if (hotspot->action)
-            hotspot->action();
-        return;
+    // if (hotspot == last_hotspot) {
+    //     if (hotspot->action)
+    //         hotspot->action();
+    //     return;
+    // }
+    last_hotspot = hotspot;
+    if (!hotspot->examined) {
+        hotspot->examined = true;
+        game_show_message(hotspot->text_id);
+    } else if (hotspot->action) {
+        hotspot->action();
     }
 
-    last_hotspot = hotspot;
-    game_show_message(hotspot->text_id);
+    //last_hotspot = hotspot;
+    //game_show_message(hotspot->text_id);
 }
 
 static void room_draw(void) {

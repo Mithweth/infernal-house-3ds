@@ -14,6 +14,7 @@ typedef struct {
     int width;
     int height;
     const char *text_id;
+    bool examined;
     bool (*is_active)(void);
     void (*action)(void);
     void (*use_item)(ItemId item);

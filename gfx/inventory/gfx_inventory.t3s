@@ -1,4 +1,5 @@
 --atlas -f rgba8888 -z auto
+arrow.png
 magnify_glass.png
 screwdriver.png
 flashlight.png
@@ -15,3 +16,6 @@ revolver.png
 invoice.png
 invoice_details.png
 glasses.png
+shovel.png
+sledgehammer.png
+

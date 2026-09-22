@@ -5,6 +5,7 @@
 #include "game.h"
 #include "room_cellar.h"
 #include "room_corridor.h"
+#include "room_firstunderground.h"
 #include "gfx_cellar.h"
 #include "inventory.h"
 #include "gamestate.h"
@@ -129,10 +130,19 @@ static void east_action(void) {
     game_wait_for_sfx("romfs:/audio/door_open.raw", move_east);
 }
 
+static void move_south(void) {
+    game_set_room(&firstunderground);
+}
+
+static void south_action(void) {
+    game_wait_for_sfx("romfs:/audio/metal_ladder.raw", move_south);
+}
+
 Room cellar = {
     .hotspots = hotspots,
     .hotspot_count = sizeof(hotspots) / sizeof(hotspots[0]),
     .east = east_action,
+    .south = south_action,
     .init = room_init,
     .draw = room_draw,
     .close = room_close

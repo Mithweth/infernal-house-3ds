@@ -1,7 +1,0 @@
-// <room_name>.h
-
-#pragma once
-
-#include "game.h"
-
-extern Room <room_name>; // Replace <room_name>

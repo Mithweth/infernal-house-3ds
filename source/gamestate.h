@@ -58,3 +58,5 @@ void gamestate_open_firstbedroom_left_nightstand(bool value);
 bool gamestate_is_firstbedroom_left_nightstand_opened(void);
 void gamestate_open_firstbedroom_right_nightstand(bool value);
 bool gamestate_is_firstbedroom_right_nightstand_opened(void);
+void gamestate_break_underground_wall(void);
+bool gamestate_is_underground_wall_broken(void);

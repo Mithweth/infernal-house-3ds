@@ -8,10 +8,11 @@
 #include "gfx_inventory.h"
 #include "gfx_inventory_t3x.h"
 
-#define ITEM_PER_LINE   6
+#define INVENTORY_COLUMNS  6
+#define INVENTORY_ROWS     2
 #define ITEM_SIZE       48.0f
-#define ITEM_SPACING    15.0f
-#define ITEM_Y          20.0f
+#define ITEM_SPACING    10.0f
+#define ITEM_Y          30.0f
 #define ITEM_X          20.0f
 #define SELECT_RADIUS   27.0f
 
@@ -25,6 +26,7 @@ static C2D_Text text;
 static C2D_SpriteSheet inventory_scene = NULL;
 static InventoryMode inventory_mode = INVENTORY_NORMAL;
 static C2D_Image object_details;
+static C2D_Image arrow;
 
 static void message_draw_action(Item *item) {
     u32 background = C2D_Color32(8, 12, 30, 255);
@@ -75,6 +77,7 @@ bool inventory_is_active(void) {
 
 void inventory_init(void) {
     inventory_scene = C2D_SpriteSheetLoadFromMem(gfx_inventory_t3x, gfx_inventory_t3x_size);
+    arrow = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_arrow_idx);
 
     if (!inventory_scene) {
         return;
@@ -156,17 +159,32 @@ void inventory_init(void) {
         .name_id = "ITEM_STAIN_REMOVER",
         .image = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_stain_remover_idx),
     };
+
     items[ITEM_REVOLVER] = (Item) {
         .id = ITEM_REVOLVER,
         .name_id = "ITEM_REVOLVER",
         .image = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_revolver_idx),
     };
+
     items[ITEM_INVOICE] = (Item) {
         .id = ITEM_INVOICE,
         .name_id = "ITEM_INVOICE",
         .image = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_invoice_idx),
         .draw_action = invoice_draw_action
     };
+
+    items[ITEM_SHOVEL] = (Item) {
+        .id = ITEM_SHOVEL,
+        .name_id = "ITEM_SHOVEL",
+        .image = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_shovel_idx),
+    };
+
+    items[ITEM_SLEDGEHAMMER] = (Item) {
+        .id = ITEM_SLEDGEHAMMER,
+        .name_id = "ITEM_SLEDGEHAMMER",
+        .image = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_sledgehammer_idx),
+    };
+
     inventory_count = 0;
     selected = 0;
 }
@@ -269,23 +287,20 @@ bool inventory_update(u32 keys) {
     }
 
 
-    if (keys & KEY_DUP) {
-        if (selected < ITEM_PER_LINE) {
+    if (keys & KEY_DDOWN) {
+        selected += INVENTORY_COLUMNS;
+
+        if (selected >= inventory_count) {
             selected = inventory_count - 1;
-        } else {
-            selected -= ITEM_PER_LINE;
         }
         return true;
     }
 
-    if (keys & KEY_DDOWN) {
-        selected += ITEM_PER_LINE;
-        if (selected >= inventory_count) {
-            if (selected < ITEM_PER_LINE * 2) {
-                selected = inventory_count - 1;
-            } else {
-                selected = 0;
-            }
+    if (keys & KEY_DUP) {
+        if (selected < INVENTORY_COLUMNS) {
+            selected = 0;
+        } else {
+            selected -= INVENTORY_COLUMNS;
         }
         return true;
     }
@@ -316,16 +331,33 @@ void inventory_draw(void) {
         return;
     }
 
-for (size_t i = 0; i < inventory_count; i++) {
-    float x = ITEM_X + (i % ITEM_PER_LINE) * (ITEM_SIZE + ITEM_SPACING);
-    float y = ITEM_Y + (i / ITEM_PER_LINE) * (ITEM_SIZE + ITEM_SPACING);
-    
-    if (i == selected) {
-        C2D_DrawCircleSolid(x + ITEM_SIZE / 2.0f, y + ITEM_SIZE / 2.0f, 0.3f, SELECT_RADIUS, C2D_Color32(40, 65, 100, 255));
+    int selected_row = selected / INVENTORY_COLUMNS;
+    int first_row = selected_row > 0 ? selected_row - 1 : 0;
+    size_t first = first_row * INVENTORY_COLUMNS;
+    size_t last = first + INVENTORY_COLUMNS * INVENTORY_ROWS;
+
+    if (last > inventory_count) {
+        last = inventory_count;
+    }
+    for (size_t i = first; i < last; i++) {
+        size_t visible = i - first;
+
+        float x = ITEM_X + (visible % INVENTORY_COLUMNS) * (ITEM_SIZE + ITEM_SPACING);
+        float y = ITEM_Y + (visible / INVENTORY_COLUMNS) * (ITEM_SIZE + ITEM_SPACING);
+        
+        if (i == selected) {
+            C2D_DrawCircleSolid(x + ITEM_SIZE / 2.0f, y + ITEM_SIZE / 2.0f, 0.3f, SELECT_RADIUS, C2D_Color32(40, 65, 100, 255));
+        }
+
+        C2D_DrawImageAt(inventory[i]->image, x, y, 0.4f, NULL, 1.0f, 1.0f);
     }
 
-    C2D_DrawImageAt(inventory[i]->image, x, y, 0.4f, NULL, 1.0f, 1.0f);
-}
+    if (first > 0) {
+        C2D_DrawImageAt(arrow, 365, 25, 0.4f, NULL, 1.0f, 1.0f);
+    }
+    if (first + INVENTORY_COLUMNS * INVENTORY_ROWS < inventory_count) {
+        C2D_DrawImageAtRotated(arrow, 375, 130, 0.4f, C3D_AngleFromDegrees(180), NULL, 1.0f, 1.0f);
+    }
 
     Item *item = inventory[selected];
 

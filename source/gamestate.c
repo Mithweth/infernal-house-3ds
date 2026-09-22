@@ -31,6 +31,7 @@ typedef struct {
     bool firstbedroom_closet_opened;
     bool firstbedroom_left_nightstand_opened;
     bool firstbedroom_right_nightstand_opened;
+    bool underground_wall_broken;
 } GameState;
 
 static GameState game_state;
@@ -249,6 +250,14 @@ void gamestate_open_firstbedroom_right_nightstand(bool value) {
 
 bool gamestate_is_firstbedroom_right_nightstand_opened(void) {
     return game_state.firstbedroom_right_nightstand_opened;
+}
+
+void gamestate_break_underground_wall(void) {
+    game_state.underground_wall_broken = true;
+}
+
+bool gamestate_is_underground_wall_broken(void) {
+    return game_state.underground_wall_broken;
 }
 
 void gamestate_reset(void) {

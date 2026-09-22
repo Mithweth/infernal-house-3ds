@@ -19,6 +19,8 @@ typedef enum {
     ITEM_INVOICE,
     ITEM_STAIN_REMOVER,
     ITEM_REVOLVER,
+    ITEM_SHOVEL,
+    ITEM_SLEDGEHAMMER,
     ITEM_COUNT
 } ItemId;
 
