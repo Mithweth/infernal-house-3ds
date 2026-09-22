@@ -1,0 +1,15 @@
+--atlas -f rgba8888 -z auto
+dark_bg.png
+dark_closet_opened.png
+dark_invoice_taken.png
+dark_left_nightstand_empty.png
+dark_left_nightstand_opened.png
+dark_right_nightstand_opened.png
+dark_stain_remover_taken.png
+light_bg.png
+light_closet_opened.png
+light_invoice_taken.png
+light_left_nightstand_empty.png
+light_left_nightstand_opened.png
+light_right_nightstand_opened.png
+light_stain_remover_taken.png

@@ -72,7 +72,7 @@ static Credit credits[] = {
     },
     {
         .role_id = "TITLE_CREDITS_REMAKE_GRAPHISM",
-        .name = "ChatGPT"
+        .name = "ChatGPT & GIMP"
     }
 };
 

@@ -64,6 +64,11 @@ static void score_draw_action(Item *item) {
     C2D_DrawImageAt(object_details, 50, 20, 0.5f, NULL, 1.0f, 1.0f);
 }
 
+static void invoice_draw_action(Item *item) {
+    object_details = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_invoice_details_idx);
+    C2D_DrawImageAt(object_details, 10, 10, 0.5f, NULL, 1.0f, 1.0f);
+}
+
 bool inventory_is_active(void) {
     return inventory_mode == INVENTORY_ACTION;
 }
@@ -140,6 +145,27 @@ void inventory_init(void) {
         .id = ITEM_CLOCK,
         .name_id = "ITEM_CLOCK",
         .image = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_clock_idx),
+    };
+    items[ITEM_GLASSES] = (Item) {
+        .id = ITEM_GLASSES,
+        .name_id = "ITEM_GLASSES",
+        .image = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_glasses_idx),
+    };
+    items[ITEM_STAIN_REMOVER] = (Item) {
+        .id = ITEM_STAIN_REMOVER,
+        .name_id = "ITEM_STAIN_REMOVER",
+        .image = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_stain_remover_idx),
+    };
+    items[ITEM_REVOLVER] = (Item) {
+        .id = ITEM_REVOLVER,
+        .name_id = "ITEM_REVOLVER",
+        .image = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_revolver_idx),
+    };
+    items[ITEM_INVOICE] = (Item) {
+        .id = ITEM_INVOICE,
+        .name_id = "ITEM_INVOICE",
+        .image = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_invoice_idx),
+        .draw_action = invoice_draw_action
     };
     inventory_count = 0;
     selected = 0;

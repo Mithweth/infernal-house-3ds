@@ -15,6 +15,10 @@ typedef enum {
     ITEM_STATUE,
     ITEM_CUP,
     ITEM_CLOCK,
+    ITEM_GLASSES,
+    ITEM_INVOICE,
+    ITEM_STAIN_REMOVER,
+    ITEM_REVOLVER,
     ITEM_COUNT
 } ItemId;
 

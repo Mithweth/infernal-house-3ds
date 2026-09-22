@@ -4,6 +4,7 @@
 #include "game.h"
 #include "room_firstfloor.h"
 #include "room_diningroom.h"
+#include "room_firstbedroom.h"
 #include "gfx_firstfloor.h"
 #include "inventory.h"
 #include "gamestate.h"
@@ -79,8 +80,12 @@ static void southeast_action(void) {
 
 }
 
-static void southwest_action(void) {
+static void move_southwest(void) {
+    game_set_room(&firstbedroom);
+}
 
+static void southwest_action(void) {
+    game_wait_for_sfx("romfs:/audio/door_open.raw", move_southwest);
 }
 
 static void north_action(void) {
