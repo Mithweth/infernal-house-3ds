@@ -48,3 +48,5 @@ void gamestate_open_kitchen_dishwasher(bool value);
 bool gamestate_is_kitchen_dishwasher_opened(void);
 void gamestate_open_kitchen_drawer(bool value);
 bool gamestate_is_kitchen_drawer_opened(void);
+void gamestate_move_firstfloor_carpet(bool value);
+bool gamestate_is_firstfloor_carpet_moved(void);

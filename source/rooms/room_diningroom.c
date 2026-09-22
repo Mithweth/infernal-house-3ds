@@ -3,7 +3,7 @@
 #include "game.h"
 #include "audio.h"
 #include "room_diningroom.h"
-
+#include "room_firstfloor.h"
 #include "gfx_diningroom.h"
 #include "inventory.h"
 #include "room_hall.h"
@@ -200,9 +200,15 @@ static void lasers_gameover(void) {
     game_over(GAMEOVER_LASERS);
 }
 
+static void move_north(void) {
+    game_set_room(&firstfloor);
+}
+
 static void north_action(void) {
     if (!gamestate_are_diningroom_lasers_disabled()) {
         game_wait_for_sfx("romfs:/audio/police_siren.raw", lasers_gameover);
+    } else {
+        game_wait_for_sfx("romfs:/audio/wooden_stairs.raw", move_north);
     }
 }
 

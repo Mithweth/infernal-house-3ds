@@ -26,6 +26,7 @@ typedef struct {
     bool kitchen_bottom_closet_opened;
     bool kitchen_drawer_opened;
     bool kitchen_dishwasher_opened;
+    bool firstfloor_carpet_moved;
 } GameState;
 
 static GameState game_state;
@@ -204,6 +205,14 @@ void gamestate_open_kitchen_drawer(bool value) {
 
 bool gamestate_is_kitchen_drawer_opened(void) {
     return game_state.kitchen_drawer_opened;
+}
+
+void gamestate_move_firstfloor_carpet(bool value) {
+    game_state.firstfloor_carpet_moved = value;
+}
+
+bool gamestate_is_firstfloor_carpet_moved(void) {
+    return game_state.firstfloor_carpet_moved;
 }
 
 void gamestate_reset(void) {
