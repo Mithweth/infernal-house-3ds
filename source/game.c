@@ -24,6 +24,22 @@ static void (*game_busy_callback)(void) = NULL;
 static int game_busy_sfx_channel = -1;
 
 
+static bool path_is_available(const Path *path) {
+    if (!path || !path->action) {
+        return false;
+    }
+    if (!path->condition) {
+        return true;
+    }
+    return path->condition();
+}
+
+static void path_execute(const Path *path) {
+    if (path_is_available(path)) {
+        path->action();
+    }
+}
+
 void game_set_room(Room *room) {
     if (!text_buf) {
         text_buf = C2D_TextBufNew(4096);
@@ -112,35 +128,35 @@ static Hotspot *find_hotspot(int x, int y) {
 }
 
 bool game_can_move_north(void) {
-    return current_room && current_room->north;
+    return current_room && path_is_available(&current_room->north);
 }
 
 bool game_can_move_northeast(void) {
-    return current_room && current_room->northeast;
+    return current_room && path_is_available(&current_room->northeast);
 }
 
 bool game_can_move_east(void) {
-    return current_room && current_room->east;
+    return current_room && path_is_available(&current_room->east);
 }
 
 bool game_can_move_southeast(void) {
-    return current_room && current_room->southeast;
+    return current_room && path_is_available(&current_room->southeast);
 }
 
 bool game_can_move_south(void) {
-    return current_room && current_room->south;
+    return current_room && path_is_available(&current_room->south);
 }
 
 bool game_can_move_southwest(void) {
-    return current_room && current_room->southwest;
+    return current_room && path_is_available(&current_room->southwest);
 }
 
 bool game_can_move_west(void) {
-    return current_room && current_room->west;
+    return current_room && path_is_available(&current_room->west);
 }
 
 bool game_can_move_northwest(void) {
-    return current_room && current_room->northwest;
+    return current_room && path_is_available(&current_room->northwest);
 }
 
 static void update_movement(circlePosition analog)
@@ -163,34 +179,42 @@ static void update_movement(circlePosition analog)
     int ay = abs(y);
 
     if (ay > ax * 2) {
-        if (y > 0 && current_room->north) {
+        if (y > 0) {
             circle_ready = false;
-            current_room->north();
-        } else if (y < 0 && current_room->south) {
+            path_execute(&current_room->north);
+            return;
+        } else if (y < 0) {
             circle_ready = false;
-            current_room->south();
+            path_execute(&current_room->south);
+            return;
         }
     } else if (ax > ay * 2) {
-        if (x > 0 && current_room->east) {
+        if (x > 0) {
             circle_ready = false;
-            current_room->east();
-        } else if (x < 0 && current_room->west) {
+            path_execute(&current_room->east);
+            return;
+        } else if (x < 0) {
             circle_ready = false;
-            current_room->west();
+            path_execute(&current_room->west);
+            return;
         }
     } else {
-        if (x > 0 && y > 0 && current_room->northeast) {
+        if (x > 0 && y > 0) {
             circle_ready = false;
-            current_room->northeast();
-        } else if (x < 0 && y > 0 && current_room->northwest) {
+            path_execute(&current_room->northeast);
+            return;
+        } else if (x < 0 && y > 0) {
             circle_ready = false;
-            current_room->northwest();
-        } else if (x > 0 && y < 0 && current_room->southeast) {
+            path_execute(&current_room->northwest);
+            return;
+        } else if (x > 0 && y < 0) {
             circle_ready = false;
-            current_room->southeast();
-        } else if (x < 0 && y < 0 && current_room->southwest) {
+            path_execute(&current_room->southeast);
+            return;
+        } else if (x < 0 && y < 0) {
             circle_ready = false;
-            current_room->southwest();
+            path_execute(&current_room->southwest);
+            return;
         }
     }
 }
@@ -207,11 +231,6 @@ static void update_touch(touchPosition touch) {
         return;
     }
 
-    // if (hotspot == last_hotspot) {
-    //     if (hotspot->action)
-    //         hotspot->action();
-    //     return;
-    // }
     last_hotspot = hotspot;
     if (!hotspot->examined) {
         hotspot->examined = true;
@@ -220,8 +239,6 @@ static void update_touch(touchPosition touch) {
         hotspot->action();
     }
 
-    //last_hotspot = hotspot;
-    //game_show_message(hotspot->text_id);
 }
 
 static void room_draw(void) {

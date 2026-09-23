@@ -1,3 +1,4 @@
+// room_cellar.c
 #include <citro2d.h>
 
 // Replace cellar
@@ -141,8 +142,8 @@ static void south_action(void) {
 Room cellar = {
     .hotspots = hotspots,
     .hotspot_count = sizeof(hotspots) / sizeof(hotspots[0]),
-    .east = east_action,
-    .south = south_action,
+    .east = {.action = east_action},
+    .south = {.action = south_action},
     .init = room_init,
     .draw = room_draw,
     .close = room_close

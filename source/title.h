@@ -1,4 +1,5 @@
 // title.h
+#pragma once
 
 void title_init(void);
 void title_update(u32 keys);

@@ -1,4 +1,6 @@
 // gamestate.h
+#pragma once
+
 #include <stdbool.h>
 
 bool gamestate_are_diningroom_lasers_disabled(void);

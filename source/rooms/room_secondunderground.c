@@ -81,19 +81,10 @@ static void north_action(void) {
     game_set_room(&deadroom);
 }
 
-static void create_new_routes(void) {
-    if (gamestate_is_underground_wall_broken()) {
-        secondunderground.north = north_action;
-    } else {
-        secondunderground.north = NULL;
-    }
-}
-
 static void room_init(void) {
     room_scene = C2D_SpriteSheetLoad("romfs:/gfx/gfx_secondunderground.t3x");
     img_background = C2D_SpriteSheetGetImage(room_scene, gfx_secondunderground_background_idx);
     img_wall_open = C2D_SpriteSheetGetImage(room_scene, gfx_secondunderground_wall_open_idx);
-    create_new_routes();
 }
 
 static void room_draw(void) {
@@ -101,7 +92,6 @@ static void room_draw(void) {
     if (gamestate_is_underground_wall_broken()) {
         C2D_DrawImageAt(img_wall_open, 103.0f, 37.0f, 0.0f, NULL, 1.0f, 1.0f);
     }
-    create_new_routes();
 }
 
 static void room_close(void) {
@@ -115,7 +105,8 @@ static void west_action(void) {
 Room secondunderground = {
     .hotspots = hotspots,
     .hotspot_count = sizeof(hotspots) / sizeof(hotspots[0]),
-    .west = west_action,
+    .west = {.action = west_action},
+    .north = {.action = north_action, .condition = gamestate_is_underground_wall_broken},
     .init = room_init,
     .draw = room_draw,
     .close = room_close

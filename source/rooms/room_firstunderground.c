@@ -93,8 +93,8 @@ static void north_action(void) {
 Room firstunderground = {
     .hotspots = hotspots,
     .hotspot_count = sizeof(hotspots) / sizeof(hotspots[0]),
-    .north = north_action,
-    .east = east_action,
+    .north = {.action = north_action},
+    .east = {.action = east_action},
     .init = room_init,
     .draw = room_draw,
     .close = room_close

@@ -1,3 +1,4 @@
+// hud.c
 #include <3ds.h>
 #include <citro2d.h>
 #include <citro3d.h>
@@ -18,8 +19,7 @@ static u64 last_time;
 #ifdef DEBUG
 static C2D_TextBuf debug_buf;
 static C2D_Text debug_text;
-static void debug_draw(void)
-{
+static void debug_draw(void) {
     if (!debug_buf) {
         debug_buf = C2D_TextBufNew(256);
     }

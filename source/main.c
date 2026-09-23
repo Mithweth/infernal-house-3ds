@@ -1,3 +1,4 @@
+// main.c
 #include <citro2d.h>
 #include <3ds.h>
 #include "room_hall.h"

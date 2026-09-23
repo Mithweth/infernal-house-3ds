@@ -1,5 +1,4 @@
 // lang.h
-
 #pragma once
 
 bool lang_init(const char *language);

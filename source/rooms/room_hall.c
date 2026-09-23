@@ -1,3 +1,4 @@
+// room_hall.c
 #include <citro2d.h>
 
 #include "game.h"
@@ -229,10 +230,7 @@ static void north_action(void) {
 Room hall = {
     .hotspots = hotspots,
     .hotspot_count = sizeof(hotspots) / sizeof(hotspots[0]),
-    .north = north_action,
-    .south = NULL,
-    .west = NULL,
-    .east = NULL,
+    .north = {.action = north_action},
     .init = room_init,
     .draw = room_draw,
     .close = room_close

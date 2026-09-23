@@ -1,3 +1,4 @@
+// inventory.c
 #include <3ds.h>
 #include <citro2d.h>
 #include <stdbool.h>

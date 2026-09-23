@@ -1,3 +1,4 @@
+// room_corridor.c
 #include <citro2d.h>
 #include "game.h"
 #include "room_corridor.h"
@@ -90,11 +91,11 @@ static void west_action(void) {
 Room corridor = {
     .hotspots = hotspots,
     .hotspot_count = sizeof(hotspots) / sizeof(hotspots[0]),
-    .north = north_action,
-    .northeast = northeast_action,
-    .east = east_action,
-    .south = south_action,
-    .west = west_action,
+    .north = {.action = north_action},
+    .northeast = {.action = northeast_action},
+    .east = {.action = east_action},
+    .south = {.action = south_action},
+    .west = {.action = west_action},
     .init = room_init,
     .draw = room_draw,
     .close = room_close

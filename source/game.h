@@ -20,18 +20,26 @@ typedef struct {
     void (*use_item)(ItemId item);
 } Hotspot;
 
+typedef void (*PathAction)(void);
+typedef bool (*PathCondition)(void);
+
+typedef struct {
+    PathAction action;
+    PathCondition condition;
+} Path;
+
 typedef struct Room {
     C2D_Image background;
     Hotspot *hotspots;
     size_t hotspot_count;
-    void (*north)(void);
-    void (*northeast)(void);
-    void (*east)(void);
-    void (*southeast)(void);
-    void (*south)(void);
-    void (*southwest)(void);
-    void (*west)(void);
-    void (*northwest)(void);
+    Path north;
+    Path northeast;
+    Path east;
+    Path southeast;
+    Path south;
+    Path southwest;
+    Path west;
+    Path northwest;
     void (*init)(void);
     void (*draw)(void);
     void (*close)(void);

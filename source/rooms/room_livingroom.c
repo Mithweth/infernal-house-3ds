@@ -1,3 +1,4 @@
+// room_livingroom.c
 #include <citro2d.h>
 #include "game.h"
 #include "room_livingroom.h"
@@ -139,14 +140,6 @@ static Hotspot hotspots[] = {
     },
 };
 
-static void create_new_routes(void) {
-    if (gamestate_is_livingroom_secret_passage_opened()) {
-        livingroom.north = north_action;
-    } else {
-        livingroom.north = NULL;
-    }
-}
-
 static void room_init(void) {
     room_scene = C2D_SpriteSheetLoad("romfs:/gfx/gfx_livingroom.t3x");
     img_background = C2D_SpriteSheetGetImage(room_scene, gfx_livingroom_bg_idx);
@@ -155,7 +148,6 @@ static void room_init(void) {
     img_hearth_prepared = C2D_SpriteSheetGetImage(room_scene, gfx_livingroom_hearth_prepared_idx);
     img_piano_opened = C2D_SpriteSheetGetImage(room_scene, gfx_livingroom_piano_opened_idx);
     img_statue = C2D_SpriteSheetGetImage(room_scene, gfx_livingroom_statue_idx);
-    create_new_routes();
 }
 
 static void room_draw(void) {
@@ -175,7 +167,6 @@ static void room_draw(void) {
     if (gamestate_is_livingroom_golden_statue_placed()) {
         C2D_DrawImageAt(img_statue, 162.0f, 54.0f, 0.1f, NULL, 1.0f, 1.0f); 
     }
-    create_new_routes();
 }
 
 static void room_close(void) {
@@ -193,8 +184,10 @@ static void south_action(void) {
 Room livingroom = {
     .hotspots = hotspots,
     .hotspot_count = sizeof(hotspots) / sizeof(hotspots[0]),
-    .south = south_action,
+    .south = {.action = south_action},
+    .north = {.action = north_action, .condition = gamestate_is_livingroom_secret_passage_opened},
     .init = room_init,
     .draw = room_draw,
     .close = room_close
 };
+

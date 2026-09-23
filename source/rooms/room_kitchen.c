@@ -1,3 +1,4 @@
+// room_kitchen.c
 #include <citro2d.h>
 #include "game.h"
 #include "gamestate.h"
@@ -293,7 +294,7 @@ static void southwest_action(void) {
 Room kitchen = {
     .hotspots = hotspots,
     .hotspot_count = sizeof(hotspots) / sizeof(hotspots[0]),
-    .southwest = southwest_action,
+    .southwest = {.action = southwest_action},
     .init = room_init,
     .draw = room_draw,
     .close = room_close

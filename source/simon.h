@@ -1,4 +1,6 @@
 // simon.h
+#pragma once
+
 #include <3ds.h>
 
 void simon_init(void);

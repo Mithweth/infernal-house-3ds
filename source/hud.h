@@ -1,4 +1,5 @@
 // hud.h
+#pragma once
 
 void hud_init(void);
 void hud_reset(void);

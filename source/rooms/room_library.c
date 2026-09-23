@@ -196,14 +196,6 @@ static void southeast_action(void) {
     game_set_room(&corridor);
 }
 
-static void create_new_routes(void) {
-    if (gamestate_is_library_secret_passage_opened()) {
-        library.north = north_action;
-    } else {
-        library.north = NULL;
-    }
-}
-
 static void room_init(void) {
     room_scene = C2D_SpriteSheetLoad("romfs:/gfx/gfx_library.t3x");
     img_background = C2D_SpriteSheetGetImage(room_scene, gfx_library_bg_idx);
@@ -212,7 +204,6 @@ static void room_init(void) {
     img_book_pushed = C2D_SpriteSheetGetImage(room_scene, gfx_library_pushed_book_idx);
     img_clock_taken = C2D_SpriteSheetGetImage(room_scene, gfx_library_clock_taken_idx);
     img_passage_opened = C2D_SpriteSheetGetImage(room_scene, gfx_library_passage_opened_idx);
-    create_new_routes();
 }
 
 static void room_draw(void) {
@@ -230,7 +221,6 @@ static void room_draw(void) {
         C2D_DrawImageAt(img_book_pushed, 75.0f, 108.0f, 0.3f, NULL, 1.0f, 1.0f);
         C2D_DrawImageAt(img_passage_opened, 127.0f, 29.0f, 0.3f, NULL, 1.0f, 1.0f);
     }
-    create_new_routes();
 }
 
 static void room_close(void) {
@@ -240,7 +230,8 @@ static void room_close(void) {
 Room library = {
     .hotspots = hotspots,
     .hotspot_count = sizeof(hotspots) / sizeof(hotspots[0]),
-    .southeast = southeast_action,
+    .southeast = {.action = southeast_action},
+    .north = {.action = north_action, .condition = gamestate_is_library_secret_passage_opened},
     .init = room_init,
     .draw = room_draw,
     .close = room_close

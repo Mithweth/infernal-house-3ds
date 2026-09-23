@@ -1,3 +1,4 @@
+// room_firstbedroom.c
 // <room_name.c
 
 #include <citro2d.h>
@@ -281,7 +282,7 @@ static void south_action(void) {
 Room firstbedroom = {
     .hotspots = hotspots,
     .hotspot_count = sizeof(hotspots) / sizeof(hotspots[0]),
-    .south = south_action,
+    .south = {.action = south_action},
     .init = room_init,
     .draw = room_draw,
     .close = room_close

@@ -1,3 +1,4 @@
+// room_firstfloor.c
 // <room_name.c
 
 #include <citro2d.h>
@@ -103,11 +104,11 @@ static void south_action(void) {
 Room firstfloor = {
     .hotspots = hotspots,
     .hotspot_count = sizeof(hotspots) / sizeof(hotspots[0]),
-    .north = north_action,
-    .east = east_action,
-    .southeast = southeast_action,
-    .south = south_action,
-    .southwest = southwest_action,
+    .north = {.action = north_action},
+    .east = {.action = east_action},
+    .southeast = {.action = southeast_action},
+    .south = {.action = south_action},
+    .southwest = {.action = southwest_action},
     .init = room_init,
     .draw = room_draw,
     .close = room_close

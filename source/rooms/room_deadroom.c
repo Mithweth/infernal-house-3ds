@@ -112,7 +112,7 @@ static void south_action(void) {
 Room deadroom = {
     .hotspots = hotspots,
     .hotspot_count = sizeof(hotspots) / sizeof(hotspots[0]),
-    .south = south_action,
+    .south = {.action = south_action},
     .init = room_init,
     .draw = room_draw,
     .close = room_close
