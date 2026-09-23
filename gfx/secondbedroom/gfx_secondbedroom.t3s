@@ -1,0 +1,11 @@
+--atlas -f rgba8888 -z auto
+dark_background.png
+dark_closet_drawer.png
+dark_closet_left_door.png
+dark_closet_right_door.png
+dark_nightstand_drawer.png
+light_background.png
+light_closet_drawer.png
+light_closet_left_door.png
+light_closet_right_door.png
+light_nightstand_drawer.png

@@ -182,6 +182,36 @@ void inventory_init(void) {
         .examinable = true
     };
 
+    items[ITEM_RUBBER] = (Item) {
+        .id = ITEM_RUBBER,
+        .name_id = "ITEM_RUBBER",
+        .image = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_rubber_idx)
+    };
+
+    items[ITEM_LIGHTBULB] = (Item) {
+        .id = ITEM_LIGHTBULB,
+        .name_id = "ITEM_LIGHTBULB",
+        .image = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_lightbulb_idx)
+    };
+
+    items[ITEM_MEASURING_TAPE] = (Item) {
+        .id = ITEM_MEASURING_TAPE,
+        .name_id = "ITEM_MEASURING_TAPE",
+        .image = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_measuring_tape_idx)
+    };
+
+    items[ITEM_CIGARETTES] = (Item) {
+        .id = ITEM_CIGARETTES,
+        .name_id = "ITEM_CIGARETTES",
+        .image = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_cigarettes_idx)
+    };
+
+    items[ITEM_BRACELET] = (Item) {
+        .id = ITEM_BRACELET,
+        .name_id = "ITEM_BRACELET",
+        .image = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_bracelet_idx),
+        .examinable = true
+    };
     inventory_count = 0;
     selected = 0;
 }
