@@ -28,36 +28,19 @@ static InventoryMode inventory_mode = INVENTORY_NORMAL;
 static C2D_Image object_details;
 static C2D_Image arrow;
 
-static void message_draw_action(Item *item) {
+static void description_draw_action(Item *item) {
+    char description_id[128];
+    snprintf(description_id, sizeof(description_id), "%s_EXAMINE", item->name_id);
+
     u32 background = C2D_Color32(8, 12, 30, 255);
     u32 text_color = C2D_Color32(255, 255, 255, 255);
 
-    C2D_DrawRectSolid(0.0f, 0.0f, 0.0f, 400.0f, 240.0f, background);
+    C2D_DrawRectSolid(0.0f, 0.0f, 0.0f,400.0f, 240.0f,background);
+
     C2D_TextBufClear(text_buf);
-    C2D_TextParse(&text, text_buf, lang_get("ITEM_MESSAGE_EXAMINE"));
+    C2D_TextParse(&text, text_buf, lang_get(description_id));
     C2D_TextOptimize(&text);
-    C2D_DrawText(&text, C2D_WithColor, 20.0f, 30.0f, 0.5f, 0.55f, 0.55f, text_color);
-}
 
-static void statue_draw_action(Item *item) {
-    u32 background = C2D_Color32(8, 12, 30, 255);
-    u32 text_color = C2D_Color32(255, 255, 255, 255);
-
-    C2D_DrawRectSolid(0.0f, 0.0f, 0.0f, 400.0f, 240.0f, background);
-    C2D_TextBufClear(text_buf);
-    C2D_TextParse(&text, text_buf, lang_get("ITEM_STATUE_EXAMINE"));
-    C2D_TextOptimize(&text);
-    C2D_DrawText(&text, C2D_WithColor, 20.0f, 30.0f, 0.5f, 0.55f, 0.55f, text_color);
-}
-
-static void cup_draw_action(Item *item) {
-    u32 background = C2D_Color32(8, 12, 30, 255);
-    u32 text_color = C2D_Color32(255, 255, 255, 255);
-
-    C2D_DrawRectSolid(0.0f, 0.0f, 0.0f, 400.0f, 240.0f, background);
-    C2D_TextBufClear(text_buf);
-    C2D_TextParse(&text, text_buf, lang_get("ITEM_CUP_EXAMINE"));
-    C2D_TextOptimize(&text);
     C2D_DrawText(&text, C2D_WithColor, 20.0f, 30.0f, 0.5f, 0.55f, 0.55f, text_color);
 }
 
@@ -91,7 +74,7 @@ void inventory_init(void) {
         .id = ITEM_MESSAGE,
         .name_id = "ITEM_MESSAGE",
         .image = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_message_idx),
-        .draw_action = message_draw_action
+        .examinable = true
     };
 
     items[ITEM_MAGNIFYING_GLASS] = (Item) {
@@ -135,14 +118,14 @@ void inventory_init(void) {
         .id = ITEM_STATUE,
         .name_id = "ITEM_STATUE",
         .image = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_statue_idx),
-        .draw_action = statue_draw_action
+        .examinable = true
     };
 
     items[ITEM_CUP] = (Item) {
         .id = ITEM_CUP,
         .name_id = "ITEM_CUP",
         .image = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_cup_idx),
-        .draw_action = cup_draw_action
+        .examinable = true
     };
     items[ITEM_CLOCK] = (Item) {
         .id = ITEM_CLOCK,
@@ -183,6 +166,19 @@ void inventory_init(void) {
         .id = ITEM_SLEDGEHAMMER,
         .name_id = "ITEM_SLEDGEHAMMER",
         .image = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_sledgehammer_idx),
+    };
+
+    items[ITEM_ROPE] = (Item) {
+        .id = ITEM_ROPE,
+        .name_id = "ITEM_ROPE",
+        .image = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_rope_idx),
+    };
+
+    items[ITEM_RING] = (Item) {
+        .id = ITEM_RING,
+        .name_id = "ITEM_RING",
+        .image = C2D_SpriteSheetGetImage(inventory_scene, gfx_inventory_ring_idx),
+        .examinable = true
     };
 
     inventory_count = 0;
@@ -308,7 +304,7 @@ bool inventory_update(u32 keys) {
     if (keys & KEY_A) {
         Item *item = inventory[selected];
         if (!game_use_item(item->id)) {
-            if (item->draw_action) {
+            if (item->draw_action || item->examinable) {
                 inventory_mode = INVENTORY_ACTION;
             }
         }
@@ -327,7 +323,10 @@ void inventory_draw(void) {
 
         if (item->draw_action) {
             item->draw_action(item);
+        } else {
+            description_draw_action(item);
         }
+
         return;
     }
 

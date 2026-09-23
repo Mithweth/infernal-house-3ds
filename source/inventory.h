@@ -21,6 +21,8 @@ typedef enum {
     ITEM_REVOLVER,
     ITEM_SHOVEL,
     ITEM_SLEDGEHAMMER,
+    ITEM_RING,
+    ITEM_ROPE,
     ITEM_COUNT
 } ItemId;
 
@@ -28,6 +30,7 @@ typedef struct Item {
     ItemId id;
     const char *name_id;
     C2D_Image image;
+    bool examinable;
     void (*draw_action)(struct Item *item);
 } Item;
 

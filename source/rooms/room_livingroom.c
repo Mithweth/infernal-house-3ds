@@ -47,6 +47,8 @@ static void fall_gameover(void) {
 static void north_action(void) {
     if (!gamestate_is_rope_used_in_livingroom_hearth()) {
         game_wait_for_sfx("romfs:/audio/falling_down.raw", fall_gameover);
+    } else {
+        //game_set_room(&laboratory);
     }
 }
 
@@ -58,7 +60,28 @@ static void fireplace_use_item(ItemId item) {
     }
 }
 
+static bool hearth_opened_is_active(void) {
+    return gamestate_is_livingroom_secret_passage_opened() && !gamestate_is_rope_used_in_livingroom_hearth();
+}
+
+static void hearth_use_item(ItemId item) {
+    if (item == ITEM_ROPE) {
+        gamestate_bind_rope_used_in_livingroom_hearth();
+        inventory_remove(ITEM_ROPE);
+        game_show_message("LIVINGROOM_USE_ROPE");
+    }
+}
+
 static Hotspot hotspots[] = {
+    {
+        .x = 146,
+        .y = 107,
+        .width = 68,
+        .height = 47,
+        .text_id = "LIVINGROOM_FIREPLACE_HEARTH_OPENED",
+        .is_active = hearth_opened_is_active,
+        .use_item = hearth_use_item
+    },
     {
         .x = 2,
         .y = 111,

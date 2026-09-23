@@ -4,6 +4,7 @@
 #include "game.h"
 #include "room_secondunderground.h"
 #include "room_firstunderground.h"
+#include "room_deadroom.h"
 #include "gfx_secondunderground.h"
 #include "inventory.h"
 #include "gamestate.h"
@@ -77,7 +78,7 @@ static Hotspot hotspots[] = {
 
 
 static void north_action(void) {
-    // to dead zone
+    game_set_room(&deadroom);
 }
 
 static void create_new_routes(void) {
