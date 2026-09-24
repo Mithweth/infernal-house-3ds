@@ -1,5 +1,6 @@
 --atlas -f rgba8888 -z auto
-arrow.png
+selected.png
+background.png
 magnify_glass.png
 screwdriver.png
 flashlight.png

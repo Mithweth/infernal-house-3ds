@@ -37,10 +37,6 @@ static void opened_alarm_box_action(void) {
     }
 }
 
-static bool opened_alarm_box_is_active(void) {
-    return gamestate_is_cellar_alarm_box_opened();
-}
-
 static void simon_action(void) {
     game_start_simon();
 }
@@ -51,8 +47,8 @@ static Hotspot hotspots[] = {
         .y = 24,
         .width = 40,
         .height = 45,
-        .text_id = "CELLAR_OPENED_ALARM_BOX",
-        .is_active = opened_alarm_box_is_active,
+        .id = "CELLAR_OPENED_ALARM_BOX",
+        .is_active = gamestate_is_cellar_alarm_box_opened,
         .action = opened_alarm_box_action
     },
     {
@@ -60,7 +56,7 @@ static Hotspot hotspots[] = {
         .y = 24,
         .width = 40,
         .height = 45,
-        .text_id = "CELLAR_ALARM_BOX",
+        .id = "CELLAR_ALARM_BOX",
         .action = alarm_box_action,
         .use_item = alarm_box_use_item
     },
@@ -69,36 +65,35 @@ static Hotspot hotspots[] = {
         .y = 39,
         .width = 74,
         .height = 29,
-        .text_id = "CELLAR_JAM",
+        .id = "CELLAR_JAM",
     },
     {
         .x = 212,
         .y = 70,
         .width = 73,
         .height = 40,
-        .text_id = "CELLAR_BOTTLES",
+        .id = "CELLAR_BOTTLES",
     },
     {
         .x = 216,
         .y = 111,
         .width = 38,
         .height = 36,
-        .text_id = "CELLAR_TOOLS",
+        .id = "CELLAR_TOOLS",
     },
     {
         .x = 217,
         .y = 199,
         .width = 103,
         .height = 41,
-        .text_id = "CELLAR_CARPET",
+        .id = "CELLAR_CARPET",
     },
     {
         .x = 255,
         .y = 115,
         .width = 31,
         .height = 36,
-        .text_id = "CELLAR_SIMON",
-        .is_active = NULL,
+        .id = "CELLAR_SIMON",
         .action = simon_action
     },
 };

@@ -57,7 +57,7 @@ static Hotspot hotspots[] = {
         .y = 38,
         .width = 25,
         .height = 30,
-        .text_id = "ITEM_STATUE",
+        .id = "ITEM_STATUE",
         .is_active = statue_is_active,
         .action = statue_action
     },
@@ -66,7 +66,7 @@ static Hotspot hotspots[] = {
         .y = 71,
         .width = 31,
         .height = 30,
-        .text_id = "ITEM_CLOCK",
+        .id = "ITEM_CLOCK",
         .is_active = clock_is_active,
         .action = clock_action
     },
@@ -75,7 +75,7 @@ static Hotspot hotspots[] = {
         .y = 61,
         .width = 21,
         .height = 25,
-        .text_id = "ITEM_CUP",
+        .id = "ITEM_CUP",
         .is_active = cup_is_active,
         .action = cup_action
     },
@@ -84,7 +84,7 @@ static Hotspot hotspots[] = {
         .y = 108,
         .width = 16,
         .height = 24,
-        .text_id = "LIBRARY_BOOK",
+        .id = "LIBRARY_BOOK",
         .is_active = book_is_active,
         .action = book_action
     },
@@ -93,98 +93,105 @@ static Hotspot hotspots[] = {
         .y = 37,
         .width = 51,
         .height = 36,
-        .text_id = "LIBRARY_BOOK"
+        .id = "LIBRARY_BOOK"
     },
     {
         .x = 10,
         .y = 104,
         .width = 48,
         .height = 30,
-        .text_id = "LIBRARY_BOOK"
+        .id = "LIBRARY_BOOK"
     },
     {
         .x = 60,
         .y = 23,
         .width = 41,
         .height = 30,
-        .text_id = "LIBRARY_BOOK"
+        .id = "LIBRARY_BOOK"
     },
     {
         .x = 95,
         .y = 78,
         .width = 35,
         .height = 30,
-        .text_id = "LIBRARY_BOOK"
+        .id = "LIBRARY_BOOK"
     },
     {
         .x = 60,
         .y = 80,
         .width = 37,
         .height = 25,
-        .text_id = "LIBRARY_BOOK"
+        .id = "LIBRARY_BOOK"
     },
     {
         .x = 60,
         .y = 108,
         .width = 13,
         .height = 24,
-        .text_id = "LIBRARY_BOOK"
+        .id = "LIBRARY_BOOK"
     },
     {
         .x = 101,
         .y = 37,
         .width = 30,
         .height = 25,
-        .text_id = "LIBRARY_BOOK"
+        .id = "LIBRARY_BOOK"
     },
     {
         .x = 144,
         .y = 49,
         .width = 39,
         .height = 84,
-        .text_id = "LIBRARY_SCIENCE_BOOKS"
+        .id = "LIBRARY_BOOK",
+        .message_id = "LIBRARY_SCIENCE_BOOKS"
     },
     {
         .x = 191,
         .y = 45,
         .width = 28,
         .height = 86,
-        .text_id = "LIBRARY_RARE_BOOKS"
+        .id = "LIBRARY_BOOK",
+        .message_id = "LIBRARY_RARE_BOOKS"
     },
     {
         .x = 227,
         .y = 40,
         .width = 33,
         .height = 70,
-        .text_id = "LIBRARY_NOVELS"
+        .id = "LIBRARY_BOOK",
+        .message_id = "LIBRARY_NOVELS"
     },
     {
         .x = 226,
         .y = 114,
         .width = 33,
         .height = 18,
-        .text_id = "LIBRARY_EASTEREGGS"
+        .id = "LIBRARY_BOOK",
+        .message_id = "LIBRARY_EASTEREGGS"
     },
     {
         .x = 0,
         .y = 196,
         .width = 40,
         .height = 26,
-        .text_id = "LIBRARY_CLONE_BOOK"
+        .id = "LIBRARY_BOOK",
+        .message_id = "LIBRARY_CLONE_BOOK"
     },
     {
         .x = 238,
         .y = 152,
         .width = 40,
         .height = 17,
-        .text_id = "LIBRARY_ROBOT_BOOK"
+        .id = "LIBRARY_BOOK",
+        .message_id = "LIBRARY_ROBOT_BOOK"
     },
     {
         .x = 296,
         .y = 40,
         .width = 24,
         .height = 57,
-        .text_id = "LIBRARY_PAINTING"
+        .id = "LIBRARY_BOOK",
+        .message_id = "LIBRARY_PAINTING"
     },
 };
 

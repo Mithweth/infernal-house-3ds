@@ -13,8 +13,8 @@ typedef struct {
     int y;
     int width;
     int height;
-    const char *text_id;
-    bool examined;
+    const char *id;
+    const char *message_id;
     bool (*is_active)(void);
     void (*action)(void);
     void (*use_item)(ItemId item);
@@ -64,6 +64,7 @@ void game_close(void);
 void game_init(void);
 void game_start(void);
 void game_set_room(Room *room);
+const char *game_target_name(void);
 bool game_can_move_north(void);
 bool game_can_move_northeast(void);
 bool game_can_move_east(void);

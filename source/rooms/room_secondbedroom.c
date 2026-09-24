@@ -28,20 +28,8 @@ static void lamp_action(void) {
     }
 }
 
-static bool closet_drawer_is_active(void) {
-    return gamestate_is_secondbedroom_closet_drawer_opened();
-}
-
 static void closet_drawer_action(void) {
     gamestate_open_secondbedroom_closet_drawer(!gamestate_is_secondbedroom_closet_drawer_opened());
-}
-
-static bool right_closet_door_opened(void) {
-    return gamestate_is_secondbedroom_right_closet_door_opened();
-}
-
-static bool left_closet_door_opened(void) {
-    return gamestate_is_secondbedroom_left_closet_door_opened();
 }
 
 static void right_closet_action(void) {
@@ -81,7 +69,7 @@ static Hotspot hotspots[] = {
         .y = 97,
         .width = 27,
         .height = 37,
-        .text_id = "SECONDBEDROOM_BEDSIDE_LAMP",
+        .id = "SECONDBEDROOM_BEDSIDE_LAMP",
         .action = lamp_action
     },
     {
@@ -89,7 +77,7 @@ static Hotspot hotspots[] = {
         .y = 136,
         .width = 22,
         .height = 29,
-        .text_id = "SECONDBEDROOM_NIGHTSTAND_DRAWER_OPENED",
+        .id = "SECONDBEDROOM_NIGHTSTAND_DRAWER_OPENED",
         .is_active = nightstand_drawer_is_active,
         .action = nightstand_objects_action
     },
@@ -98,7 +86,7 @@ static Hotspot hotspots[] = {
         .y = 136,
         .width = 27,
         .height = 15,
-        .text_id = "SECONDBEDROOM_NIGHTSTAND_DRAWER",
+        .id = "SECONDBEDROOM_NIGHTSTAND_DRAWER",
         .action = nightstand_drawer_action
     },
     {
@@ -106,30 +94,31 @@ static Hotspot hotspots[] = {
         .y = 51,
         .width = 53,
         .height = 47,
-        .text_id = "SECONDBEDROOM_PAINTING_1"
+        .id = "SECONDBEDROOM_PAINTING_1"
     },
     {
         .x = 230,
         .y = 60,
         .width = 28,
         .height = 53,
-        .text_id = "SECONDBEDROOM_PAINTING_2",
-        .is_active = right_closet_door_opened
+        .id = "SECONDBEDROOM_PAINTING_2",
+        .is_active = gamestate_is_secondbedroom_right_closet_door_opened
     },
     {
         .x = 222,
         .y = 60,
         .width = 39,
         .height = 53,
-        .text_id = "SECONDBEDROOM_PAINTING_2"
+        .id = "SECONDBEDROOM_PAINTING_2"
     },
     {
         .x = 143,
         .y = 51,
         .width = 35,
         .height = 26,
-        .text_id = "SECONDBEDROOM_LEFT_CLOSET_TOP",
-        .is_active = left_closet_door_opened,
+        .id = "SECONDBEDROOM_CLOSET",
+        .message_id = "SECONDBEDROOM_LEFT_CLOSET_TOP",
+        .is_active = gamestate_is_secondbedroom_left_closet_door_opened,
         .action = left_closet_action
     },
     {
@@ -137,8 +126,9 @@ static Hotspot hotspots[] = {
         .y = 79,
         .width = 35,
         .height = 26,
-        .text_id = "SECONDBEDROOM_LEFT_CLOSET_MIDDLE",
-        .is_active = left_closet_door_opened,
+        .id = "SECONDBEDROOM_CLOSET",
+        .message_id = "SECONDBEDROOM_LEFT_CLOSET_MIDDLE",
+        .is_active = gamestate_is_secondbedroom_left_closet_door_opened,
         .action = left_closet_action
     },
     {
@@ -146,8 +136,9 @@ static Hotspot hotspots[] = {
         .y = 106,
         .width = 35,
         .height = 37,
-        .text_id = "SECONDBEDROOM_LEFT_CLOSET_BOTTOM",
-        .is_active = left_closet_door_opened,
+        .id = "SECONDBEDROOM_CLOSET",
+        .message_id = "SECONDBEDROOM_LEFT_CLOSET_BOTTOM",
+        .is_active = gamestate_is_secondbedroom_left_closet_door_opened,
         .action = left_closet_action
     },
     {
@@ -155,7 +146,7 @@ static Hotspot hotspots[] = {
         .y = 40,
         .width = 40,
         .height = 109,
-        .text_id = "SECONDBEDROOM_CLOSET",
+        .id = "SECONDBEDROOM_CLOSET",
         .action = left_closet_action
     },
     {
@@ -163,16 +154,25 @@ static Hotspot hotspots[] = {
         .y = 61,
         .width = 34,
         .height = 76,
-        .text_id = "SECONDBEDROOM_RIGHT_CLOSET",
+        .id = "SECONDBEDROOM_RIGHT_CLOSET",
+        .message_id = "SECONDBEDROOM_RIGHT_CLOSET_POCKET",
         .is_active = pocket_is_active,
         .action = pocket_action
+    },
+    {
+        .x = 180,
+        .y = 61,
+        .width = 34,
+        .height = 76,
+        .id = "SECONDBEDROOM_RIGHT_CLOSET",
+        .is_active = gamestate_is_secondbedroom_right_closet_door_opened
     },
     {
         .x = 178,
         .y = 40,
         .width = 40,
         .height = 109,
-        .text_id = "SECONDBEDROOM_CLOSET",
+        .id = "SECONDBEDROOM_CLOSET",
         .action = right_closet_action
     },
     {
@@ -180,8 +180,8 @@ static Hotspot hotspots[] = {
         .y = 150,
         .width = 79,
         .height = 26,
-        .text_id = "SECONDBEDROOM_CLOSET_DRAWER_OPENED",
-        .is_active = closet_drawer_is_active,
+        .id = "SECONDBEDROOM_CLOSET_DRAWER_OPENED",
+        .is_active = gamestate_is_secondbedroom_closet_drawer_opened,
         .action = closet_drawer_action
     },
     {
@@ -189,7 +189,7 @@ static Hotspot hotspots[] = {
         .y = 150,
         .width = 72,
         .height = 20,
-        .text_id = "SECONDBEDROOM_CLOSET_DRAWER",
+        .id = "SECONDBEDROOM_CLOSET_DRAWER",
         .action = closet_drawer_action
     },
     {
@@ -197,21 +197,21 @@ static Hotspot hotspots[] = {
         .y = 177,
         .width = 52,
         .height = 48,
-        .text_id = "SECONDBEDROOM_CARPET"
+        .id = "SECONDBEDROOM_CARPET"
     },
     {
         .x = 8,
         .y = 132,
         .width = 34,
         .height = 44,
-        .text_id = "SECONDBEDROOM_NIGHTSTAND"
+        .id = "SECONDBEDROOM_NIGHTSTAND"
     },
     {
         .x = 49,
         .y = 113,
         .width = 92,
         .height = 91,
-        .text_id = "SECONDBEDROOM_BED"
+        .id = "SECONDBEDROOM_BED"
     }
 };
 

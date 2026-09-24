@@ -19,27 +19,21 @@ static Hotspot hotspots[] = {
         .y = 15,
         .width = 15,
         .height = 125,
-        .text_id = "CORRIDOR_WINDOW",
-        .is_active = NULL,
-        .action = NULL
+        .id = "CORRIDOR_WINDOW"
     },
     {
         .x = 27,
         .y = 47,
         .width = 32,
         .height = 42,
-        .text_id = "CORRIDOR_LAMP",
-        .is_active = NULL,
-        .action = NULL
+        .id = "CORRIDOR_LAMP"
     },
     {
         .x = 168,
         .y = 68,
         .width = 50,
         .height = 45,
-        .text_id = "CORRIDOR_SWORD",
-        .is_active = NULL,
-        .action = NULL
+        .id = "CORRIDOR_SWORD"
     },
 };
 

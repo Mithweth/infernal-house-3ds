@@ -16,7 +16,8 @@
 static Room *current_room = NULL;
 static GameMode game_mode = GAME_NORMAL;
 static bool circle_ready = true;
-static Hotspot *last_hotspot = NULL;
+static Hotspot *active_hotspot = NULL;
+static Hotspot *target = NULL;
 static const char *message_text = NULL;
 static C2D_TextBuf text_buf;
 static C2D_Text text;
@@ -51,15 +52,13 @@ void game_set_room(Room *room) {
 
     current_room = room;
 
-    last_hotspot = NULL;
+    active_hotspot = NULL;
+    target = NULL;
     game_mode = GAME_NORMAL;
     message_text = NULL;
 
     if (current_room && current_room->init) {
         current_room->init();
-    }
-    for (size_t i = 0; i < current_room->hotspot_count; i++) {
-        current_room->hotspots[i].examined = false;
     }
 }
 
@@ -74,6 +73,13 @@ void game_close(void) {
         text_buf = NULL;
     }
     hud_close();
+}
+
+const char *game_target_name(void) {
+    if (!target) {
+        return NULL;
+    }
+    return target->id;
 }
 
 void game_over(GameOverId id) {
@@ -96,7 +102,7 @@ void game_start(void) {
     hud_reset();
     game_mode = GAME_NORMAL;
     message_text = NULL;
-    last_hotspot = NULL;
+    active_hotspot = NULL;
     music_play("romfs:/audio/background.ogg");
     game_set_room(&hall);
 }
@@ -231,14 +237,29 @@ static void update_touch(touchPosition touch) {
         return;
     }
 
-    last_hotspot = hotspot;
-    if (!hotspot->examined) {
-        hotspot->examined = true;
-        game_show_message(hotspot->text_id);
-    } else if (hotspot->action) {
+    if (hotspot != active_hotspot) {
+        active_hotspot = hotspot;
+        target = hotspot;
+        
+        if (hotspot->message_id) {
+            game_show_message(hotspot->message_id);
+            return;
+        }
+
+        //return;
+    }
+
+    if (hotspot->action) {
         hotspot->action();
     }
 
+    if (target && target->is_active && !target->is_active()) {
+        target = NULL;
+    }
+
+    if (active_hotspot && active_hotspot->is_active && !active_hotspot->is_active()) {
+        active_hotspot = NULL;
+    }
 }
 
 static void room_draw(void) {
@@ -293,12 +314,12 @@ void game_end_simon(bool success) {
 }
 
 bool game_use_item(ItemId item) {
-    if (!last_hotspot) {
+    if (!target) {
         return false;
     }
 
-    if (last_hotspot->use_item) {
-        last_hotspot->use_item(item);
+    if (target->use_item) {
+        target->use_item(item);
         return true;
     }
     return false;
@@ -320,7 +341,7 @@ void game_update(u32 keys, circlePosition analog, touchPosition touch) {
             return;
 
         case GAME_OVER:
-            if (keys & KEY_A) {
+            if ((keys & KEY_A) || (keys & KEY_TOUCH)) {
                 game_init();
             }
             return;

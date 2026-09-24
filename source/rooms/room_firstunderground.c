@@ -35,14 +35,14 @@ static Hotspot hotspots[] = {
         .y = 32,
         .width = 104,
         .height = 176,
-        .text_id = "UNDERGROUND_LADDER",
+        .id = "UNDERGROUND_LADDER",
     },
     {
         .x = 18,
         .y = 89,
         .width = 37,
         .height = 100,
-        .text_id = "UNDERGROUND_SHOVEL",
+        .id = "UNDERGROUND_SHOVEL",
         .is_active = shovel_is_active,
         .action = shovel_action
     },
@@ -51,7 +51,7 @@ static Hotspot hotspots[] = {
         .y = 84,
         .width = 35,
         .height = 102,
-        .text_id = "UNDERGROUND_SLEDGEHAMMER",
+        .id = "UNDERGROUND_SLEDGEHAMMER",
         .is_active = sledgehammer_is_active,
         .action = sledgehammer_action
     },

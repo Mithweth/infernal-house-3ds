@@ -47,10 +47,6 @@ static void revolver_action(void) {
     inventory_add(ITEM_GLASSES);
 }
 
-static bool closet_is_active(void) {
-    return gamestate_is_firstbedroom_closet_opened();
-}
-
 static void closet_action(void) {
     gamestate_open_firstbedroom_closet(!gamestate_is_firstbedroom_closet_opened());
 }
@@ -85,14 +81,14 @@ static Hotspot hotspots[] = {
         .y = 58,
         .width = 24,
         .height = 24,
-        .text_id = "FIRSTBEDROOM_LAMP"
+        .id = "FIRSTBEDROOM_LAMP"
     },
     {
         .x = 217,
         .y = 88,
         .width = 16,
         .height = 16,
-        .text_id = "FIRSTBEDROOM_LAMP_SWITCH",
+        .id = "FIRSTBEDROOM_LAMP_SWITCH",
         .action = switch_action
     },
     {
@@ -100,7 +96,7 @@ static Hotspot hotspots[] = {
         .y = 43,
         .width = 20,
         .height = 26,
-        .text_id = "FIRSTBEDROOM_STAIN_REMOVER",
+        .id = "FIRSTBEDROOM_STAIN_REMOVER",
         .is_active = stain_remover_is_active,
         .action = stain_remover_action
     },
@@ -109,14 +105,14 @@ static Hotspot hotspots[] = {
         .y = 45,
         .width = 28,
         .height = 23,
-        .text_id = "FIRSTBEDROOM_BOOKS",
+        .id = "FIRSTBEDROOM_BOOKS",
     },
     {
         .x = 125,
         .y = 112,
         .width = 81,
         .height = 14,
-        .text_id = "FIRSTBEDROOM_PILLOW",
+        .id = "FIRSTBEDROOM_PILLOW",
         .action = pillow_action
     },
     {
@@ -124,14 +120,14 @@ static Hotspot hotspots[] = {
         .y = 125,
         .width = 111,
         .height = 60,
-        .text_id = "FIRSTBEDROOM_BED",
+        .id = "FIRSTBEDROOM_BED",
     },
     {
         .x = 235,
         .y = 127,
         .width = 24,
         .height = 27,
-        .text_id = "FIRSTBEDROOM_EMPTY_NIGHTSTAND_OPENED",
+        .id = "FIRSTBEDROOM_EMPTY_NIGHTSTAND_OPENED",
         .is_active = right_nightstand_is_active,
         .action = right_nightstand_action
     },
@@ -140,7 +136,7 @@ static Hotspot hotspots[] = {
         .y = 127,
         .width = 24,
         .height = 27,
-        .text_id = "FIRSTBEDROOM_EMPTY_NIGHTSTAND_OPENED",
+        .id = "FIRSTBEDROOM_EMPTY_NIGHTSTAND_OPENED",
         .is_active = right_nightstand_is_active,
         .action = right_nightstand_action
     },
@@ -149,7 +145,7 @@ static Hotspot hotspots[] = {
         .y = 127,
         .width = 24,
         .height = 27,
-        .text_id = "FIRSTBEDROOM_NIGHTSTAND",
+        .id = "FIRSTBEDROOM_NIGHTSTAND",
         .action = right_nightstand_action
     },
     {
@@ -157,7 +153,7 @@ static Hotspot hotspots[] = {
         .y = 127,
         .width = 24,
         .height = 27,
-        .text_id = "FIRSTBEDROOM_LEFT_NIGHTSTAND_OPENED",
+        .id = "FIRSTBEDROOM_LEFT_NIGHTSTAND_OPENED",
         .is_active = left_nightstand_is_active,
         .action = revolver_action
     },
@@ -166,7 +162,7 @@ static Hotspot hotspots[] = {
         .y = 127,
         .width = 24,
         .height = 27,
-        .text_id = "FIRSTBEDROOM_NIGHTSTAND",
+        .id = "FIRSTBEDROOM_NIGHTSTAND",
         .action = left_nightstand_action
     },
     {
@@ -174,7 +170,7 @@ static Hotspot hotspots[] = {
         .y = 113,
         .width = 10,
         .height = 12,
-        .text_id = "FIRSTBEDROOM_CLOSET_INVOICE",
+        .id = "FIRSTBEDROOM_CLOSET_INVOICE",
         .is_active = invoice_is_active,
         .action = invoice_action
     },
@@ -183,8 +179,8 @@ static Hotspot hotspots[] = {
         .y = 74,
         .width = 41,
         .height = 72,
-        .text_id = "FIRSTBEDROOM_CLOSET_OPENED",
-        .is_active = closet_is_active,
+        .id = "FIRSTBEDROOM_CLOSET_OPENED",
+        .is_active = gamestate_is_firstbedroom_closet_opened,
         .action = closet_action
     },
     {
@@ -192,15 +188,15 @@ static Hotspot hotspots[] = {
         .y = 41,
         .width = 38,
         .height = 20,
-        .text_id = "FIRSTBEDROOM_CLOSET_TISSUE",
-        .is_active = closet_is_active
+        .id = "FIRSTBEDROOM_CLOSET_TISSUE",
+        .is_active = gamestate_is_firstbedroom_closet_opened
     }, 
     {
         .x = 2,
         .y = 21,
         .width = 64,
         .height = 143,
-        .text_id = "FIRSTBEDROOM_CLOSET",
+        .id = "FIRSTBEDROOM_CLOSET",
         .action = closet_action
     },
 };

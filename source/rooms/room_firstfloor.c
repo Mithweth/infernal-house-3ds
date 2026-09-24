@@ -19,40 +19,27 @@ static void carpet_action(void) {
     gamestate_move_firstfloor_carpet(!gamestate_is_firstfloor_carpet_moved());
 }
 
-static bool carpet_is_active(void) {
-    return gamestate_is_firstfloor_carpet_moved();
-}
-
 static Hotspot hotspots[] = {
     {
         .x = 46,
         .y = 34,
         .width = 49,
         .height = 51,
-        .text_id = "FIRSTFLOOR_LARGE_PAINTING",
+        .id = "FIRSTFLOOR_LARGE_PAINTING",
     },
     {
         .x = 68,
         .y = 160,
         .width = 25,
         .height = 29,
-        .text_id = "FIRSTFLOOR_SMALL_PAINTING",
-    },
-    {
-        .x = 191,
-        .y = 158,
-        .width = 71,
-        .height = 44,
-        .text_id = "FIRSTFLOOR_CARPET_MOVED",
-        .is_active = carpet_is_active,
-        .action = carpet_action
+        .id = "FIRSTFLOOR_SMALL_PAINTING",
     },
     {
         .x = 229,
         .y = 165,
         .width = 82,
         .height = 46,
-        .text_id = "FIRSTFLOOR_CARPET",
+        .id = "FIRSTFLOOR_CARPET",
         .action = carpet_action
     },
 };

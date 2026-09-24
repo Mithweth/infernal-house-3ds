@@ -64,16 +64,24 @@ static Hotspot hotspots[] = {
         .y = 24,
         .width = 100,
         .height = 168,
-        .text_id = "DINING_LASERS",
-        .is_active = lasers_are_active,
-        .action = NULL
+        .id = "DINING_STAIRS",
+        .message_id = "DINING_LASERS",
+        .is_active = lasers_are_active
+    },
+    {
+        .x = 130,
+        .y = 24,
+        .width = 100,
+        .height = 168,
+        .id = "DINING_STAIRS"
     },
     {
         .x = 36,
         .y = 103,
         .width = 36,
         .height = 30,
-        .text_id = "DINING_SOUP_CONTENTS",
+        .id = "DINING_SOUP",
+        .message_id = "DINING_SOUP_CONTENTS",
         .is_active = soup_message_is_active,
         .action = soup_contents_action,
     },
@@ -82,8 +90,7 @@ static Hotspot hotspots[] = {
         .y = 103,
         .width = 36,
         .height = 30,
-        .text_id = "DINING_SOUP",
-        .is_active = NULL,
+        .id = "DINING_SOUP",
         .action = soup_cover_action,
     },
     {
@@ -91,7 +98,8 @@ static Hotspot hotspots[] = {
         .y = 135,
         .width = 60,
         .height = 75,
-        .text_id = "DINING_LEFT_CABINET_CONTENTS",
+        .id = "DINING_CABINET",
+        .message_id = "DINING_LEFT_CABINET_CONTENTS",
         .is_active = gamestate_is_diningroom_left_cabinet_door_opened,
         .action = left_cabinet_door_action
     },
@@ -100,7 +108,8 @@ static Hotspot hotspots[] = {
         .y = 134,
         .width = 55,
         .height = 60,
-        .text_id = "DINING_RIGHT_CABINET_CONTENTS",
+        .id = "DINING_CABINET",
+        .message_id = "DINING_RIGHT_CABINET_CONTENTS",
         .is_active = gamestate_is_diningroom_right_cabinet_door_opened,
         .action = right_cabinet_door_action
     },
@@ -109,8 +118,7 @@ static Hotspot hotspots[] = {
         .y = 135,
         .width = 60,
         .height = 75,
-        .text_id = "DINING_CABINET",
-        .is_active = NULL,
+        .id = "DINING_CABINET",
         .action = left_cabinet_door_action
     },
     {
@@ -118,8 +126,7 @@ static Hotspot hotspots[] = {
         .y = 134,
         .width = 55,
         .height = 60,
-        .text_id = "DINING_CABINET",
-        .is_active = NULL,
+        .id = "DINING_CABINET",
         .action = right_cabinet_door_action
     },
     {
@@ -127,27 +134,22 @@ static Hotspot hotspots[] = {
         .y = 101,
         .width = 111,
         .height = 109,
-        .text_id = "DINING_CABINET",
-        .is_active = NULL,
-        .action = NULL
+        .id = "DINING_CABINET"
     },
     {
         .x = 3,
         .y = 22,
         .width = 101,
         .height = 79,
-        .text_id = "DINING_UP_CABINET",
-        .is_active = NULL,
-        .action = NULL
+        .id = "DINING_CABINET",
+        .message_id = "DINING_UP_CABINET"
     },
     {
         .x = 265,
         .y = 105,
         .width = 25,
         .height = 25,
-        .text_id = "DINING_SWITCH",
-        .is_active = NULL,
-        .action = NULL
+        .id = "DINING_SWITCH"
     },
 };
 

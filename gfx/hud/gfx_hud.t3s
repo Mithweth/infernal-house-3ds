@@ -1,3 +1,12 @@
 --atlas -f rgba8888 -z auto
-arrow.png
-clock.png
+inventory.png
+arrow_nw.png
+arrow_n.png
+arrow_ne.png
+arrow_e.png
+arrow_se.png
+arrow_s.png
+arrow_sw.png
+arrow_w.png
+directions.png
+background.png

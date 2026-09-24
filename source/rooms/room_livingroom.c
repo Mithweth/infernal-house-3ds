@@ -20,10 +20,6 @@ static void play_piano_action(void) {
     game_play_piano();
 }
 
-static bool piano_is_opened(void) {
-    return gamestate_is_livingroom_piano_opened();
-}
-
 static void piano_action(void) {
     if (gamestate_is_livingroom_piano_opened()) {
         sfx_play("romfs:/audio/closet_close.raw");
@@ -73,13 +69,19 @@ static void hearth_use_item(ItemId item) {
     }
 }
 
+static void wood_use_item(ItemId item) {
+    if (item == ITEM_LIGHTER) {
+        game_show_message("LIVINGROOM_USE_LIGHTER");
+    }
+}
+
 static Hotspot hotspots[] = {
     {
         .x = 146,
         .y = 107,
         .width = 68,
         .height = 47,
-        .text_id = "LIVINGROOM_FIREPLACE_HEARTH_OPENED",
+        .id = "LIVINGROOM_FIREPLACE_HEARTH_OPENED",
         .is_active = hearth_opened_is_active,
         .use_item = hearth_use_item
     },
@@ -88,8 +90,8 @@ static Hotspot hotspots[] = {
         .y = 111,
         .width = 91,
         .height = 30,
-        .text_id = "LIVINGROOM_OPENED_PIANO",
-        .is_active = piano_is_opened,
+        .id = "LIVINGROOM_PIANO",
+        .is_active = gamestate_is_livingroom_piano_opened,
         .action = play_piano_action
     },
     {
@@ -97,7 +99,7 @@ static Hotspot hotspots[] = {
         .y = 111,
         .width = 91,
         .height = 30,
-        .text_id = "LIVINGROOM_PIANO",
+        .id = "LIVINGROOM_PIANO",
         .action = piano_action
     },
     {
@@ -105,7 +107,7 @@ static Hotspot hotspots[] = {
         .y = 178,
         .width = 32,
         .height = 20,
-        .text_id = "LIVINGROOM_LIGHTER",
+        .id = "LIVINGROOM_LIGHTER",
         .is_active = lighter_is_active,
         .action = lighter_action
     },
@@ -114,21 +116,23 @@ static Hotspot hotspots[] = {
         .y = 114,
         .width = 31,
         .height = 37,
-        .text_id = "LIVINGROOM_WOOD"
+        .id = "LIVINGROOM_WOOD",
+        .use_item = wood_use_item
     },
     {
         .x = 9,
         .y = 29,
         .width = 52,
         .height = 54,
-        .text_id = "LIVINGROOM_PAINTING"
+        .id = "LIVINGROOM_PAINTING"
     },
     {
         .x = 163,
         .y = 72,
         .width = 26,
         .height = 17,
-        .text_id = "LIVINGROOM_FIREPLACE",
+        .id = "LIVINGROOM_FIREPLACE",
+        .message_id = "LIVINGROOM_FIREPLACE_EXAMINE",
         .use_item = fireplace_use_item
     },
     {
@@ -136,8 +140,16 @@ static Hotspot hotspots[] = {
         .y = 107,
         .width = 68,
         .height = 47,
-        .text_id = "LIVINGROOM_FIREPLACE_HEARTH"
+        .id = "LIVINGROOM_FIREPLACE",
+        .message_id = "LIVINGROOM_FIREPLACE_HEARTH"
     },
+    {
+        .x = 138,
+        .y = 50,
+        .width = 92,
+        .height = 104,
+        .id = "LIVINGROOM_FIREPLACE"
+    }
 };
 
 static void room_init(void) {

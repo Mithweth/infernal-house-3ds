@@ -23,16 +23,8 @@ static void refrigerator_action(void) {
     gamestate_open_kitchen_refrigerator(!gamestate_is_kitchen_refrigerator_opened());
 }
 
-static bool refrigerator_is_active(void) {
-    return gamestate_is_kitchen_refrigerator_opened();
-}
-
 static void below_closet_action(void) {
     gamestate_open_kitchen_below_closet(!gamestate_is_kitchen_below_closet_opened());
-}
-
-static bool below_closet_is_active(void) {
-    return gamestate_is_kitchen_below_closet_opened();
 }
 
 static void oven_action(void) {
@@ -43,32 +35,16 @@ static void dishwasher_action(void) {
     gamestate_open_kitchen_dishwasher(!gamestate_is_kitchen_dishwasher_opened());
 }
 
-static bool dishwasher_is_active(void) {
-    return gamestate_is_kitchen_dishwasher_opened();
-}
-
 static void top_closet_action(void) {
     gamestate_open_kitchen_top_closet(!gamestate_is_kitchen_top_closet_opened());
-}
-
-static bool top_closet_is_active(void) {
-    return gamestate_is_kitchen_top_closet_opened();
 }
 
 static void bottom_closet_action(void) {
     gamestate_open_kitchen_bottom_closet(!gamestate_is_kitchen_bottom_closet_opened());
 }
 
-static bool bottom_closet_is_active(void) {
-    return gamestate_is_kitchen_bottom_closet_opened();
-}
-
 static void drawer_action(void) {
     gamestate_open_kitchen_drawer(!gamestate_is_kitchen_drawer_opened());
-}
-
-static bool drawer_is_active(void) {
-    return gamestate_is_kitchen_drawer_opened();
 }
 
 static Hotspot hotspots[] = {
@@ -77,8 +53,9 @@ static Hotspot hotspots[] = {
         .y = 60,
         .width = 25,
         .height = 20,
-        .text_id = "KITCHEN_REFRIGERATOR_OPENED_1",
-        .is_active = refrigerator_is_active,
+        .id = "KITCHEN_REFRIGERATOR",
+        .message_id = "KITCHEN_REFRIGERATOR_OPENED_1",
+        .is_active = gamestate_is_kitchen_refrigerator_opened,
         .action = refrigerator_action
     },
     {
@@ -86,8 +63,9 @@ static Hotspot hotspots[] = {
         .y = 80,
         .width = 25,
         .height = 19,
-        .text_id = "KITCHEN_REFRIGERATOR_OPENED_2",
-        .is_active = refrigerator_is_active,
+        .id = "KITCHEN_REFRIGERATOR",
+        .message_id = "KITCHEN_REFRIGERATOR_OPENED_2",
+        .is_active = gamestate_is_kitchen_refrigerator_opened,
         .action = refrigerator_action
     },
     {
@@ -95,8 +73,9 @@ static Hotspot hotspots[] = {
         .y = 100,
         .width = 25,
         .height = 19,
-        .text_id = "KITCHEN_REFRIGERATOR_OPENED_3",
-        .is_active = refrigerator_is_active,
+        .id = "KITCHEN_REFRIGERATOR",
+        .message_id = "KITCHEN_REFRIGERATOR_OPENED_3",
+        .is_active = gamestate_is_kitchen_refrigerator_opened,
         .action = refrigerator_action
     },
     {
@@ -104,8 +83,9 @@ static Hotspot hotspots[] = {
         .y = 118,
         .width = 25,
         .height = 21,
-        .text_id = "KITCHEN_REFRIGERATOR_OPENED_4",
-        .is_active = refrigerator_is_active,
+        .id = "KITCHEN_REFRIGERATOR",
+        .message_id = "KITCHEN_REFRIGERATOR_OPENED_4",
+        .is_active = gamestate_is_kitchen_refrigerator_opened,
         .action = refrigerator_action
     },
     {
@@ -113,8 +93,9 @@ static Hotspot hotspots[] = {
         .y = 142,
         .width = 25,
         .height = 48,
-        .text_id = "KITCHEN_REFRIGERATOR_OPENED_5",
-        .is_active = refrigerator_is_active,
+        .id = "KITCHEN_REFRIGERATOR",
+        .message_id = "KITCHEN_REFRIGERATOR_OPENED_5",
+        .is_active = gamestate_is_kitchen_refrigerator_opened,
         .action = refrigerator_action
     },
     {
@@ -122,7 +103,7 @@ static Hotspot hotspots[] = {
         .y = 40,
         .width = 48,
         .height = 173,
-        .text_id = "KITCHEN_REFRIGERATOR",
+        .id = "KITCHEN_REFRIGERATOR",
         .action = refrigerator_action
     },
     {
@@ -130,8 +111,9 @@ static Hotspot hotspots[] = {
         .y = 130,
         .width = 55,
         .height = 64,
-        .text_id = "KITCHEN_CLOSET_BELOW_OPENED",
-        .is_active = below_closet_is_active,
+        .id = "KITCHEN_CLOSET",
+        .message_id = "KITCHEN_CLOSET_BELOW_OPENED",
+        .is_active = gamestate_is_kitchen_below_closet_opened,
         .action = below_closet_action
     },
     {
@@ -139,7 +121,7 @@ static Hotspot hotspots[] = {
         .y = 130,
         .width = 55,
         .height = 64,
-        .text_id = "KITCHEN_CLOSET",
+        .id = "KITCHEN_CLOSET",
         .action = below_closet_action
     },
     {
@@ -147,7 +129,7 @@ static Hotspot hotspots[] = {
         .y = 131,
         .width = 47,
         .height = 63,
-        .text_id = "KITCHEN_OVEN",
+        .id = "KITCHEN_OVEN",
         .action = oven_action
     },
     {
@@ -155,8 +137,9 @@ static Hotspot hotspots[] = {
         .y = 131,
         .width = 60,
         .height = 70,
-        .text_id = "KITCHEN_DISHWASHER_OPENED",
-        .is_active = dishwasher_is_active,
+        .id = "KITCHEN_DISHWASHER",
+        .message_id = "KITCHEN_DISHWASHER_OPENED",
+        .is_active = gamestate_is_kitchen_dishwasher_opened,
         .action = dishwasher_action
     },
     {
@@ -164,7 +147,7 @@ static Hotspot hotspots[] = {
         .y = 131,
         .width = 60,
         .height = 70,
-        .text_id = "KITCHEN_DISHWASHER",
+        .id = "KITCHEN_DISHWASHER",
         .action = dishwasher_action
     },
     {
@@ -172,8 +155,9 @@ static Hotspot hotspots[] = {
         .y = 2,
         .width = 53,
         .height = 119,
-        .text_id = "KITCHEN_TOP_CLOSET_OPENED",
-        .is_active = top_closet_is_active,
+        .id = "KITCHEN_CLOSET",
+        .message_id = "KITCHEN_TOP_CLOSET_OPENED",
+        .is_active = gamestate_is_kitchen_top_closet_opened,
         .action = top_closet_action
     },
     {
@@ -181,7 +165,7 @@ static Hotspot hotspots[] = {
         .y = 2,
         .width = 53,
         .height = 119,
-        .text_id = "KITCHEN_CLOSET",
+        .id = "KITCHEN_CLOSET",
         .action = top_closet_action
     },
     {
@@ -189,8 +173,9 @@ static Hotspot hotspots[] = {
         .y = 120,
         .width = 51,
         .height = 19,
-        .text_id = "KITCHEN_DRAWER_OPENED",
-        .is_active = drawer_is_active,
+        .id = "KITCHEN_DRAWER",
+        .message_id = "KITCHEN_DRAWER_OPENED",
+        .is_active = gamestate_is_kitchen_drawer_opened,
         .action = drawer_action
     },
     {
@@ -198,7 +183,7 @@ static Hotspot hotspots[] = {
         .y = 120,
         .width = 51,
         .height = 19,
-        .text_id = "KITCHEN_DRAWER",
+        .id = "KITCHEN_DRAWER",
         .action = drawer_action
     },
     {
@@ -206,8 +191,9 @@ static Hotspot hotspots[] = {
         .y = 138,
         .width = 48,
         .height = 64,
-        .text_id = "KITCHEN_BOTTOM_CLOSET_OPENED",
-        .is_active = bottom_closet_is_active,
+        .id = "KITCHEN_CLOSET",
+        .message_id = "KITCHEN_BOTTOM_CLOSET_OPENED",
+        .is_active = gamestate_is_kitchen_bottom_closet_opened,
         .action = bottom_closet_action
     },
     {
@@ -215,7 +201,7 @@ static Hotspot hotspots[] = {
         .y = 138,
         .width = 48,
         .height = 64,
-        .text_id = "KITCHEN_CLOSET",
+        .id = "KITCHEN_CLOSET",
         .action = bottom_closet_action
     },
     {
@@ -223,21 +209,21 @@ static Hotspot hotspots[] = {
         .y = 49,
         .width = 50,
         .height = 42,
-        .text_id = "KITCHEN_TOWELS"
+        .id = "KITCHEN_TOWELS"
     },
     {
         .x = 176,
         .y = 47,
         .width = 74,
         .height = 46,
-        .text_id = "KITCHEN_TOOLS"
+        .id = "KITCHEN_TOOLS"
     },
     {
         .x = 180,
         .y = 94,
         .width = 36,
         .height = 30,
-        .text_id = "KITCHEN_TOOLS"
+        .id = "KITCHEN_TOOLS"
     }
 };
 

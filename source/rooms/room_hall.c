@@ -67,14 +67,14 @@ static void right_closet_contents_action(void) {
     inventory_add(ITEM_BINOCULARS);
 }
 
-
 static Hotspot hotspots[] = {
     {
         .x = 0,
         .y = 144,
         .width = 36,
         .height = 70,
-        .text_id = "HALL_LEFT_CLOSET_CONTENTS",
+        .id = "HALL_CLOSET",
+        .message_id = "HALL_LEFT_CLOSET_CONTENTS",
         .is_active = left_closet_contents_is_active,
         .action = left_closet_contents_action
     },
@@ -83,7 +83,8 @@ static Hotspot hotspots[] = {
         .y = 135,
         .width = 36,
         .height = 70,
-        .text_id = "HALL_RIGHT_CLOSET_CONTENTS",
+        .id = "HALL_CLOSET",
+        .message_id = "HALL_RIGHT_CLOSET_CONTENTS",
         .is_active = right_closet_contents_is_active,
         .action = right_closet_contents_action
     },
@@ -92,62 +93,49 @@ static Hotspot hotspots[] = {
         .y = 50,
         .width = 25,
         .height = 40,
-        .text_id = "HALL_CROSS",
-        .is_active = NULL,
-        .action = NULL
+        .id = "HALL_CROSS"
     },
     {
         .x = 35,
         .y = 40,
         .width = 34,
         .height = 47,
-        .text_id = "HALL_WALL",
-        .is_active = NULL,
-        .action = NULL
+        .id = "HALL_WALL"
     },
     {
         .x = 0,
         .y = 130,
         .width = 20,
         .height = 12,
-        .text_id = "HALL_ASHTRAY",
-        .is_active = NULL,
-        .action = NULL
+        .id = "HALL_ASHTRAY"
     },
     {
         .x = 25,
         .y = 95,
         .width = 15,
         .height = 40,
-        .text_id = "HALL_CANDLE",
-        .is_active = NULL,
-        .action = NULL
+        .id = "HALL_CANDLE"
     },
     {
         .x = 180,
         .y = 75,
         .width = 50,
         .height = 25,
-        .text_id = "HALL_HANGER",
-        .is_active = NULL,
-        .action = NULL
+        .id = "HALL_HANGER"
     },
     {
         .x = 250,
         .y = 30,
         .width = 70,
         .height = 100,
-        .text_id = "HALL_PAINTING",
-        .is_active = NULL,
-        .action = NULL
+        .id = "HALL_PAINTING"
     },
     {
         .x = 0,
         .y = 154,
         .width = 36,
         .height = 70,
-        .text_id = "HALL_CLOSET",
-        .is_active = NULL,
+        .id = "HALL_CLOSET",
         .action = left_closet_action
     },
     {
@@ -155,8 +143,7 @@ static Hotspot hotspots[] = {
         .y = 135,
         .width = 36,
         .height = 60,
-        .text_id = "HALL_CLOSET",
-        .is_active = NULL,
+        .id = "HALL_CLOSET",
         .action = right_closet_action
     },
     {
@@ -164,8 +151,9 @@ static Hotspot hotspots[] = {
         .y = 200,
         .width = 28,
         .height = 20,
-        .text_id = "HALL_MESSAGE",
+        .id = "HALL_CARPET",
         .is_active = message_is_active,
+        .message_id = "HALL_MESSAGE",
         .action = message_action
     },
     {
@@ -173,8 +161,7 @@ static Hotspot hotspots[] = {
         .y = 175,
         .width = 200,
         .height = 65,
-        .text_id = "HALL_CARPET",
-        .is_active = NULL,
+        .id = "HALL_CARPET",
         .action = carpet_action
     }
 };

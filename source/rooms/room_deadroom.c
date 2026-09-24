@@ -34,7 +34,7 @@ static Hotspot hotspots[] = {
         .y = 188,
         .width = 131,
         .height = 44,
-        .text_id = "DEADROOM_ROPE",
+        .id = "DEADROOM_ROPE",
         .is_active = rope_is_active,
         .action = rope_action
     },
@@ -43,7 +43,7 @@ static Hotspot hotspots[] = {
         .y = 9,
         .width = 21,
         .height = 31,
-        .text_id = "DEADROOM_RING",
+        .id = "DEADROOM_RING",
         .is_active = ring_is_active,
         .action = ring_action
     },
@@ -52,35 +52,38 @@ static Hotspot hotspots[] = {
         .y = 0,
         .width = 30,
         .height = 40,
-        .text_id = "DEADROOM_CHAINS",
+        .id = "DEADROOM_CHAINS",
+        .message_id = "DEADROOM_CHAINS_EXAMINE"
     },
     {
         .x = 188,
         .y = 0,
         .width = 30,
         .height = 40,
-        .text_id = "DEADROOM_CHAINS",
+        .id = "DEADROOM_CHAINS",
+        .message_id = "DEADROOM_CHAINS_EXAMINE"
     },
     {
         .x = 131,
         .y = 41,
         .width = 53,
         .height = 168,
-        .text_id = "DEADROOM_SKELETON",
+        .id = "DEADROOM_SKELETON",
+        .message_id = "DEADROOM_SKELETON_EXAMINE"
     },
     {
         .x = 0,
         .y = 0,
         .width = 320,
         .height = 183,
-        .text_id = "DEADROOM_WALL",
+        .id = "DEADROOM_WALL",
     },
     {
         .x = 18,
         .y = 193,
         .width = 282,
         .height = 49,
-        .text_id = "DEADROOM_GROUND",
+        .id = "DEADROOM_GROUND",
     },
 };
 
