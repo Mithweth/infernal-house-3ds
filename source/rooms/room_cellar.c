@@ -16,11 +16,17 @@ static C2D_Image img_background;
 static C2D_Image img_alarm_box_opened;
 static C2D_Image img_alarm_box_enabled;
 
-static void alarm_box_use_item(ItemId item) {
-    if ((item == ITEM_SCREWDRIVER) && (!gamestate_is_cellar_alarm_box_unscrewed())) {
-        gamestate_unscrew_cellar_alarm_box();
-        game_show_message("CELLAR_OPEN_ALARM_BOX");
+static bool alarm_box_use_item(ItemId item) {
+    if (item == ITEM_SCREWDRIVER) {
+        if (!gamestate_is_cellar_alarm_box_unscrewed()) {
+            gamestate_unscrew_cellar_alarm_box();
+            game_show_message("CELLAR_OPEN_ALARM_BOX");
+        } else {
+            game_show_message("CELLAR_ALARM_BOX_ALREADY_OPENED");
+        }
+        return true;
     }
+    return false;
 }
 
 static void alarm_box_action(void) {

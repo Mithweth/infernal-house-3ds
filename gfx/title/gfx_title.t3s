@@ -1,5 +1,6 @@
 --atlas -f rgba8888 -z auto
 abutton.png
+xbutton.png
 analogpad.png
 background.png
 dpad.png

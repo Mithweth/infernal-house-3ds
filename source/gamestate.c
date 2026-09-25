@@ -19,6 +19,7 @@ typedef struct {
     bool livingroom_secret_passage;
     bool rope_used_in_livingroom_hearth;
     bool library_secret_passage_opened;
+    bool library_statue_taken;
     bool kitchen_refrigerator_opened;
     bool kitchen_below_closet_opened;
     bool kitchen_oven_opened;
@@ -159,6 +160,14 @@ void gamestate_open_library_secret_passage(void) {
 
 bool gamestate_is_library_secret_passage_opened(void) {
     return game_state.library_secret_passage_opened;
+}
+
+void gamestate_take_library_statue(void) {
+    game_state.library_statue_taken = true;
+}
+
+bool gamestate_is_library_statue_taken(void) {
+    return game_state.library_statue_taken;
 }
 
 void gamestate_open_kitchen_refrigerator(bool value) {

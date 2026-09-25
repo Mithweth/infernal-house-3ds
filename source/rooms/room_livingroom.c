@@ -49,30 +49,44 @@ static void north_action(void) {
     }
 }
 
-static void fireplace_use_item(ItemId item) {
+static bool fireplace_use_item(ItemId item) {
     if (item == ITEM_STATUE) {
         gamestate_set_livingroom_golden_statue_placed();
         inventory_remove(ITEM_STATUE);
         game_show_message("LIVINGROOM_PLACE_STATUE");
+        return true;
     }
+    return false;
 }
 
 static bool hearth_opened_is_active(void) {
     return gamestate_is_livingroom_secret_passage_opened() && !gamestate_is_rope_used_in_livingroom_hearth();
 }
 
-static void hearth_use_item(ItemId item) {
+static bool hearth_use_item(ItemId item) {
     if (item == ITEM_ROPE) {
         gamestate_bind_rope_used_in_livingroom_hearth();
         inventory_remove(ITEM_ROPE);
         game_show_message("LIVINGROOM_USE_ROPE");
+        return true;
     }
+    return false;
 }
 
-static void wood_use_item(ItemId item) {
+static bool wood_use_item(ItemId item) {
     if (item == ITEM_LIGHTER) {
         game_show_message("LIVINGROOM_USE_LIGHTER");
+        return true;
     }
+    return false;
+}
+
+static bool lighter_use_item(ItemId item) {
+    if (item == ITEM_MAGNIFYING_GLASS) {
+        game_show_message("LIVINGROOM_USE_MAGNIFYING_GLASS");
+        return true;
+    }
+    return false;
 }
 
 static Hotspot hotspots[] = {
@@ -109,7 +123,8 @@ static Hotspot hotspots[] = {
         .height = 20,
         .id = "LIVINGROOM_LIGHTER",
         .is_active = lighter_is_active,
-        .action = lighter_action
+        .action = lighter_action,
+        .use_item = lighter_use_item
     },
     {
         .x = 104,

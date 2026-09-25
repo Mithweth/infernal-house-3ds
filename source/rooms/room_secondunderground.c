@@ -21,11 +21,17 @@ static bool wall_is_active(void) {
     return !gamestate_is_underground_wall_broken();
 }
 
-static void wall_use_item(ItemId item) {
-    if ((item == ITEM_SLEDGEHAMMER) && (!gamestate_is_underground_wall_broken())) {
-        gamestate_break_underground_wall();
-        game_show_message("UNDERGROUND_BREAK_WALL");
+static bool wall_use_item(ItemId item) {
+    if (item == ITEM_SLEDGEHAMMER) {
+        if (!gamestate_is_underground_wall_broken()) {
+            gamestate_break_underground_wall();
+            game_show_message("UNDERGROUND_BREAK_WALL");
+        } else {
+            game_show_message("UNDERGROUND_WALL_ALREADY_BROKEN");
+        }
+        return true;
     }
+    return false;
 }
 
 static Hotspot hotspots[] = {

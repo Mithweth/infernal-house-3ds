@@ -17,7 +17,7 @@ typedef struct {
     const char *message_id;
     bool (*is_active)(void);
     void (*action)(void);
-    void (*use_item)(ItemId item);
+    bool (*use_item)(ItemId item);
 } Hotspot;
 
 typedef void (*PathAction)(void);

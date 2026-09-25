@@ -243,10 +243,10 @@ static void update_touch(touchPosition touch) {
         
         if (hotspot->message_id) {
             game_show_message(hotspot->message_id);
-            return;
+            //return;
         }
 
-        //return;
+        return;
     }
 
     if (hotspot->action) {
@@ -318,10 +318,10 @@ bool game_use_item(ItemId item) {
         return false;
     }
 
-    if (target->use_item) {
-        target->use_item(item);
+    if (target->use_item && target->use_item(item)) {
         return true;
     }
+    game_show_message("GENERIC_USE");
     return false;
 }
 
@@ -374,6 +374,11 @@ void game_update(u32 keys, circlePosition analog, touchPosition touch) {
         default:
             hud_update();
             break;
+    }
+
+    if ((keys & KEY_A) && (game_mode == GAME_MESSAGE)) {
+        game_mode = GAME_NORMAL;
+        return;
     }
 
     if ((inventory_is_active()) | (inventory_update(keys))) {

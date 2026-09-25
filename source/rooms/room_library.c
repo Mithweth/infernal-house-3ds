@@ -18,10 +18,11 @@ static C2D_Image img_passage_opened;
 static C2D_Image img_clock_taken;
 
 static bool statue_is_active(void) {
-    return !inventory_has(ITEM_STATUE);
+    return !gamestate_is_library_statue_taken();
 }
 
 static void statue_action(void) {
+    gamestate_take_library_statue();
     inventory_add(ITEM_STATUE);
 }
 
@@ -215,7 +216,7 @@ static void room_init(void) {
 
 static void room_draw(void) {
     C2D_DrawImageAt(img_background, 0.0f, 0.0f, 0.0f, NULL, 1.0f, 1.0f);
-    if (inventory_has(ITEM_STATUE)) {
+    if (gamestate_is_library_statue_taken()) {
         C2D_DrawImageAt(img_statue_taken, 13.0f, 39.0f, 0.3f, NULL, 1.0f, 1.0f);
     }
     if (inventory_has(ITEM_CLOCK)) {

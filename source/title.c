@@ -36,6 +36,7 @@ static C2D_SpriteSheet title_assets;
 static C2D_Image img_background;
 static C2D_Image img_lankhor;
 static C2D_Image img_abutton;
+static C2D_Image img_xbutton;
 static C2D_Image img_analogpad;
 static C2D_Image img_dpad;
 static C2D_Image img_touch;
@@ -71,6 +72,10 @@ static Credit credits[] = {
         .name = "Jean-Baptiste Langlois"
     },
     {
+        .role_id = "TITLE_CREDITS_REMAKE_TESTER",
+        .name = "Akira Langlois"
+    },
+    {
         .role_id = "TITLE_CREDITS_REMAKE_GRAPHISM",
         .name = "ChatGPT & GIMP"
     }
@@ -81,11 +86,12 @@ void title_init(void) {
     img_background = C2D_SpriteSheetGetImage(title_assets, gfx_title_background_idx);
     img_lankhor = C2D_SpriteSheetGetImage(title_assets, gfx_title_lankhor_idx);
     img_abutton = C2D_SpriteSheetGetImage(title_assets, gfx_title_abutton_idx);
+    img_xbutton = C2D_SpriteSheetGetImage(title_assets, gfx_title_xbutton_idx);
     img_analogpad = C2D_SpriteSheetGetImage(title_assets, gfx_title_analogpad_idx);
     img_dpad = C2D_SpriteSheetGetImage(title_assets, gfx_title_dpad_idx);
     img_touch = C2D_SpriteSheetGetImage(title_assets, gfx_title_touch_idx);
     selected = TITLE_INTRO;
-    text_buf = C2D_TextBufNew(1024);
+    text_buf = C2D_TextBufNew(4096);
     for (int i = 0; i < TITLE_COUNT; i++) {
         C2D_TextParse(&text[i], text_buf, lang_get(choices[i]));
         C2D_TextOptimize(&text[i]);
@@ -99,8 +105,8 @@ void title_init(void) {
 
     C2D_TextParse(&controls_text[0], text_buf, lang_get("TITLE_CONTROLS_MOVE"));
     C2D_TextParse(&controls_text[1], text_buf, lang_get("TITLE_CONTROLS_INVENTORY"));
-    C2D_TextParse(&controls_text[2], text_buf, lang_get("TITLE_CONTROLS_OBJECT"));
-    C2D_TextParse(&controls_text[3], text_buf, lang_get("TITLE_CONTROLS_EXAMINE"));
+    C2D_TextParse(&controls_text[2], text_buf, lang_get("TITLE_CONTROLS_EXAMINE"));
+    C2D_TextParse(&controls_text[3], text_buf, lang_get("TITLE_CONTROLS_USE"));
     C2D_TextParse(&controls_text[4], text_buf, lang_get("TITLE_CONTROLS_ACTION"));
     C2D_TextOptimize(&controls_text[0]);
     C2D_TextOptimize(&controls_text[1]);
@@ -169,7 +175,7 @@ void title_draw_top(void) {
 
 static void title_draw_credits(void) {
     for (int i = 0; i < (sizeof(credits) / sizeof(credits[0])); i++) {
-        float y = 20.0f + i * 25.0f;
+        float y = 20.0f + i * 20.0f;
         C2D_DrawText(&credits[i].role, C2D_WithColor, 20.0f, y, 0.5f, 0.4f, 0.4f, C2D_Color32(128, 128, 128, 255));
         C2D_DrawText(&credits[i].person, C2D_WithColor | C2D_AlignRight, 300.0f, y, 0.5f, 0.4f, 0.4f, C2D_Color32(164, 164, 164, 255));
     }
@@ -177,15 +183,16 @@ static void title_draw_credits(void) {
 }
 
 static void title_draw_controls(void) {
-    C2D_DrawImageAt(img_analogpad, 10.0f, 10.0f, 0.3f, NULL, 1.0f, 1.0f);
-    C2D_DrawImageAt(img_dpad, 10.0f, 70.0f, 0.3f, NULL, 1.0f, 1.0f);
-    C2D_DrawImageAt(img_abutton, 18.0f, 130.0f, 0.3f, NULL, 1.0f, 1.0f);
-    C2D_DrawImageAt(img_touch, 10.0f, 176.0f, 0.3f, NULL, 1.0f, 1.0f);
-    C2D_DrawText(&controls_text[0], C2D_WithColor, 90.0f, 25.0f, 0.5f, 0.55f, 0.55f, C2D_Color32(224, 224, 224, 255));
-    C2D_DrawText(&controls_text[1], C2D_WithColor, 90.0f, 85.0f, 0.5f, 0.55f, 0.55f, C2D_Color32(224, 224, 224, 255));
-    C2D_DrawText(&controls_text[2], C2D_WithColor, 90.0f, 135.0f, 0.5f, 0.55f, 0.55f, C2D_Color32(224, 224, 224, 255));
-    C2D_DrawText(&controls_text[3], C2D_WithColor, 90.0f, 190.0f, 0.5f, 0.55f, 0.55f, C2D_Color32(224, 224, 224, 255));
-    C2D_DrawText(&controls_text[4], C2D_WithColor, 90.0f, 210.0f, 0.5f, 0.55f, 0.55f, C2D_Color32(224, 224, 224, 255));
+    C2D_DrawImageAt(img_analogpad, 10.0f, 0.0f, 0.3f, NULL, 1.0f, 1.0f);
+    C2D_DrawImageAt(img_dpad, 10.0f, 55.0f, 0.3f, NULL, 1.0f, 1.0f);
+    C2D_DrawImageAt(img_xbutton, 18.0f, 110.0f, 0.3f, NULL, 1.0f, 1.0f);
+    C2D_DrawImageAt(img_abutton, 18.0f, 150.0f, 0.3f, NULL, 1.0f, 1.0f);
+    C2D_DrawImageAt(img_touch, 10.0f, 185.0f, 0.3f, NULL, 0.9f, 0.9f);
+    C2D_DrawText(&controls_text[0], C2D_WithColor, 90.0f, 15.0f, 0.5f, 0.55f, 0.55f, C2D_Color32(224, 224, 224, 255));
+    C2D_DrawText(&controls_text[1], C2D_WithColor, 90.0f, 70.0f, 0.5f, 0.55f, 0.55f, C2D_Color32(224, 224, 224, 255));
+    C2D_DrawText(&controls_text[2], C2D_WithColor, 90.0f, 115.0f, 0.5f, 0.55f, 0.55f, C2D_Color32(224, 224, 224, 255));
+    C2D_DrawText(&controls_text[3], C2D_WithColor, 90.0f, 155.0f, 0.5f, 0.55f, 0.55f, C2D_Color32(224, 224, 224, 255));
+    C2D_DrawText(&controls_text[4], C2D_WithColor, 90.0f, 200.0f, 0.5f, 0.55f, 0.55f, C2D_Color32(224, 224, 224, 255));
 }
 
 static void title_draw_menu(void) {

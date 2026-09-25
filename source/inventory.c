@@ -284,7 +284,7 @@ void inventory_remove(ItemId id) {
 
 bool inventory_update(u32 keys) {
     if (inventory_mode == INVENTORY_ACTION) {
-        if (keys & KEY_A) {
+        if ((keys & KEY_X) || (keys & KEY_B)) {
             inventory_mode = INVENTORY_NORMAL;
         }
         return true;
@@ -330,13 +330,16 @@ bool inventory_update(u32 keys) {
         return true;
     }
 
-    if (keys & KEY_A) {
-        Item *item = inventory[selected];
-        if (!game_use_item(item->id)) {
-            if (item->draw_action || item->examinable) {
-                inventory_mode = INVENTORY_ACTION;
-            }
+    Item *item = inventory[selected];
+    if (keys & KEY_X) {    
+        if (item->draw_action || item->examinable) {
+            inventory_mode = INVENTORY_ACTION;
         }
+        return true;
+    }
+
+    if (keys & KEY_A) {
+        game_use_item(item->id);
         return true;
     }
     return false;

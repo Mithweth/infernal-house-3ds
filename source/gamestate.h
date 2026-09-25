@@ -36,6 +36,8 @@ void gamestate_bind_rope_used_in_livingroom_hearth(void);
 bool gamestate_is_rope_used_in_livingroom_hearth(void);
 void gamestate_open_library_secret_passage(void);
 bool gamestate_is_library_secret_passage_opened(void);
+void gamestate_take_library_statue(void);
+bool gamestate_is_library_statue_taken(void);
 void gamestate_open_kitchen_refrigerator(bool value);
 bool gamestate_is_kitchen_refrigerator_opened(void);
 void gamestate_open_kitchen_below_closet(bool value);
