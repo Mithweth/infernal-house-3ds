@@ -12,6 +12,7 @@
 #include "title.h"
 #include "simon.h"
 #include "piano.h"
+#include "measure.h"
 
 static Room *current_room = NULL;
 static GameMode game_mode = GAME_NORMAL;
@@ -289,6 +290,16 @@ void game_start_simon(void) {
     game_mode = GAME_SIMON;
 }
 
+void game_start_measure(void) {
+    measure_init(151.0f, 197.0f);
+    game_mode = GAME_MEASURE;
+}
+
+void game_stop_measure(void) {
+    measure_close();
+    game_mode = GAME_NORMAL;
+}
+
 void game_play_piano(void) {
     music_stop();
     piano_init();
@@ -356,6 +367,11 @@ void game_update(u32 keys, circlePosition analog, touchPosition touch) {
             piano_update(keys, touch);
             return;
 
+        case GAME_MEASURE:
+            hud_update();
+            measure_update(keys, touch);
+            return;
+
         case GAME_BUSY:
             hud_update();
             if (game_busy_sfx_channel > -1) {
@@ -421,6 +437,14 @@ void game_draw(C3D_RenderTarget *top, C3D_RenderTarget *bottom) {
         case GAME_PIANO:
             C2D_SceneBegin(bottom);
             piano_draw_bottom();
+            C2D_SceneBegin(top);
+            hud_draw();
+            break;
+
+        case GAME_MEASURE:
+            C2D_SceneBegin(bottom);
+            room_draw();
+            measure_draw();
             C2D_SceneBegin(top);
             hud_draw();
             break;

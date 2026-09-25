@@ -246,6 +246,12 @@ void inventory_init(void) {
         .name_id = "ITEM_TOOTHPASTE",
         .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_toothpaste_idx)
     };
+
+    items[ITEM_MAGNETIC_CARD] = (Item) {
+        .id = ITEM_MAGNETIC_CARD,
+        .name_id = "ITEM_MAGNETIC_CARD",
+        .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_magnetic_card_idx)
+    };
     inventory_count = 0;
     selected = 0;
 }

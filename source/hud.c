@@ -183,7 +183,8 @@ void hud_update(void) {
 void hud_close(void) {
     inventory_close();
     if (text_buf) {
-        text_buf = C2D_TextBufNew(1024);
+        C2D_TextBufDelete(text_buf);
+        text_buf = NULL;
     }
     C2D_SpriteSheetFree(hud_assets);
 }

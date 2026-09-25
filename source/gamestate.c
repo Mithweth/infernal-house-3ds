@@ -39,6 +39,8 @@ typedef struct {
     bool secondbedroom_lights_on;
     bool secondbedroom_bedpost_pulled;
     bool underground_wall_broken;
+    bool underground_dug;
+    bool underground_card_taken;
     bool bathroom_shower_curtain_opened;
     bool bathroom_carpet_moved;
     bool bathroom_closet_doors_opened;
@@ -350,6 +352,18 @@ void gamestate_open_bathroom_closet_doors(bool value) {
 }
 void gamestate_open_bathroom_closet_drawer(bool value) {
     game_state.bathroom_closet_drawer_opened  = value;
+}
+bool gamestate_is_underground_dug(void) {
+    return game_state.underground_dug;
+}
+bool gamestate_is_underground_card_taken(void) {
+    return game_state.underground_card_taken;
+}
+void gamestate_dig_underground(void) {
+    game_state.underground_dug  = true;
+}
+void gamestate_underground_take_card(void) {
+    game_state.underground_card_taken  = true;
 }
 
 void gamestate_reset(void) {

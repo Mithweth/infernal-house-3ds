@@ -52,6 +52,7 @@ typedef enum {
     GAME_OVER,
     GAME_SIMON,
     GAME_PIANO,
+    GAME_MEASURE,
     GAME_TITLE,
     GAME_INTRO,
     GAME_ENDING
@@ -74,6 +75,8 @@ bool game_can_move_southwest(void);
 bool game_can_move_west(void);
 bool game_can_move_northwest(void);
 void game_start_simon(void);
+void game_start_measure(void);
+void game_stop_measure(void);
 void game_play_piano(void);
 void game_stop_piano(bool success);
 void game_end_simon(bool success);

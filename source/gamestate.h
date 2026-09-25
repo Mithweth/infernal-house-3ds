@@ -84,3 +84,7 @@ void gamestate_open_bathroom_shower_curtain(bool value);
 void gamestate_move_bathroom_carpet(bool value);
 void gamestate_open_bathroom_closet_doors(bool value);
 void gamestate_open_bathroom_closet_drawer(bool value);
+bool gamestate_is_underground_dug(void);
+bool gamestate_is_underground_card_taken(void);
+void gamestate_dig_underground(void);
+void gamestate_underground_take_card(void);
