@@ -36,9 +36,13 @@ typedef struct {
     bool secondbedroom_left_closet_door_opened;
     bool secondbedroom_right_closet_door_opened;
     bool secondbedroom_closet_drawer_opened;
-    bool underground_wall_broken;
     bool secondbedroom_lights_on;
     bool secondbedroom_bedpost_pulled;
+    bool underground_wall_broken;
+    bool bathroom_shower_curtain_opened;
+    bool bathroom_carpet_moved;
+    bool bathroom_closet_doors_opened;
+    bool bathroom_closet_drawer_opened;
 } GameState;
 
 static GameState game_state;
@@ -321,6 +325,31 @@ void gamestate_turn_secondbedroom_lights_on(bool value) {
 
 bool gamestate_is_secondbedroom_lights_on(void) {
     return game_state.secondbedroom_lights_on;
+}
+
+bool gamestate_is_bathroom_shower_curtain_opened(void) {
+    return game_state.bathroom_shower_curtain_opened;
+}
+bool gamestate_is_bathroom_carpet_moved(void) {
+    return game_state.bathroom_carpet_moved;
+}
+bool gamestate_are_bathroom_closet_doors_opened(void) {
+    return game_state.bathroom_closet_doors_opened;
+}
+bool gamestate_is_bathroom_closet_drawer_opened(void) {
+    return game_state.bathroom_closet_drawer_opened;
+}
+void gamestate_open_bathroom_shower_curtain(bool value) {
+    game_state.bathroom_shower_curtain_opened  = value;
+}
+void gamestate_move_bathroom_carpet(bool value) {
+    game_state.bathroom_carpet_moved  = value;
+}
+void gamestate_open_bathroom_closet_doors(bool value) {
+    game_state.bathroom_closet_doors_opened  = value;
+}
+void gamestate_open_bathroom_closet_drawer(bool value) {
+    game_state.bathroom_closet_drawer_opened  = value;
 }
 
 void gamestate_reset(void) {

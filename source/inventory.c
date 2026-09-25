@@ -216,6 +216,36 @@ void inventory_init(void) {
         .name_id = "ITEM_KEY_ONE",
         .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_key_one_idx)
     };
+
+    items[ITEM_SOAP] = (Item) {
+        .id = ITEM_SOAP,
+        .name_id = "ITEM_SOAP",
+        .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_soap_idx)
+    };
+
+    items[ITEM_PERFUME] = (Item) {
+        .id = ITEM_PERFUME,
+        .name_id = "ITEM_PERFUME",
+        .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_perfume_idx)
+    };
+
+    items[ITEM_RAZOR] = (Item) {
+        .id = ITEM_RAZOR,
+        .name_id = "ITEM_RAZOR",
+        .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_razor_idx)
+    };
+
+    items[ITEM_COMB] = (Item) {
+        .id = ITEM_COMB,
+        .name_id = "ITEM_COMB",
+        .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_comb_idx)
+    };
+
+    items[ITEM_TOOTHPASTE] = (Item) {
+        .id = ITEM_TOOTHPASTE,
+        .name_id = "ITEM_TOOTHPASTE",
+        .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_toothpaste_idx)
+    };
     inventory_count = 0;
     selected = 0;
 }

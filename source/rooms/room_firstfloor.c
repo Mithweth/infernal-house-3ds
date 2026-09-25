@@ -7,6 +7,7 @@
 #include "room_diningroom.h"
 #include "room_firstbedroom.h"
 #include "room_secondbedroom.h"
+#include "room_bathroom.h"
 #include "gfx_firstfloor.h"
 #include "inventory.h"
 #include "gamestate.h"
@@ -61,8 +62,12 @@ static void room_close(void) {
     C2D_SpriteSheetFree(room_scene);
 }
 
-static void east_action(void) {
+static void move_east(void) {
+    game_set_room(&bathroom);
+}
 
+static void east_action(void) {
+    game_wait_for_sfx("romfs:/audio/door_open.raw", move_east);
 }
 
 static void move_southeast(void) {

@@ -8,19 +8,18 @@ while getopts "f" opt; do
 	esac
 done
 shift $((OPTIND-1))
-
-SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
+ROOT_DIR=$(dirname "$(cd "$(dirname "$0")" && pwd)")
 NAME=$1
 
-mkdir -p $SCRIPT_DIR/gfx/$NAME 
-echo "--atlas -f rgba8888 -z auto" > $SCRIPT_DIR/gfx/$NAME/gfx_$NAME.t3s
+mkdir -p $ROOT_DIR/gfx/$NAME 
+echo "--atlas -f rgba8888 -z auto" > $ROOT_DIR/gfx/$NAME/gfx_$NAME.t3s
 
-for i in $SCRIPT_DIR/gfx/$NAME/*.png; do
-	basename "$i" >> $SCRIPT_DIR/gfx/$NAME/gfx_$NAME.t3s
+for i in $ROOT_DIR/gfx/$NAME/*.png; do
+	basename "$i" >> $ROOT_DIR/gfx/$NAME/gfx_$NAME.t3s
 done
 
-if [ ! -f $SCRIPT_DIR/source/rooms/room_$NAME.c ] || $FORCE; then
-	cat << EOF > "$SCRIPT_DIR/source/rooms/room_$NAME.c"
+if [ ! -f $ROOT_DIR/source/rooms/room_$NAME.c ] || $FORCE; then
+	cat << EOF > "$ROOT_DIR/source/rooms/room_$NAME.c"
 // room_$NAME.c
 
 #include <citro2d.h>
@@ -28,34 +27,35 @@ if [ ! -f $SCRIPT_DIR/source/rooms/room_$NAME.c ] || $FORCE; then
 #include "room_$NAME.h"
 #include "gfx_$NAME.h"
 #include "inventory.h"
+#include "gamestate.h"
 
 static C2D_SpriteSheet room_scene;
 EOF
-	for i in $SCRIPT_DIR/gfx/$NAME/*.png; do
+	for i in $ROOT_DIR/gfx/$NAME/*.png; do
 		img=$(basename $i .png)
-		echo "static C2D_Image img_$img;" >> "$SCRIPT_DIR/source/rooms/room_$NAME.c"
+		echo "static C2D_Image img_$img;" >> "$ROOT_DIR/source/rooms/room_$NAME.c"
 	done
-	cat << EOF >> "$SCRIPT_DIR/source/rooms/room_$NAME.c"
+	cat << EOF >> "$ROOT_DIR/source/rooms/room_$NAME.c"
 
 static Hotspot hotspots[] = {};
 
 static void room_init(void) {
     room_scene = C2D_SpriteSheetLoad("romfs:/gfx/gfx_$NAME.t3x");
 EOF
-	for i in $SCRIPT_DIR/gfx/$NAME/*.png; do
+	for i in $ROOT_DIR/gfx/$NAME/*.png; do
 		img=$(basename $i .png)
-		echo "    img_${img} = C2D_SpriteSheetGetImage(room_scene, gfx_${NAME}_${img}_idx);" >> "$SCRIPT_DIR/source/rooms/room_$NAME.c"
+		echo "    img_${img} = C2D_SpriteSheetGetImage(room_scene, gfx_${NAME}_${img}_idx);" >> "$ROOT_DIR/source/rooms/room_$NAME.c"
 	done
-	cat << "EOF" >> "$SCRIPT_DIR/source/rooms/room_$NAME.c"
+	cat << "EOF" >> "$ROOT_DIR/source/rooms/room_$NAME.c"
 }
 
 static void room_draw(void) {
 EOF
-	for i in $SCRIPT_DIR/gfx/$NAME/*.png; do
+	for i in $ROOT_DIR/gfx/$NAME/*.png; do
 		img=$(basename $i .png)
-		echo "    C2D_DrawImageAt(img_$img, 0.0f, 0.0f, 0.0f, NULL, 1.0f, 1.0f);" >> "$SCRIPT_DIR/source/rooms/room_$NAME.c"
+		echo "    C2D_DrawImageAt(img_$img, 0.0f, 0.0f, 0.0f, NULL, 1.0f, 1.0f);" >> "$ROOT_DIR/source/rooms/room_$NAME.c"
 	done
-	cat << EOF >> "$SCRIPT_DIR/source/rooms/room_$NAME.c"
+	cat << EOF >> "$ROOT_DIR/source/rooms/room_$NAME.c"
 }
 
 static void room_close(void) {
@@ -78,7 +78,7 @@ Room $NAME = {
     .close = room_close
 };
 EOF
-	cat << EOF > "$SCRIPT_DIR/source/rooms/room_$NAME.h"
+	cat << EOF > "$ROOT_DIR/source/rooms/room_$NAME.h"
 // room_$NAME.h
 
 #pragma once

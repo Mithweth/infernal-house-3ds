@@ -30,6 +30,11 @@ typedef enum {
     ITEM_CIGARETTES,
     ITEM_BRACELET,
     ITEM_KEY_ONE,
+    ITEM_PERFUME,
+    ITEM_COMB,
+    ITEM_SOAP,
+    ITEM_TOOTHPASTE,
+    ITEM_RAZOR,
     ITEM_COUNT
 } ItemId;
 

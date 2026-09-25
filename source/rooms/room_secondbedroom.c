@@ -127,42 +127,6 @@ static Hotspot hotspots[] = {
         .action = move_left_painting
     },
     {
-        .x = 230,
-        .y = 60,
-        .width = 28,
-        .height = 53,
-        .id = "SECONDBEDROOM_PAINTING_2",
-        .message_id = "SECONDBEDROOM_PAINTING_2_MOVED",
-        .is_active = opened_painting_and_key_not_taken,
-        .action = take_key_one_action
-    },
-    {
-        .x = 230,
-        .y = 60,
-        .width = 28,
-        .height = 53,
-        .id = "SECONDBEDROOM_PAINTING_2",
-        .message_id = "SECONDBEDROOM_PAINTING_2_EMPTY",
-        .is_active = gamestate_is_secondbedroom_bedpost_pulled
-    },
-    {
-        .x = 230,
-        .y = 60,
-        .width = 28,
-        .height = 53,
-        .id = "SECONDBEDROOM_PAINTING_2",
-        .is_active = gamestate_is_secondbedroom_right_closet_door_opened,
-        .action = move_right_painting
-    },
-    {
-        .x = 222,
-        .y = 60,
-        .width = 39,
-        .height = 53,
-        .id = "SECONDBEDROOM_PAINTING_2",
-        .action = move_right_painting
-    },
-    {
         .x = 143,
         .y = 51,
         .width = 35,
@@ -225,6 +189,33 @@ static Hotspot hotspots[] = {
         .height = 109,
         .id = "SECONDBEDROOM_CLOSET",
         .action = right_closet_action
+    },
+    {
+        .x = 230,
+        .y = 60,
+        .width = 28,
+        .height = 53,
+        .id = "SECONDBEDROOM_PAINTING_2",
+        .message_id = "SECONDBEDROOM_PAINTING_2_MOVED",
+        .is_active = opened_painting_and_key_not_taken,
+        .action = take_key_one_action
+    },
+    {
+        .x = 230,
+        .y = 60,
+        .width = 28,
+        .height = 53,
+        .id = "SECONDBEDROOM_PAINTING_2",
+        .message_id = "SECONDBEDROOM_PAINTING_2_EMPTY",
+        .is_active = gamestate_is_secondbedroom_bedpost_pulled
+    },
+    {
+        .x = 222,
+        .y = 60,
+        .width = 39,
+        .height = 53,
+        .id = "SECONDBEDROOM_PAINTING_2",
+        .action = move_right_painting
     },
     {
         .x = 142,

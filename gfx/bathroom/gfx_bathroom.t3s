@@ -1,0 +1,8 @@
+--atlas -f rgba8888 -z auto
+background.png
+carpet_moved.png
+doors_opened.png
+drawer_opened.png
+perfume_taken.png
+shower_opened.png
+soap_taken.png
