@@ -74,3 +74,5 @@ void gamestate_open_secondbedroom_closet_drawer(bool value);
 bool gamestate_is_secondbedroom_closet_drawer_opened(void);
 void gamestate_turn_secondbedroom_lights_on(bool value);
 bool gamestate_is_secondbedroom_lights_on(void);
+void gamestate_pull_secondbedroom_bedpost(bool value);
+bool gamestate_is_secondbedroom_bedpost_pulled(void);

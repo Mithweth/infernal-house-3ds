@@ -210,6 +210,12 @@ void inventory_init(void) {
         .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_bracelet_idx),
         .examinable = true
     };
+
+    items[ITEM_KEY_ONE] = (Item) {
+        .id = ITEM_KEY_ONE,
+        .name_id = "ITEM_KEY_ONE",
+        .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_key_one_idx)
+    };
     inventory_count = 0;
     selected = 0;
 }

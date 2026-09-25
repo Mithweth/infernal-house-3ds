@@ -14,11 +14,17 @@ static C2D_Image img_dark_closet_drawer;
 static C2D_Image img_dark_closet_left_door;
 static C2D_Image img_dark_closet_right_door;
 static C2D_Image img_dark_nightstand_drawer;
+static C2D_Image img_dark_bedpost;
+static C2D_Image img_dark_paint_empty;
+static C2D_Image img_dark_paint_opened;
 static C2D_Image img_light_background;
 static C2D_Image img_light_closet_drawer;
 static C2D_Image img_light_closet_left_door;
 static C2D_Image img_light_closet_right_door;
 static C2D_Image img_light_nightstand_drawer;
+static C2D_Image img_light_bedpost;
+static C2D_Image img_light_paint_empty;
+static C2D_Image img_light_paint_opened;
 
 
 static void lamp_action(void) {
@@ -63,6 +69,29 @@ static void nightstand_objects_action(void) {
     inventory_add(ITEM_MEASURING_TAPE);
 }
 
+static void move_left_painting(void) {
+    game_show_message("SECONDBEDROOM_PAINTING_1_MOVE");
+}
+
+static void move_right_painting(void) {
+    game_show_message("SECONDBEDROOM_PAINTING_2_MOVE");
+}
+
+static void pull_bedpost_action(void) {
+    gamestate_pull_secondbedroom_bedpost(!gamestate_is_secondbedroom_bedpost_pulled());
+    if (gamestate_is_secondbedroom_bedpost_pulled()) {
+        game_show_message("SECONDBEDROOM_BED_FOOT_PULLED");
+    }
+}
+
+static bool opened_painting_and_key_not_taken(void) {
+    return gamestate_is_secondbedroom_bedpost_pulled() && !inventory_has(ITEM_KEY_ONE);
+}
+
+static void take_key_one_action(void) {
+    inventory_add(ITEM_KEY_ONE);
+}
+
 static Hotspot hotspots[] = {
     {
         .x = 12,
@@ -94,7 +123,8 @@ static Hotspot hotspots[] = {
         .y = 51,
         .width = 53,
         .height = 47,
-        .id = "SECONDBEDROOM_PAINTING_1"
+        .id = "SECONDBEDROOM_PAINTING_1",
+        .action = move_left_painting
     },
     {
         .x = 230,
@@ -102,14 +132,35 @@ static Hotspot hotspots[] = {
         .width = 28,
         .height = 53,
         .id = "SECONDBEDROOM_PAINTING_2",
-        .is_active = gamestate_is_secondbedroom_right_closet_door_opened
+        .message_id = "SECONDBEDROOM_PAINTING_2_MOVED",
+        .is_active = opened_painting_and_key_not_taken,
+        .action = take_key_one_action
+    },
+    {
+        .x = 230,
+        .y = 60,
+        .width = 28,
+        .height = 53,
+        .id = "SECONDBEDROOM_PAINTING_2",
+        .message_id = "SECONDBEDROOM_PAINTING_2_EMPTY",
+        .is_active = gamestate_is_secondbedroom_bedpost_pulled
+    },
+    {
+        .x = 230,
+        .y = 60,
+        .width = 28,
+        .height = 53,
+        .id = "SECONDBEDROOM_PAINTING_2",
+        .is_active = gamestate_is_secondbedroom_right_closet_door_opened,
+        .action = move_right_painting
     },
     {
         .x = 222,
         .y = 60,
         .width = 39,
         .height = 53,
-        .id = "SECONDBEDROOM_PAINTING_2"
+        .id = "SECONDBEDROOM_PAINTING_2",
+        .action = move_right_painting
     },
     {
         .x = 143,
@@ -207,6 +258,15 @@ static Hotspot hotspots[] = {
         .id = "SECONDBEDROOM_NIGHTSTAND"
     },
     {
+        .x = 110,
+        .y = 100,
+        .width = 16,
+        .height = 16,
+        .id = "SECONDBEDROOM_BED",
+        .message_id = "SECONDBEDROOM_BED_FOOT",
+        .action = pull_bedpost_action
+    },
+    {
         .x = 49,
         .y = 113,
         .width = 92,
@@ -223,11 +283,17 @@ static void room_init(void) {
     img_dark_closet_left_door = C2D_SpriteSheetGetImage(room_scene, gfx_secondbedroom_dark_closet_left_door_idx);
     img_dark_closet_right_door = C2D_SpriteSheetGetImage(room_scene, gfx_secondbedroom_dark_closet_right_door_idx);
     img_dark_nightstand_drawer = C2D_SpriteSheetGetImage(room_scene, gfx_secondbedroom_dark_nightstand_drawer_idx);
+    img_dark_bedpost = C2D_SpriteSheetGetImage(room_scene, gfx_secondbedroom_dark_bedpost_idx);
+    img_dark_paint_empty = C2D_SpriteSheetGetImage(room_scene, gfx_secondbedroom_dark_paint_empty_idx);
+    img_dark_paint_opened = C2D_SpriteSheetGetImage(room_scene, gfx_secondbedroom_dark_paint_opened_idx);
     img_light_background = C2D_SpriteSheetGetImage(room_scene, gfx_secondbedroom_light_background_idx);
     img_light_closet_drawer = C2D_SpriteSheetGetImage(room_scene, gfx_secondbedroom_light_closet_drawer_idx);
     img_light_closet_left_door = C2D_SpriteSheetGetImage(room_scene, gfx_secondbedroom_light_closet_left_door_idx);
     img_light_closet_right_door = C2D_SpriteSheetGetImage(room_scene, gfx_secondbedroom_light_closet_right_door_idx);
     img_light_nightstand_drawer = C2D_SpriteSheetGetImage(room_scene, gfx_secondbedroom_light_nightstand_drawer_idx);
+    img_light_bedpost = C2D_SpriteSheetGetImage(room_scene, gfx_secondbedroom_light_bedpost_idx);
+    img_light_paint_empty = C2D_SpriteSheetGetImage(room_scene, gfx_secondbedroom_light_paint_empty_idx);
+    img_light_paint_opened = C2D_SpriteSheetGetImage(room_scene, gfx_secondbedroom_light_paint_opened_idx);
 }
 
 static void room_draw(void) {
@@ -240,10 +306,17 @@ static void room_draw(void) {
             C2D_DrawImageAt(img_light_closet_left_door, 127.0f, 40.0f, 0.3f, NULL, 1.0f, 1.0f);
         }
         if (gamestate_is_secondbedroom_right_closet_door_opened()) {
-            C2D_DrawImageAt(img_light_closet_right_door, 177.0f, 40.0f, 0.3f, NULL, 1.0f, 1.0f);
+            C2D_DrawImageAt(img_light_closet_right_door, 177.0f, 40.0f, 0.6f, NULL, 1.0f, 1.0f);
         }
         if (gamestate_is_secondbedroom_closet_drawer_opened()) {
             C2D_DrawImageAt(img_light_closet_drawer, 144.0f, 151.0f, 0.3f, NULL, 1.0f, 1.0f);
+        }
+        if (gamestate_is_secondbedroom_bedpost_pulled()) {
+            C2D_DrawImageAt(img_light_bedpost, 113.0f, 95.0f, 0.3f, NULL, 1.0f, 1.0f);
+            C2D_DrawImageAt(img_light_paint_opened, 218.0f, 54.0f, 0.4f, NULL, 1.0f, 1.0f);
+            if (inventory_has(ITEM_KEY_ONE)) {
+                C2D_DrawImageAt(img_light_paint_empty, 231.0f, 78.0f, 0.5f, NULL, 1.0f, 1.0f);
+            }
         }
     } else {
         C2D_DrawImageAt(img_dark_background, 0.0f, 0.0f, 0.0f, NULL, 1.0f, 1.0f);
@@ -254,10 +327,17 @@ static void room_draw(void) {
             C2D_DrawImageAt(img_dark_closet_left_door, 126.0f, 40.0f, 0.3f, NULL, 1.0f, 1.0f);
         }
         if (gamestate_is_secondbedroom_right_closet_door_opened()) {
-            C2D_DrawImageAt(img_dark_closet_right_door, 179.0f, 40.0f, 0.3f, NULL, 1.0f, 1.0f);
+            C2D_DrawImageAt(img_dark_closet_right_door, 179.0f, 40.0f, 0.6f, NULL, 1.0f, 1.0f);
         }
         if (gamestate_is_secondbedroom_closet_drawer_opened()) {
             C2D_DrawImageAt(img_dark_closet_drawer, 144.0f, 150.0f, 0.3f, NULL, 1.0f, 1.0f);
+        }
+        if (gamestate_is_secondbedroom_bedpost_pulled()) {
+            C2D_DrawImageAt(img_dark_bedpost, 113.0f, 94.0f, 0.3f, NULL, 1.0f, 1.0f);
+            C2D_DrawImageAt(img_dark_paint_opened, 218.0f, 54.0f, 0.4f, NULL, 1.0f, 1.0f);
+            if (inventory_has(ITEM_KEY_ONE)) {
+                C2D_DrawImageAt(img_dark_paint_empty, 231.0f, 75.0f, 0.5f, NULL, 1.0f, 1.0f);
+            }
         }
     }
 }

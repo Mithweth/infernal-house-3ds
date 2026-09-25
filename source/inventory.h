@@ -29,6 +29,7 @@ typedef enum {
     ITEM_MEASURING_TAPE,
     ITEM_CIGARETTES,
     ITEM_BRACELET,
+    ITEM_KEY_ONE,
     ITEM_COUNT
 } ItemId;
 

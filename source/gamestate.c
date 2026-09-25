@@ -38,6 +38,7 @@ typedef struct {
     bool secondbedroom_closet_drawer_opened;
     bool underground_wall_broken;
     bool secondbedroom_lights_on;
+    bool secondbedroom_bedpost_pulled;
 } GameState;
 
 static GameState game_state;
@@ -296,6 +297,14 @@ void gamestate_open_secondbedroom_right_closet_door(bool value) {
 
 bool gamestate_is_secondbedroom_right_closet_door_opened(void) {
     return game_state.secondbedroom_right_closet_door_opened;
+}
+
+void gamestate_pull_secondbedroom_bedpost(bool value) {
+    game_state.secondbedroom_bedpost_pulled = value;
+}
+
+bool gamestate_is_secondbedroom_bedpost_pulled(void) {
+    return game_state.secondbedroom_bedpost_pulled;
 }
 
 void gamestate_open_secondbedroom_closet_drawer(bool value) {

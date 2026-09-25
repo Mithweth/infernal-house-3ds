@@ -1,11 +1,17 @@
 --atlas -f rgba8888 -z auto
 dark_background.png
+dark_bedpost.png
 dark_closet_drawer.png
 dark_closet_left_door.png
 dark_closet_right_door.png
 dark_nightstand_drawer.png
+dark_paint_empty.png
+dark_paint_opened.png
 light_background.png
+light_bedpost.png
 light_closet_drawer.png
 light_closet_left_door.png
 light_closet_right_door.png
 light_nightstand_drawer.png
+light_paint_empty.png
+light_paint_opened.png
