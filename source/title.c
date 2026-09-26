@@ -149,7 +149,7 @@ void title_update(u32 keys) {
 
     switch (selected) {
         case TITLE_INTRO:
-            //game_intro();
+            game_start_intro();
             break;
 
         case TITLE_GAME:

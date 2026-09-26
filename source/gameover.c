@@ -68,4 +68,5 @@ void gameover_close(void) {
         C2D_TextBufDelete(text_buf);
         text_buf = NULL;
     }
+    music_stop();
 }

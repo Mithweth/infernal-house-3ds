@@ -13,6 +13,7 @@
 #include "simon.h"
 #include "piano.h"
 #include "measure.h"
+#include "intro.h"
 
 static Room *current_room = NULL;
 static GameMode game_mode = GAME_NORMAL;
@@ -90,7 +91,6 @@ void game_over(GameOverId id) {
 
 void game_init(void) {
     hud_init();
-    music_stop();
     game_mode = GAME_TITLE;
     title_init();
 }
@@ -105,9 +105,6 @@ void game_start(void) {
     message_text = NULL;
     active_hotspot = NULL;
     music_play("romfs:/audio/background.ogg");
-    gamestate_disable_diningroom_lasers(true);
-    inventory_add(ITEM_KEY_ONE);
-    gamestate_take_secondbedroom_key();
     game_set_room(&hall);
 }
 
@@ -167,6 +164,18 @@ bool game_can_move_west(void) {
 
 bool game_can_move_northwest(void) {
     return current_room && path_is_available(&current_room->northwest);
+}
+
+void game_end_intro(void) {
+    intro_close();
+    music_stop();
+    game_mode = GAME_TITLE;
+    title_init();
+}
+void game_start_intro(void) {
+    title_close();
+    game_mode = GAME_INTRO;
+    intro_init();
 }
 
 static void update_movement(circlePosition analog)
@@ -351,7 +360,7 @@ void game_update(u32 keys, circlePosition analog, touchPosition touch) {
             return;
 
         case GAME_INTRO:
-            //intro_update(keys);
+            intro_update();
             return;
 
         case GAME_OVER:
@@ -424,10 +433,9 @@ void game_draw(C3D_RenderTarget *top, C3D_RenderTarget *bottom) {
 
         case GAME_INTRO:
             C2D_SceneBegin(top);
-            //intro_draw_top();
-
+            intro_draw_top();
             C2D_SceneBegin(bottom);
-            //intro_draw_bottom();
+            intro_draw_bottom();
             break;
 
         case GAME_SIMON:
