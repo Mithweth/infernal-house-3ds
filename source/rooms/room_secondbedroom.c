@@ -85,10 +85,11 @@ static void pull_bedpost_action(void) {
 }
 
 static bool opened_painting_and_key_not_taken(void) {
-    return gamestate_is_secondbedroom_bedpost_pulled() && !inventory_has(ITEM_KEY_ONE);
+    return gamestate_is_secondbedroom_bedpost_pulled() && !gamestate_is_secondbedroom_key_taken();
 }
 
 static void take_key_one_action(void) {
+    gamestate_take_secondbedroom_key();
     inventory_add(ITEM_KEY_ONE);
 }
 
@@ -305,7 +306,7 @@ static void room_draw(void) {
         if (gamestate_is_secondbedroom_bedpost_pulled()) {
             C2D_DrawImageAt(img_light_bedpost, 113.0f, 95.0f, 0.3f, NULL, 1.0f, 1.0f);
             C2D_DrawImageAt(img_light_paint_opened, 218.0f, 54.0f, 0.4f, NULL, 1.0f, 1.0f);
-            if (inventory_has(ITEM_KEY_ONE)) {
+            if (gamestate_is_secondbedroom_key_taken()) {
                 C2D_DrawImageAt(img_light_paint_empty, 231.0f, 78.0f, 0.5f, NULL, 1.0f, 1.0f);
             }
         }
@@ -326,7 +327,7 @@ static void room_draw(void) {
         if (gamestate_is_secondbedroom_bedpost_pulled()) {
             C2D_DrawImageAt(img_dark_bedpost, 113.0f, 94.0f, 0.3f, NULL, 1.0f, 1.0f);
             C2D_DrawImageAt(img_dark_paint_opened, 218.0f, 54.0f, 0.4f, NULL, 1.0f, 1.0f);
-            if (inventory_has(ITEM_KEY_ONE)) {
+            if (gamestate_is_secondbedroom_key_taken()) {
                 C2D_DrawImageAt(img_dark_paint_empty, 231.0f, 75.0f, 0.5f, NULL, 1.0f, 1.0f);
             }
         }

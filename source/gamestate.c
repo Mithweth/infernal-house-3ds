@@ -28,6 +28,7 @@ typedef struct {
     bool kitchen_drawer_opened;
     bool kitchen_dishwasher_opened;
     bool firstfloor_carpet_moved;
+    bool secondfloor_door_unlocked;
     bool firstbedroom_lights_on;
     bool firstbedroom_closet_opened;
     bool firstbedroom_left_nightstand_opened;
@@ -38,6 +39,7 @@ typedef struct {
     bool secondbedroom_closet_drawer_opened;
     bool secondbedroom_lights_on;
     bool secondbedroom_bedpost_pulled;
+    bool secondbedroom_key_taken;
     bool underground_wall_broken;
     bool underground_dug;
     bool underground_card_taken;
@@ -241,6 +243,14 @@ bool gamestate_is_firstfloor_carpet_moved(void) {
     return game_state.firstfloor_carpet_moved;
 }
 
+void gamestate_unlock_secondfloor_door(void) {
+    game_state.secondfloor_door_unlocked = true;
+}
+
+bool gamestate_is_secondfloor_door_unlocked(void) {
+    return game_state.secondfloor_door_unlocked;
+}
+
 void gamestate_turn_firstbedroom_lights_on(bool value) {
     game_state.firstbedroom_lights_on = value;
 }
@@ -321,6 +331,14 @@ bool gamestate_is_secondbedroom_closet_drawer_opened(void) {
     return game_state.secondbedroom_closet_drawer_opened;
 }
 
+void gamestate_take_secondbedroom_key(void) {
+    game_state.secondbedroom_key_taken = true;
+}
+
+bool gamestate_is_secondbedroom_key_taken(void) {
+    return game_state.secondbedroom_key_taken;
+}
+
 void gamestate_turn_secondbedroom_lights_on(bool value) {
     game_state.secondbedroom_lights_on = value;
 }
@@ -332,36 +350,47 @@ bool gamestate_is_secondbedroom_lights_on(void) {
 bool gamestate_is_bathroom_shower_curtain_opened(void) {
     return game_state.bathroom_shower_curtain_opened;
 }
+
 bool gamestate_is_bathroom_carpet_moved(void) {
     return game_state.bathroom_carpet_moved;
 }
+
 bool gamestate_are_bathroom_closet_doors_opened(void) {
     return game_state.bathroom_closet_doors_opened;
 }
+
 bool gamestate_is_bathroom_closet_drawer_opened(void) {
     return game_state.bathroom_closet_drawer_opened;
 }
+
 void gamestate_open_bathroom_shower_curtain(bool value) {
     game_state.bathroom_shower_curtain_opened  = value;
 }
+
 void gamestate_move_bathroom_carpet(bool value) {
     game_state.bathroom_carpet_moved  = value;
 }
+
 void gamestate_open_bathroom_closet_doors(bool value) {
     game_state.bathroom_closet_doors_opened  = value;
 }
+
 void gamestate_open_bathroom_closet_drawer(bool value) {
     game_state.bathroom_closet_drawer_opened  = value;
 }
+
 bool gamestate_is_underground_dug(void) {
     return game_state.underground_dug;
 }
+
 bool gamestate_is_underground_card_taken(void) {
     return game_state.underground_card_taken;
 }
+
 void gamestate_dig_underground(void) {
     game_state.underground_dug  = true;
 }
+
 void gamestate_underground_take_card(void) {
     game_state.underground_card_taken  = true;
 }

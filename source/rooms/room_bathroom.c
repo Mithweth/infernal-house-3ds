@@ -236,7 +236,7 @@ static void room_close(void) {
 }
 
 static void move_west(void) {
-    game_set_room(&bathroom);
+    game_set_room(&firstfloor);
 }
 
 static void west_action(void) {

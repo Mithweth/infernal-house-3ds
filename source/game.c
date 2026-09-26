@@ -105,6 +105,9 @@ void game_start(void) {
     message_text = NULL;
     active_hotspot = NULL;
     music_play("romfs:/audio/background.ogg");
+    gamestate_disable_diningroom_lasers(true);
+    inventory_add(ITEM_KEY_ONE);
+    gamestate_take_secondbedroom_key();
     game_set_room(&hall);
 }
 
