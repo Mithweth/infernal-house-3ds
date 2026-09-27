@@ -2,7 +2,6 @@
 #include <citro2d.h>
 #include "intro.h"
 #include "gfx_intro.h"
-#include "gfx_intro_final.h"
 #include "game.h"
 #include "lang.h"
 #include "audio.h"
@@ -23,6 +22,7 @@ typedef enum {
     INTRO_IMAGE_RIGHT,
     INTRO_END_SCENE,
     INTRO_FINAL,
+    INTRO_FINAL_LOGO,
     INTRO_END
 } IntroEventType;
 
@@ -33,11 +33,18 @@ static u64 next_char_time;
 static u64 pause_start;
 
 static bool final_scene = false;
+static bool final_scene_logo = false;
 static C2D_Image image_final_top;
 static C2D_Image image_final_bottom;
+static C2D_Image image_walking_man;
 static C2D_Image image_left;
 static C2D_Image image_center;
 static C2D_Image image_right;
+static C2D_Image image_logo_infernal;
+static C2D_Image image_logo_house;
+static float walking_man_x;
+static float walking_man_y;
+static bool walking_man_visible = false;
 static bool image_left_visible   = false;
 static bool image_center_visible = false;
 static bool image_right_visible  = false;
@@ -56,8 +63,8 @@ typedef struct {
     TextColor color;
     int image;
     struct {
-        int top;
-        int bottom;
+        float x;
+        float y;
     } final;
 } IntroEvent;
 
@@ -133,16 +140,16 @@ static const IntroEvent timeline[] = {
     { .type = INTRO_IMAGE_CENTER, .image = -1 },
     { .type = INTRO_TEXT,         .text = "TITLE_INTRO_SCENE_17", .color = BLUE },
     { .type = INTRO_PAUSE,        .duration = 2000 },
-    { .type = INTRO_FINAL,        .final = {.top = gfx_intro_final_top_background_idx, .bottom = gfx_intro_final_bottom_background_idx} },
+    { .type = INTRO_FINAL,        .image = -1 },
     { .type = INTRO_PAUSE,        .duration = 2000 },
-    { .type = INTRO_FINAL,        .final = {.top = gfx_intro_final_top_background_idx, .bottom = gfx_intro_final_bottom_far_man_idx} },
-    { .type = INTRO_PAUSE,        .duration = 700 },
-    { .type = INTRO_FINAL,        .final = {.top = gfx_intro_final_top_background_idx, .bottom = gfx_intro_final_bottom_approaching_idx} },
-    { .type = INTRO_PAUSE,        .duration = 700 },
-    { .type = INTRO_FINAL,        .final = {.top = gfx_intro_final_top_background_idx, .bottom = gfx_intro_final_bottom_close_man_idx} },
-    { .type = INTRO_PAUSE,        .duration = 1000 },
-    { .type = INTRO_FINAL,        .final = {.top = gfx_intro_final_top_logo_idx, .bottom = gfx_intro_final_bottom_logo_idx} },
-    { .type = INTRO_PAUSE,        .duration = 4000 },
+    { .type = INTRO_FINAL,        .image = gfx_intro_far_man_idx, .final = {.x = 94.0f, .y = 0.0f} },
+    { .type = INTRO_PAUSE,        .duration = 1500 },
+    { .type = INTRO_FINAL,        .image = gfx_intro_not_very_far_man_idx, .final = {.x = 141.0f, .y = 34.0f} },
+    { .type = INTRO_PAUSE,        .duration = 1500 },
+    { .type = INTRO_FINAL,        .image = gfx_intro_close_man_idx, .final = {.x = 144.0f, .y = 24.0f} },
+    { .type = INTRO_PAUSE,        .duration = 1500 },
+    { .type = INTRO_FINAL_LOGO },
+    { .type = INTRO_PAUSE,        .duration = 4500 },
     { .type = INTRO_END_SCENE },
     {. type = INTRO_END }
 };
@@ -252,6 +259,7 @@ void intro_update(void) {
         image_left_visible   = false;
         image_center_visible = false;
         image_right_visible  = false;
+        walking_man_visible = false;
         current_str[0] = '\0';
         previous_str[0] = '\0';
         text_position = 0;
@@ -264,14 +272,23 @@ void intro_update(void) {
         if (!final_scene) {
             final_scene = true;
             music_stop();
-            if (intro_assets) {
-                C2D_SpriteSheetFree(intro_assets);
-                intro_assets = NULL;
-            }
-            intro_assets = C2D_SpriteSheetLoad("romfs:/gfx/gfx_intro_final.t3x");
+            sfx_play("romfs:/audio/footsteps.raw");
         }
-        image_final_top = C2D_SpriteSheetGetImage(intro_assets, event->final.top);
-        image_final_bottom = C2D_SpriteSheetGetImage(intro_assets, event->final.bottom);
+        if (event->image < 0) {
+            walking_man_visible = false;
+        } else {
+            image_walking_man = C2D_SpriteSheetGetImage(intro_assets, event->image);
+            walking_man_x = event->final.x;
+            walking_man_y = event->final.y;
+            walking_man_visible = true;
+        }
+        current_event++;
+        break;
+
+    case INTRO_FINAL_LOGO:
+        if (!final_scene_logo) {
+            final_scene_logo = true;
+        }
         current_event++;
         break;
 
@@ -282,8 +299,16 @@ void intro_update(void) {
 }
 
 void intro_draw_bottom(void) {
+    if (final_scene_logo) {
+        C2D_DrawImageAt(image_final_bottom, 0.0f, 0.0f, 0.0f, NULL, 1.0f, 1.0f);
+        C2D_DrawImageAt(image_logo_house, 57.0f, 78.0f, 0.1f, NULL, 1.0f, 1.0f);
+        return;
+    }
     if (final_scene) {
-        C2D_DrawImageAt(image_final_bottom, 40.0f, 0.0f, 0.0f, NULL, 1.0f, 1.0f);
+        C2D_DrawImageAt(image_final_bottom, 0.0f, 0.0f, 0.0f, NULL, 1.0f, 1.0f);
+        if (walking_man_visible) {
+            C2D_DrawImageAt(image_walking_man, walking_man_x, walking_man_y, 0.1f, NULL, 1.0f, 1.0f);
+        }
         return;
     }
     C2D_DrawText(&text_current, C2D_WithColor, 7.0f, 70.0f, 0.0f, 0.6f, 0.65f, C2D_Color32(192, 192, 192, 255));
@@ -292,8 +317,13 @@ void intro_draw_bottom(void) {
 
 
 void intro_draw_top(void) {
+    if (final_scene_logo) {
+        C2D_DrawImageAt(image_final_top, 40.0f, 0.0f, 0.0f, NULL, 1.0f, 1.0f);
+        C2D_DrawImageAt(image_logo_infernal, 55.0f, 62.0f, 0.1f, NULL, 1.0f, 1.0f);
+        return;
+    }
     if (final_scene) {
-        C2D_DrawImageAt(image_final_top, 0.0f, 0.0f, 0.0f, NULL, 1.0f, 1.0f);
+        C2D_DrawImageAt(image_final_top, 40.0f, 0.0f, 0.0f, NULL, 1.0f, 1.0f);
         return;
     }
     if (image_left_visible) {
@@ -312,6 +342,8 @@ void intro_init(void) {
         text_buf = C2D_TextBufNew(4096);
     }
     final_scene = false;
+    final_scene_logo = false;
+    walking_man_visible = false;
     current_event = 0;
     event_pos = 0;
     text_position = 0;
@@ -324,6 +356,10 @@ void intro_init(void) {
     current_color = C2D_Color32(164, 164, 164, 255);;
     next_char_time = osGetTime();
     intro_assets = C2D_SpriteSheetLoad("romfs:/gfx/gfx_intro.t3x");
+    image_final_top = C2D_SpriteSheetGetImage(intro_assets, gfx_intro_top_background_idx);
+    image_final_bottom = C2D_SpriteSheetGetImage(intro_assets, gfx_intro_bottom_background_idx);
+    image_logo_infernal = C2D_SpriteSheetGetImage(intro_assets, gfx_intro_logo_infernal_idx);
+    image_logo_house = C2D_SpriteSheetGetImage(intro_assets, gfx_intro_logo_house_idx);
     music_play("romfs:/audio/intro.ogg");
     update_text();
 }

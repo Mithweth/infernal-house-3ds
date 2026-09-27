@@ -187,7 +187,7 @@ int sfx_play(const char *filename) {
 
     ndspChnReset(channel);
     ndspChnSetInterp(channel, NDSP_INTERP_LINEAR);
-    ndspChnSetRate(channel, 44100.0f);
+    ndspChnSetRate(channel, 22050.0f);
     ndspChnSetFormat(channel, NDSP_FORMAT_MONO_PCM16);
 
     float mix[12] = {0};
