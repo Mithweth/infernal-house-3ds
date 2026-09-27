@@ -13,16 +13,19 @@ static char previous_str[2048];
 
 #define INTRO_CHAR_DELAY      100
 #define INTRO_CHAR_DELAY_FAST  33
+#define INTRO_MAX_SPRITES      5
 
 typedef enum {
     INTRO_TEXT,
     INTRO_PAUSE,
+    INTRO_MUSIC_START,
+    INTRO_MUSIC_STOP,
+    INTRO_PLAY_SOUND,
     INTRO_IMAGE_LEFT,
     INTRO_IMAGE_CENTER,
     INTRO_IMAGE_RIGHT,
     INTRO_END_SCENE,
-    INTRO_FINAL,
-    INTRO_FINAL_LOGO,
+    INTRO_FULL_SCREEN,
     INTRO_END
 } IntroEventType;
 
@@ -32,19 +35,10 @@ static size_t current_event;
 static u64 next_char_time;
 static u64 pause_start;
 
-static bool final_scene = false;
-static bool final_scene_logo = false;
-static C2D_Image image_final_top;
-static C2D_Image image_final_bottom;
-static C2D_Image image_walking_man;
+static bool full_screen = false;
 static C2D_Image image_left;
 static C2D_Image image_center;
 static C2D_Image image_right;
-static C2D_Image image_logo_infernal;
-static C2D_Image image_logo_house;
-static float walking_man_x;
-static float walking_man_y;
-static bool walking_man_visible = false;
 static bool image_left_visible   = false;
 static bool image_center_visible = false;
 static bool image_right_visible  = false;
@@ -57,22 +51,36 @@ typedef enum {
 } TextColor;
 
 typedef struct {
+    float x;
+    float y;
+    int image;
+} IntroSprite;
+
+typedef struct {
+    float x;
+    float y;
+    C2D_Image image;
+    bool visible;
+} Sprite;
+
+typedef struct {
     IntroEventType type;
     const char *text;
     u32 duration;
     TextColor color;
     int image;
-    struct {
-        float x;
-        float y;
-    } final;
+    IntroSprite sprites[INTRO_MAX_SPRITES];
+    const char *sound;
 } IntroEvent;
+
+static Sprite sprites[INTRO_MAX_SPRITES];
 
 static C2D_Text text_current;
 static C2D_Text text_previous;
 static C2D_TextBuf text_buf;
 static u32 current_color;
 static const IntroEvent timeline[] = {
+    { .type = INTRO_MUSIC_START,  .sound = "romfs:/audio/intro.ogg"},
     { .type = INTRO_TEXT,         .text = "TITLE_INTRO_SCENE_1", .color = BLUE },
     { .type = INTRO_PAUSE,        .duration = 2000 },
     { .type = INTRO_END_SCENE },
@@ -140,15 +148,37 @@ static const IntroEvent timeline[] = {
     { .type = INTRO_IMAGE_CENTER, .image = -1 },
     { .type = INTRO_TEXT,         .text = "TITLE_INTRO_SCENE_17", .color = BLUE },
     { .type = INTRO_PAUSE,        .duration = 2000 },
-    { .type = INTRO_FINAL,        .image = -1 },
+    { .type = INTRO_MUSIC_STOP },
+    { .type = INTRO_FULL_SCREEN,  .sprites = {
+        {.x = 0.0f, .y = 240.0f, .image = gfx_intro_bottom_background_idx},
+        {.x = 0.0f, .y = 0.0f, .image = gfx_intro_top_background_idx}
+    }},
+    { .type = INTRO_PLAY_SOUND,   .sound = "romfs:/audio/footsteps.raw" },
     { .type = INTRO_PAUSE,        .duration = 2000 },
-    { .type = INTRO_FINAL,        .image = gfx_intro_far_man_idx, .final = {.x = 94.0f, .y = 0.0f} },
+    { .type = INTRO_FULL_SCREEN,  .sprites = {
+        {.x = 0.0f, .y = 240.0f, .image = gfx_intro_bottom_background_idx},
+        {.x = 0.0f, .y = 0.0f, .image = gfx_intro_top_background_idx},
+        {.x = 94.0f, .y = 240.0f, .image = gfx_intro_far_man_idx},
+    }},
     { .type = INTRO_PAUSE,        .duration = 1500 },
-    { .type = INTRO_FINAL,        .image = gfx_intro_not_very_far_man_idx, .final = {.x = 141.0f, .y = 34.0f} },
+    { .type = INTRO_FULL_SCREEN,  .sprites = {
+        {.x = 0.0f, .y = 240.0f, .image = gfx_intro_bottom_background_idx},
+        {.x = 0.0f, .y = 0.0f, .image = gfx_intro_top_background_idx},
+        {.x = 141.0f, .y = 274.0f, .image = gfx_intro_not_very_far_man_idx}
+    }},
     { .type = INTRO_PAUSE,        .duration = 1500 },
-    { .type = INTRO_FINAL,        .image = gfx_intro_close_man_idx, .final = {.x = 144.0f, .y = 24.0f} },
+    { .type = INTRO_FULL_SCREEN,  .sprites = {
+        {.x = 0.0f, .y = 240.0f, .image = gfx_intro_bottom_background_idx},
+        {.x = 0.0f, .y = 0.0f, .image = gfx_intro_top_background_idx},
+        {.x = 144.0f, .y = 264.0f, .image = gfx_intro_close_man_idx}
+    }},
     { .type = INTRO_PAUSE,        .duration = 1500 },
-    { .type = INTRO_FINAL_LOGO },
+    { .type = INTRO_FULL_SCREEN,  .sprites = {
+        {.x = 0.0f, .y = 240.0f, .image = gfx_intro_bottom_background_idx},
+        {.x = 0.0f, .y = 0.0f, .image = gfx_intro_top_background_idx},
+        {.x = 15.0f, .y = 62.0f, .image = gfx_intro_logo_infernal_idx},
+        {.x = 57.0f, .y = 318.0f, .image = gfx_intro_logo_house_idx}
+    }},
     { .type = INTRO_PAUSE,        .duration = 4500 },
     { .type = INTRO_END_SCENE },
     {. type = INTRO_END }
@@ -181,6 +211,22 @@ void intro_update(void) {
     int pause_duration = (held & KEY_A) ? INTRO_CHAR_DELAY_FAST : INTRO_CHAR_DELAY;
 
     switch (event->type) {
+    case INTRO_MUSIC_START:
+        if (event->sound) {
+            music_play(event->sound);
+        }
+        current_event++;
+        break;
+    case INTRO_MUSIC_STOP:
+        music_stop();
+        current_event++;
+        break;
+    case INTRO_PLAY_SOUND:
+        if (event->sound) {
+            sfx_play(event->sound);
+        }
+        current_event++;
+        break;
     case INTRO_TEXT:
         if (now >= next_char_time) {
             const char *str = lang_get(event->text);
@@ -259,7 +305,7 @@ void intro_update(void) {
         image_left_visible   = false;
         image_center_visible = false;
         image_right_visible  = false;
-        walking_man_visible = false;
+        full_screen = false;
         current_str[0] = '\0';
         previous_str[0] = '\0';
         text_position = 0;
@@ -268,26 +314,17 @@ void intro_update(void) {
         current_event++;
         break;
 
-    case INTRO_FINAL:
-        if (!final_scene) {
-            final_scene = true;
-            music_stop();
-            sfx_play("romfs:/audio/footsteps.raw");
-        }
-        if (event->image < 0) {
-            walking_man_visible = false;
-        } else {
-            image_walking_man = C2D_SpriteSheetGetImage(intro_assets, event->image);
-            walking_man_x = event->final.x;
-            walking_man_y = event->final.y;
-            walking_man_visible = true;
-        }
-        current_event++;
-        break;
-
-    case INTRO_FINAL_LOGO:
-        if (!final_scene_logo) {
-            final_scene_logo = true;
+    case INTRO_FULL_SCREEN:
+        full_screen = true;
+        for (int i = 0; i < INTRO_MAX_SPRITES; i++) {
+            if (event->sprites[i].image) {
+                sprites[i].visible = true;
+                sprites[i].image = C2D_SpriteSheetGetImage(intro_assets, event->sprites[i].image);
+                sprites[i].x = event->sprites[i].x;
+                sprites[i].y = event->sprites[i].y;
+            } else {
+                sprites[i].visible = false;
+            }
         }
         current_event++;
         break;
@@ -299,15 +336,13 @@ void intro_update(void) {
 }
 
 void intro_draw_bottom(void) {
-    if (final_scene_logo) {
-        C2D_DrawImageAt(image_final_bottom, 0.0f, 0.0f, 0.0f, NULL, 1.0f, 1.0f);
-        C2D_DrawImageAt(image_logo_house, 57.0f, 78.0f, 0.1f, NULL, 1.0f, 1.0f);
-        return;
-    }
-    if (final_scene) {
-        C2D_DrawImageAt(image_final_bottom, 0.0f, 0.0f, 0.0f, NULL, 1.0f, 1.0f);
-        if (walking_man_visible) {
-            C2D_DrawImageAt(image_walking_man, walking_man_x, walking_man_y, 0.1f, NULL, 1.0f, 1.0f);
+    if (full_screen) {
+        for (int i = 0; i < INTRO_MAX_SPRITES; i++) {
+            float z = i * 0.01f;
+            Sprite *sprite = &sprites[i];
+            if (sprite->visible && sprite->y >= 240.0f) {
+                C2D_DrawImageAt(sprite->image, sprite->x, sprite->y - 240, z, NULL, 1.0f, 1.0f);
+            }
         }
         return;
     }
@@ -317,13 +352,14 @@ void intro_draw_bottom(void) {
 
 
 void intro_draw_top(void) {
-    if (final_scene_logo) {
-        C2D_DrawImageAt(image_final_top, 40.0f, 0.0f, 0.0f, NULL, 1.0f, 1.0f);
-        C2D_DrawImageAt(image_logo_infernal, 55.0f, 62.0f, 0.1f, NULL, 1.0f, 1.0f);
-        return;
-    }
-    if (final_scene) {
-        C2D_DrawImageAt(image_final_top, 40.0f, 0.0f, 0.0f, NULL, 1.0f, 1.0f);
+    if (full_screen) {
+        for (int i = 0; i < INTRO_MAX_SPRITES; i++) {
+            float z = i * 0.01f;
+            Sprite *sprite = &sprites[i];
+            if (sprite->visible && sprite->y < 240.0f) {
+                C2D_DrawImageAt(sprite->image, sprite->x + 40.0f, sprite->y, z, NULL, 1.0f, 1.0f);
+            }
+        }
         return;
     }
     if (image_left_visible) {
@@ -341,9 +377,7 @@ void intro_init(void) {
     if (!text_buf) {
         text_buf = C2D_TextBufNew(4096);
     }
-    final_scene = false;
-    final_scene_logo = false;
-    walking_man_visible = false;
+    full_screen = false;
     current_event = 0;
     event_pos = 0;
     text_position = 0;
@@ -356,11 +390,6 @@ void intro_init(void) {
     current_color = C2D_Color32(164, 164, 164, 255);;
     next_char_time = osGetTime();
     intro_assets = C2D_SpriteSheetLoad("romfs:/gfx/gfx_intro.t3x");
-    image_final_top = C2D_SpriteSheetGetImage(intro_assets, gfx_intro_top_background_idx);
-    image_final_bottom = C2D_SpriteSheetGetImage(intro_assets, gfx_intro_bottom_background_idx);
-    image_logo_infernal = C2D_SpriteSheetGetImage(intro_assets, gfx_intro_logo_infernal_idx);
-    image_logo_house = C2D_SpriteSheetGetImage(intro_assets, gfx_intro_logo_house_idx);
-    music_play("romfs:/audio/intro.ogg");
     update_text();
 }
 
