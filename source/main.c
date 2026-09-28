@@ -2,9 +2,7 @@
 #include <citro2d.h>
 #include <3ds.h>
 
-#include "room_hall.h"
 #include "game.h"
-#include "gameover.h"
 #include "lang.h"
 #include "hud.h"
 #include "audio.h"
@@ -71,7 +69,6 @@ int main(int argc, char **argv) {
     C3D_RenderTarget *bottom = C2D_CreateScreenTarget(GFX_BOTTOM, GFX_LEFT);
     aptHook(&apt_cookie, apt_callback, NULL);
     audio_init();
-    //game_set_room(&hall);
     game_init();
     while (aptMainLoop()) {
         hidScanInput();

@@ -5,7 +5,6 @@
 #include <citro2d.h>
 #include <stdbool.h>
 #include <stddef.h>
-#include "gameover.h"
 #include "inventory.h"
 
 typedef struct {
@@ -50,7 +49,6 @@ typedef enum {
     GAME_NORMAL,
     GAME_MESSAGE,
     GAME_BUSY,
-    GAME_OVER,
     GAME_SIMON,
     GAME_PIANO,
     GAME_MEASURE,
@@ -61,11 +59,10 @@ typedef enum {
 
 void game_update(u32 keys, circlePosition analog, touchPosition touch);
 void game_draw(C3D_RenderTarget *top, C3D_RenderTarget *bottom);
-void game_over(GameOverId id);
+void game_over(const char *timeline);
 void game_close(void);
 void game_init(void);
-void game_end_timeline(void);
-void game_start_intro(void);
+void game_intro(void);
 void game_start(void);
 void game_set_room(Room *room);
 const char *game_target_name(void);

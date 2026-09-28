@@ -224,7 +224,7 @@ static bool load_timeline(const char *filename) {
             continue;
         }
 
-        char *command = strtok(p, ";");
+        char *command = strtok(p, " ");
 
         if (!command) {
             continue;
@@ -232,9 +232,9 @@ static bool load_timeline(const char *filename) {
 
         if (full_screen) {
             if (strcmp(command, "SPRITE") == 0) {
-                char *image_name = strtok(NULL, ";");
-                char *x_str      = strtok(NULL, ";");
-                char *y_str      = strtok(NULL, ";");
+                char *image_name = strtok(NULL, " ");
+                char *x_str      = strtok(NULL, " ");
+                char *y_str      = strtok(NULL, " ");
 
                 if (!image_name || !x_str || !y_str) {
                     printf( "%s:%zu: invalid SPRITE\n", filename, line_number);
@@ -278,8 +278,8 @@ static bool load_timeline(const char *filename) {
         }
 
         if (strcmp(command, "TEXT") == 0) {
-            char *color = strtok(NULL, ";");
-            char *text  = strtok(NULL, ";");
+            char *color = strtok(NULL, " ");
+            char *text  = strtok(NULL, " ");
             if (!color || !text) {
                 printf("%s:%zu: syntax error: %s\n", filename, line_number, command);
                 fclose(f);
@@ -301,7 +301,7 @@ static bool load_timeline(const char *filename) {
         }
 
         if (strcmp(command, "PAUSE") == 0) {
-            char *duration = strtok(NULL, ";");
+            char *duration = strtok(NULL, " ");
             if (!duration) {
                 printf("%s:%zu: syntax error: %s\n", filename, line_number, command);
                 fclose(f);
@@ -322,7 +322,7 @@ static bool load_timeline(const char *filename) {
         }
 
         if (strcmp(command, "MUSIC_START") == 0) {
-            char *sound = strtok(NULL, ";");
+            char *sound = strtok(NULL, " ");
             if (!sound) {
                 printf("%s:%zu: syntax error: %s\n", filename, line_number, command);
                 fclose(f);
@@ -354,7 +354,7 @@ static bool load_timeline(const char *filename) {
         }
 
         if (strcmp(command, "PLAY_SOUND") == 0) {
-            char *sound = strtok(NULL, ";");
+            char *sound = strtok(NULL, " ");
             if (!sound) {
                 printf("%s:%zu: syntax error: %s\n", filename, line_number, command);
                 fclose(f);
@@ -384,7 +384,7 @@ static bool load_timeline(const char *filename) {
             } else if (strcmp(command, "IMAGE_RIGHT") == 0) {
                 image_type = TIMELINE_IMAGE_RIGHT;
             }
-            char *image_name = strtok(NULL, ";");
+            char *image_name = strtok(NULL, " ");
             if (!image_name) {
                 printf("%s:%zu: syntax error: %s\n", filename, line_number, command);
                 fclose(f);
@@ -480,7 +480,7 @@ static void update_text(void) {
 
 void timeline_update(u32 keys) {
     if (keys & KEY_B) {
-        game_end_timeline();
+        current_event++;
         return;
     }
     const TimelineEvent *event = &events[current_event];
@@ -524,6 +524,7 @@ void timeline_update(u32 keys) {
             default:
                 current_color = C2D_Color32(164, 164, 164, 255);
             }
+
             if (str[event_pos] != '\0') {
                 size_t len = utf8_char_size(&str[event_pos]);
                 memcpy(previous_str, current_str, text_position);
@@ -542,10 +543,12 @@ void timeline_update(u32 keys) {
         break;
 
     case TIMELINE_PAUSE:
+        if (event->duration == 0) {
+            break;
+        }
         if (pause_start == 0) {
             pause_start = now;
         }
-
         if (now - pause_start >= event->duration * pause_duration / TIMELINE_CHAR_DELAY) {
             pause_start = 0;
             current_event++;
@@ -586,7 +589,7 @@ void timeline_update(u32 keys) {
         break;
 
     case TIMELINE_END:
-        game_end_timeline();
+        game_init();
         return;
     }
 }
@@ -636,25 +639,26 @@ bool timeline_init(const char *directory) {
     snprintf(script_path, sizeof(script_path), "%s/timeline", directory);
     snprintf(gfx_path, sizeof(gfx_path), "%s/gfx.t3x", directory);
     snprintf(header_path, sizeof(header_path), "%s/gfx.h", directory);
-
+    printf("starting timeline: %s\n", script_path);
     timeline_assets = C2D_SpriteSheetLoad(gfx_path);
-
 
     if (!text_buf) {
         text_buf = C2D_TextBufNew(4096);
     }
     if (!timeline_assets) {
-        printf("Cannot load %s\n", gfx_path);
+        printf("Cannot load: %s\n", gfx_path);
         return false;
     }
 
     if (!load_gfx_header(header_path)) {
+        printf("Cannot load gfx headers: %s\n", header_path);
         C2D_SpriteSheetFree(timeline_assets);
         timeline_assets = NULL;
         return false;
     }
 
     if (!load_timeline(script_path)) {
+        printf("Cannot load timeline: %s\n", script_path);
         C2D_SpriteSheetFree(timeline_assets);
         timeline_assets = NULL;
         return false;

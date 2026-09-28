@@ -59,8 +59,8 @@ bool gamestate_init(const char *filename) {
         if (*p == '\0' || *p == '#')
             continue;
 
-        char *name = strtok(p, ";");
-        char *type = strtok(NULL, ";");
+        char *name = strtok(p, " ");
+        char *type = strtok(NULL, " ");
 
         if (!name || !type) {
             printf("romfs:/game.state:%zu: syntax error\n", line_number);

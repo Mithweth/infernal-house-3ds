@@ -38,7 +38,7 @@ static bool lighter_is_active(void) {
 }
 
 static void fall_gameover(void) {
-    game_over(GAMEOVER_FALL);
+    game_over("falldown");
 }
 
 static void north_action(void) {

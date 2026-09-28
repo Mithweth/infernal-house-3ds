@@ -6,7 +6,6 @@
 #include "inventory.h"
 #include "gamestate.h"
 #include "room_hall.h"
-#include "gameover.h"
 #include "hud.h"
 #include "audio.h"
 #include "title.h"
@@ -85,13 +84,19 @@ const char *game_target_name(void) {
     return target->id;
 }
 
-void game_over(GameOverId id) {
-    game_mode = GAME_OVER;
-    gameover_init(id);
+void game_over(const char *timeline) {
+    char path[256];
+    snprintf(path, sizeof(path), "romfs:/timelines/gameover_%s", timeline);
+    if (timeline_init(path)) {
+        game_mode = GAME_TIMELINE;
+        return;
+    }
+    game_init();
 }
 
 void game_init(void) {
-    gameover_close();
+    timeline_close();
+    music_stop();
     hud_init();
     game_mode = GAME_TITLE;
     title_init();
@@ -167,14 +172,7 @@ bool game_can_move_northwest(void) {
     return current_room && path_is_available(&current_room->northwest);
 }
 
-void game_end_timeline(void) {
-    timeline_close();
-    music_stop();
-    game_mode = GAME_TITLE;
-    title_init();
-}
-
-void game_start_intro(void) {
+void game_intro(void) {
     title_close();
     if (!timeline_init("romfs:/timelines/intro")) {
         game_mode = GAME_TITLE;
@@ -359,6 +357,7 @@ bool game_use_item(ItemId item) {
 
 void game_show_message(const char *message_id) {
     message_text = lang_get(message_id);
+    printf("Print: %s\n", message_id);
     game_mode = GAME_MESSAGE;
 }
 
@@ -370,12 +369,6 @@ void game_update(u32 keys, circlePosition analog, touchPosition touch) {
 
         case GAME_TIMELINE:
             timeline_update(keys);
-            return;
-
-        case GAME_OVER:
-            if ((keys & KEY_A) || (keys & KEY_TOUCH)) {
-                game_init();
-            }
             return;
 
         case GAME_SIMON:
@@ -467,13 +460,6 @@ void game_draw(C3D_RenderTarget *top, C3D_RenderTarget *bottom) {
             measure_draw();
             C2D_SceneBegin(top);
             hud_draw();
-            break;
-
-        case GAME_OVER:
-            C2D_SceneBegin(top);
-            gameover_draw_top();
-            C2D_SceneBegin(bottom);
-            gameover_draw_bottom();
             break;
 
         default:

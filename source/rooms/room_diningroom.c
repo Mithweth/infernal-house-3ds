@@ -10,7 +10,6 @@
 #include "room_hall.h"
 #include "room_corridor.h"
 #include "gamestate.h"
-#include "gameover.h"
 
 static C2D_SpriteSheet room_scene;
 static C2D_Image img_background;
@@ -204,7 +203,7 @@ static void west_action(void) {
 }
 
 static void lasers_gameover(void) {
-    game_over(GAMEOVER_LASERS);
+    game_over("prison");
 }
 
 static void move_north(void) {

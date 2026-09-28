@@ -8,7 +8,6 @@
 #include "inventory.h"
 #include "gfx_hud.h"
 #include "gfx_hud_t3x.h"
-#include "gameover.h"
 #include "lang.h"
 
 #define TIME_MAX_SECONDS 3600
@@ -87,7 +86,6 @@ static void background_draw(void) {
 
 static void timer_draw() {
     int total_seconds = TIME_MAX_SECONDS - elapsed_time / 1000;
-
     int hours   = (total_seconds / 3600) % 100;
     int minutes = (total_seconds / 60) % 60;
     int seconds = total_seconds % 60;
@@ -160,7 +158,7 @@ void hud_reset(void) {
 void hud_update(void) {
     timer_update();
     if (elapsed_time / 1000 > TIME_MAX_SECONDS) {
-        game_over(GAMEOVER_TIMEUP);
+        game_over("timeup");
     }
 }
 
