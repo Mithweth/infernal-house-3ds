@@ -29,22 +29,6 @@ static C2D_Text text;
 static u64 elapsed_time;
 static u64 last_time;
 
-#ifdef DEBUG
-static C2D_TextBuf debug_buf;
-static C2D_Text debug_text;
-static void debug_draw(void) {
-    if (!debug_buf) {
-        debug_buf = C2D_TextBufNew(256);
-    }
-    char str[64];
-    snprintf(str, sizeof(str), "elapsed: %llu", elapsed_time);
-    C2D_TextBufClear(debug_buf);
-    C2D_TextParse(&debug_text, debug_buf, str);
-    C2D_TextOptimize(&debug_text);
-    C2D_DrawText(&debug_text, C2D_WithColor, 10, 10, 0.9f, 0.5f, 0.5f, C2D_Color32(255, 0, 0, 255));
-}
-#endif
-
 void timer_start(void) {
     elapsed_time = 0;
     last_time = osGetTime();
@@ -196,7 +180,4 @@ void hud_draw(void) {
     inventory_draw();
     movement_draw();
     timer_draw();
-#ifdef DEBUG
-    debug_draw();
-#endif
 }

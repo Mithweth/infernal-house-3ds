@@ -13,7 +13,7 @@
 #include "simon.h"
 #include "piano.h"
 #include "measure.h"
-#include "intro.h"
+#include "timeline.h"
 
 static Room *current_room = NULL;
 static GameMode game_mode = GAME_NORMAL;
@@ -166,16 +166,20 @@ bool game_can_move_northwest(void) {
     return current_room && path_is_available(&current_room->northwest);
 }
 
-void game_end_intro(void) {
-    intro_close();
+void game_end_timeline(void) {
+    timeline_close();
     music_stop();
     game_mode = GAME_TITLE;
     title_init();
 }
 void game_start_intro(void) {
     title_close();
-    game_mode = GAME_INTRO;
-    intro_init();
+    if (!timeline_init("romfs:/timelines/intro")) {
+        game_mode = GAME_TITLE;
+        title_init();
+        return;
+    }
+    game_mode = GAME_TIMELINE;
 }
 
 static void update_movement(circlePosition analog)
@@ -359,8 +363,8 @@ void game_update(u32 keys, circlePosition analog, touchPosition touch) {
             title_update(keys);
             return;
 
-        case GAME_INTRO:
-            intro_update();
+        case GAME_TIMELINE:
+            timeline_update();
             return;
 
         case GAME_OVER:
@@ -431,11 +435,11 @@ void game_draw(C3D_RenderTarget *top, C3D_RenderTarget *bottom) {
             title_draw_bottom();
             break;
 
-        case GAME_INTRO:
+        case GAME_TIMELINE:
             C2D_SceneBegin(top);
-            intro_draw_top();
+            timeline_draw_top();
             C2D_SceneBegin(bottom);
-            intro_draw_bottom();
+            timeline_draw_bottom();
             break;
 
         case GAME_SIMON:

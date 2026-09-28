@@ -54,7 +54,7 @@ typedef enum {
     GAME_PIANO,
     GAME_MEASURE,
     GAME_TITLE,
-    GAME_INTRO,
+    GAME_TIMELINE,
     GAME_ENDING
 } GameMode;
 
@@ -63,7 +63,7 @@ void game_draw(C3D_RenderTarget *top, C3D_RenderTarget *bottom);
 void game_over(GameOverId id);
 void game_close(void);
 void game_init(void);
-void game_end_intro(void);
+void game_end_timeline(void);
 void game_start_intro(void);
 void game_start(void);
 void game_set_room(Room *room);

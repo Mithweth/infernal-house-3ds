@@ -1,12 +1,45 @@
 // main.c
 #include <citro2d.h>
 #include <3ds.h>
+
 #include "room_hall.h"
 #include "game.h"
 #include "gameover.h"
 #include "lang.h"
 #include "hud.h"
 #include "audio.h"
+
+#ifdef DEBUG
+
+#include <malloc.h>
+#include <unistd.h>
+
+static u32 *soc_buffer;
+static int debug_fd = -1;
+
+static void debug_init(void) {
+    soc_buffer = memalign(0x1000, 0x100000);
+    if (!soc_buffer) {
+        return;
+    }
+    Result rc = socInit(soc_buffer, 0x100000);
+    if (R_SUCCEEDED(rc)) {
+        debug_fd = link3dsStdio();
+    }
+}
+
+static void debug_close(void) {
+    if (debug_fd >= 0) {
+        close(debug_fd);
+    }
+    socExit();
+    free(soc_buffer);
+}
+
+#else
+static void debug_init(void) {}
+static void debug_close(void) {}
+#endif
 
 static aptHookCookie apt_cookie;
 
@@ -16,13 +49,13 @@ static void apt_callback(APT_HookType hook, void *param) {
     }
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     gfxInitDefault();
     romfsInit();
     if (!lang_init("fr")) {
         return 1;
     }
+    debug_init();
     C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
     C2D_Init(C2D_DEFAULT_MAX_OBJECTS);
     C2D_Prepare();
@@ -55,12 +88,21 @@ int main(int argc, char **argv)
 
     aptUnhook(&apt_cookie);
     audio_close();
+    printf("audio_close();\n");
     game_close();
+    printf(" game_close();\n");
     C2D_Fini();
+    printf("C2D_Fini();\n");
     C3D_Fini();
+    printf("C3D_Fini();\n");
     lang_close();
+    printf("lang_close();\n");
     romfsExit();
+    printf("romfsExit();\n");
     gfxExit();
+    printf("gfxExit();\n");
+    debug_close();
+    printf("debug_close();\n");
 
     return 0;
 }
