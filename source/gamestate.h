@@ -1,94 +1,22 @@
 // gamestate.h
+
 #pragma once
 
 #include <stdbool.h>
 
-bool gamestate_are_diningroom_lasers_disabled(void);
-void gamestate_disable_diningroom_lasers(bool value);
-void gamestate_open_hall_left_closet(bool value);
-void gamestate_open_hall_right_closet(bool value);
-void gamestate_move_hall_carpet(bool value);
-bool gamestate_is_hall_left_closet_opened(void);
-bool gamestate_is_hall_right_closet_opened(void);
-bool gamestate_is_hall_carpet_moved(void);
+typedef enum {
+    GAMESTATE_REVERSIBLE,
+    GAMESTATE_IRREVERSIBLE
+} GameStateType;
+
+typedef struct {
+    char *name;
+    GameStateType type;
+    bool value;
+} GameState;
+
+bool gamestate_init(const char *filename);
+void gamestate_close(void);
+bool gamestate_get(const char *name);
+void gamestate_set(const char *name);
 void gamestate_reset(void);
-bool gamestate_is_diningroom_right_cabinet_door_opened(void);
-void gamestate_open_diningroom_right_cabinet_door(bool value);
-bool gamestate_is_diningroom_left_cabinet_door_opened(void);
-void gamestate_open_diningroom_left_cabinet_door(bool value);
-void gamestate_move_diningroom_soup(bool value);
-bool gamestate_is_diningroom_soup_opened(void);
-void gamestate_unscrew_cellar_alarm_box(void);
-bool gamestate_is_cellar_alarm_box_unscrewed(void);
-void gamestate_open_cellar_alarm_box(void);
-bool gamestate_is_cellar_alarm_box_opened(void);
-void gamestate_disable_cellar_alarm_box(bool value);
-bool gamestate_is_cellar_alarm_box_disabled(void);
-void gamestate_open_livingroom_piano(bool value);
-bool gamestate_is_livingroom_piano_opened(void);
-void gamestate_open_livingroom_fireplace_hearth(void);
-bool gamestate_is_livingroom_fireplace_hearth_opened(void);
-void gamestate_set_livingroom_golden_statue_placed(void);
-bool gamestate_is_livingroom_golden_statue_placed(void);
-void gamestate_open_livingroom_secret_passage(void);
-bool gamestate_is_livingroom_secret_passage_opened(void);
-void gamestate_bind_rope_used_in_livingroom_hearth(void);
-bool gamestate_is_rope_used_in_livingroom_hearth(void);
-void gamestate_open_library_secret_passage(void);
-bool gamestate_is_library_secret_passage_opened(void);
-void gamestate_take_library_statue(void);
-bool gamestate_is_library_statue_taken(void);
-void gamestate_open_kitchen_refrigerator(bool value);
-bool gamestate_is_kitchen_refrigerator_opened(void);
-void gamestate_open_kitchen_below_closet(bool value);
-bool gamestate_is_kitchen_below_closet_opened(void);
-void gamestate_open_kitchen_oven(bool value);
-bool gamestate_is_kitchen_oven_opened(void);
-void gamestate_open_kitchen_top_closet(bool value);
-bool gamestate_is_kitchen_top_closet_opened(void);
-void gamestate_open_kitchen_bottom_closet(bool value);
-bool gamestate_is_kitchen_bottom_closet_opened(void);
-void gamestate_open_kitchen_dishwasher(bool value);
-bool gamestate_is_kitchen_dishwasher_opened(void);
-void gamestate_open_kitchen_drawer(bool value);
-bool gamestate_is_kitchen_drawer_opened(void);
-void gamestate_move_firstfloor_carpet(bool value);
-bool gamestate_is_firstfloor_carpet_moved(void);
-void gamestate_unlock_secondfloor_door(void);
-bool gamestate_is_secondfloor_door_unlocked(void);
-void gamestate_turn_firstbedroom_lights_on(bool value);
-bool gamestate_is_firstbedroom_lights_on(void);
-void gamestate_open_firstbedroom_closet(bool value);
-bool gamestate_is_firstbedroom_closet_opened(void);
-void gamestate_open_firstbedroom_left_nightstand(bool value);
-bool gamestate_is_firstbedroom_left_nightstand_opened(void);
-void gamestate_open_firstbedroom_right_nightstand(bool value);
-bool gamestate_is_firstbedroom_right_nightstand_opened(void);
-void gamestate_break_underground_wall(void);
-bool gamestate_is_underground_wall_broken(void);
-void gamestate_open_secondbedroom_left_nightstand(bool value);
-bool gamestate_is_secondbedroom_left_nightstand_opened(void);
-void gamestate_open_secondbedroom_left_closet_door(bool value);
-bool gamestate_is_secondbedroom_left_closet_door_opened(void);
-void gamestate_open_secondbedroom_right_closet_door(bool value);
-bool gamestate_is_secondbedroom_right_closet_door_opened(void);
-void gamestate_open_secondbedroom_closet_drawer(bool value);
-bool gamestate_is_secondbedroom_closet_drawer_opened(void);
-void gamestate_turn_secondbedroom_lights_on(bool value);
-bool gamestate_is_secondbedroom_lights_on(void);
-void gamestate_pull_secondbedroom_bedpost(bool value);
-bool gamestate_is_secondbedroom_bedpost_pulled(void);
-void gamestate_take_secondbedroom_key(void);
-bool gamestate_is_secondbedroom_key_taken(void);
-bool gamestate_is_bathroom_shower_curtain_opened(void);
-bool gamestate_is_bathroom_carpet_moved(void);
-bool gamestate_are_bathroom_closet_doors_opened(void);
-bool gamestate_is_bathroom_closet_drawer_opened(void);
-void gamestate_open_bathroom_shower_curtain(bool value);
-void gamestate_move_bathroom_carpet(bool value);
-void gamestate_open_bathroom_closet_doors(bool value);
-void gamestate_open_bathroom_closet_drawer(bool value);
-bool gamestate_is_underground_dug(void);
-bool gamestate_is_underground_card_taken(void);
-void gamestate_dig_underground(void);
-void gamestate_underground_take_card(void);

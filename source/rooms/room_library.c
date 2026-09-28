@@ -18,11 +18,11 @@ static C2D_Image img_passage_opened;
 static C2D_Image img_clock_taken;
 
 static bool statue_is_active(void) {
-    return !gamestate_is_library_statue_taken();
+    return !gamestate_get("library_statue_taken");
 }
 
 static void statue_action(void) {
-    gamestate_take_library_statue();
+    gamestate_set("library_statue_taken");
     inventory_add(ITEM_STATUE);
 }
 
@@ -43,15 +43,18 @@ static void cup_action(void) {
 }
 
 static bool book_is_active(void) {
-    return !gamestate_is_library_secret_passage_opened();
+    return !gamestate_get("library_secret_passage_opened");
 }
 
 static void book_action(void) {
-    gamestate_open_library_secret_passage();
+    gamestate_set("library_secret_passage_opened");
     sfx_play("romfs:/audio/book_pushed.raw");
     game_show_message("LIBRARY_SECRET_PASSAGE");
 }
 
+static bool secret_passage_opened(void) {
+    return gamestate_get("library_secret_passage_opened");
+}
 static Hotspot hotspots[] = {
     {
         .x = 13,
@@ -59,7 +62,7 @@ static Hotspot hotspots[] = {
         .width = 25,
         .height = 30,
         .id = "ITEM_STATUE",
-        .is_active = statue_is_active,
+        .condition = statue_is_active,
         .action = statue_action
     },
     {
@@ -68,7 +71,7 @@ static Hotspot hotspots[] = {
         .width = 31,
         .height = 30,
         .id = "ITEM_CLOCK",
-        .is_active = clock_is_active,
+        .condition = clock_is_active,
         .action = clock_action
     },
     {
@@ -77,7 +80,7 @@ static Hotspot hotspots[] = {
         .width = 21,
         .height = 25,
         .id = "ITEM_CUP",
-        .is_active = cup_is_active,
+        .condition = cup_is_active,
         .action = cup_action
     },
     {
@@ -86,7 +89,7 @@ static Hotspot hotspots[] = {
         .width = 16,
         .height = 24,
         .id = "LIBRARY_BOOK",
-        .is_active = book_is_active,
+        .condition = book_is_active,
         .action = book_action
     },
     {
@@ -216,7 +219,7 @@ static void room_init(void) {
 
 static void room_draw(void) {
     C2D_DrawImageAt(img_background, 0.0f, 0.0f, 0.0f, NULL, 1.0f, 1.0f);
-    if (gamestate_is_library_statue_taken()) {
+    if (gamestate_get("library_statue_taken")) {
         C2D_DrawImageAt(img_statue_taken, 13.0f, 39.0f, 0.3f, NULL, 1.0f, 1.0f);
     }
     if (inventory_has(ITEM_CLOCK)) {
@@ -225,7 +228,7 @@ static void room_draw(void) {
     if (inventory_has(ITEM_CUP)) {
         C2D_DrawImageAt(img_cup_taken, 103.0f, 62.0f, 0.3f, NULL, 1.0f, 1.0f);
     }
-    if (gamestate_is_library_secret_passage_opened()) {
+    if (gamestate_get("library_secret_passage_opened")) {
         C2D_DrawImageAt(img_book_pushed, 75.0f, 108.0f, 0.3f, NULL, 1.0f, 1.0f);
         C2D_DrawImageAt(img_passage_opened, 127.0f, 29.0f, 0.3f, NULL, 1.0f, 1.0f);
     }
@@ -239,7 +242,7 @@ Room library = {
     .hotspots = hotspots,
     .hotspot_count = sizeof(hotspots) / sizeof(hotspots[0]),
     .southeast = {.action = southeast_action},
-    .north = {.action = north_action, .condition = gamestate_is_library_secret_passage_opened},
+    .north = {.action = north_action, .condition = secret_passage_opened},
     .init = room_init,
     .draw = room_draw,
     .close = room_close

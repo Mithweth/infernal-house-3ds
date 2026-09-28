@@ -6,6 +6,7 @@
 #include "room_secondunderground.h"
 #include "gfx_deadroom.h"
 #include "inventory.h"
+#include "gamestate.h"
 
 static C2D_SpriteSheet room_scene;
 static C2D_Image img_background;
@@ -22,10 +23,11 @@ static bool ring_is_active(void) {
 
 static void rope_action(void) {
     inventory_add(ITEM_ROPE);
+    gamestate_set("underground_rope_taken");
 }
 
 static bool rope_is_active(void) {
-    return !inventory_has(ITEM_ROPE);
+    return !gamestate_get("underground_rope_taken");
 }
 
 static Hotspot hotspots[] = {
@@ -35,7 +37,7 @@ static Hotspot hotspots[] = {
         .width = 131,
         .height = 44,
         .id = "DEADROOM_ROPE",
-        .is_active = rope_is_active,
+        .condition = rope_is_active,
         .action = rope_action
     },
     {
@@ -44,7 +46,7 @@ static Hotspot hotspots[] = {
         .width = 21,
         .height = 31,
         .id = "DEADROOM_RING",
-        .is_active = ring_is_active,
+        .condition = ring_is_active,
         .action = ring_action
     },
     {
@@ -99,7 +101,7 @@ static void room_draw(void) {
     if (inventory_has(ITEM_RING)) {
         C2D_DrawImageAt(img_ring_taken, 191.0f, 8.0f, 0.2f, NULL, 1.0f, 1.0f);
     }
-    if (inventory_has(ITEM_ROPE)) {
+    if (gamestate_get("underground_rope_taken")) {
         C2D_DrawImageAt(img_rope_taken, 0.0f, 186.0f, 0.2f, NULL, 1.0f, 1.0f);
     }
 }

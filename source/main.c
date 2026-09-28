@@ -8,6 +8,7 @@
 #include "lang.h"
 #include "hud.h"
 #include "audio.h"
+#include "gamestate.h"
 
 #ifdef DEBUG
 
@@ -29,6 +30,10 @@ static void debug_init(void) {
 }
 
 static void debug_close(void) {
+    fflush(stdout);
+    fflush(stderr);
+    close(STDOUT_FILENO);
+    close(STDERR_FILENO);
     if (debug_fd >= 0) {
         close(debug_fd);
     }
@@ -52,10 +57,13 @@ static void apt_callback(APT_HookType hook, void *param) {
 int main(int argc, char **argv) {
     gfxInitDefault();
     romfsInit();
+    debug_init();
     if (!lang_init("fr")) {
         return 1;
     }
-    debug_init();
+    if (!gamestate_init("romfs:/states/game.state")) {
+        return 1;
+    }
     C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
     C2D_Init(C2D_DEFAULT_MAX_OBJECTS);
     C2D_Prepare();
@@ -87,22 +95,15 @@ int main(int argc, char **argv) {
     }
 
     aptUnhook(&apt_cookie);
+    gamestate_close();
     audio_close();
-    printf("audio_close();\n");
     game_close();
-    printf(" game_close();\n");
     C2D_Fini();
-    printf("C2D_Fini();\n");
     C3D_Fini();
-    printf("C3D_Fini();\n");
     lang_close();
-    printf("lang_close();\n");
     romfsExit();
-    printf("romfsExit();\n");
     gfxExit();
-    printf("gfxExit();\n");
     debug_close();
-    printf("debug_close();\n");
-
+    
     return 0;
 }

@@ -15,7 +15,8 @@ typedef struct {
     int height;
     const char *id;
     const char *message_id;
-    bool (*is_active)(void);
+    const char *condition_state;
+    bool (*condition)(void);
     void (*action)(void);
     bool (*use_item)(ItemId item);
 } Hotspot;

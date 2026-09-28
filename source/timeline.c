@@ -478,10 +478,13 @@ static void update_text(void) {
     C2D_TextOptimize(&text_previous);
 }
 
-void timeline_update(void) {
+void timeline_update(u32 keys) {
+    if (keys & KEY_B) {
+        game_end_timeline();
+        return;
+    }
     const TimelineEvent *event = &events[current_event];
     u64 now = osGetTime();
-
     u32 held = hidKeysHeld();
     int pause_duration = (held & KEY_A) ? TIMELINE_CHAR_DELAY_FAST : TIMELINE_CHAR_DELAY;
 

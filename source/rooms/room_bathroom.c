@@ -18,15 +18,15 @@ static C2D_Image img_shower_opened;
 static C2D_Image img_soap_taken;
 
 static void move_carpet_action(void) {
-    gamestate_move_bathroom_carpet(!gamestate_is_bathroom_carpet_moved());
-    if (gamestate_is_bathroom_carpet_moved()) {
+    gamestate_set("bathroom_carpet_moved");
+    if (gamestate_get("bathroom_carpet_moved")) {
         game_show_message("BATHROOM_CARPET_EXAMINE");
     }
 }
 
 static void shower_action(void) {
-    gamestate_open_bathroom_shower_curtain(!gamestate_is_bathroom_shower_curtain_opened());
-    if (gamestate_is_bathroom_shower_curtain_opened()) {
+    gamestate_set("bathroom_shower_curtain_opened");
+    if (gamestate_get("bathroom_shower_curtain_opened")) {
         game_show_message("BATHROOM_SHOWER_EXAMINE");
     }
 }
@@ -48,11 +48,11 @@ static void check_carpet_action(void) {
 }
 
 static void closet_action(void) {
-    gamestate_open_bathroom_closet_doors(!gamestate_are_bathroom_closet_doors_opened());
+    gamestate_set("bathroom_closet_doors_opened");
 }
 
 static void drawer_action(void) {
-    gamestate_open_bathroom_closet_drawer(!gamestate_is_bathroom_closet_drawer_opened());
+    gamestate_set("bathroom_closet_drawer_opened");
 }
 
 static void drawer_take(void) {
@@ -62,7 +62,7 @@ static void drawer_take(void) {
 }
 
 static bool drawer_is_active(void) {
-    return gamestate_is_bathroom_closet_drawer_opened() && !inventory_has(ITEM_TOOTHPASTE);
+    return gamestate_get("bathroom_closet_drawer_opened") && !inventory_has(ITEM_TOOTHPASTE);
 }
 
 static void soap_action(void) {
@@ -73,6 +73,10 @@ static bool soap_is_active(void) {
     return !inventory_has(ITEM_SOAP);
 }
 
+static bool are_bathroom_closet_doors_opened(void) {
+    return gamestate_get("bathroom_closet_doors_opened");
+}
+
 static Hotspot hotspots[] = {
     {
         .x = 216,
@@ -80,7 +84,7 @@ static Hotspot hotspots[] = {
         .width = 13,
         .height = 16,
         .id = "BATHROOM_PERFUME",
-        .is_active = perfume_is_active,
+        .condition = perfume_is_active,
         .action = perfume_action
     },
     {
@@ -105,7 +109,7 @@ static Hotspot hotspots[] = {
         .height = 18,
         .id = "BATHROOM_DRAWER",
         .message_id = "BATHROOM_DRAWER_EXAMINE",
-        .is_active = drawer_is_active,
+        .condition = drawer_is_active,
         .action = drawer_take
     },
     {
@@ -123,7 +127,7 @@ static Hotspot hotspots[] = {
         .height = 79,
         .id = "BATHROOM_CLOSET",
         .message_id = "BATHROOM_CLOSET_EXAMINE",
-        .is_active = gamestate_are_bathroom_closet_doors_opened,
+        .condition = are_bathroom_closet_doors_opened,
         .action = closet_action
     },
     {
@@ -154,7 +158,7 @@ static Hotspot hotspots[] = {
         .width = 12,
         .height = 10,
         .id = "BATHROOM_SOAP",
-        .is_active = soap_is_active,
+        .condition = soap_is_active,
         .action = soap_action
     },
     {
@@ -211,16 +215,16 @@ static void room_init(void) {
 
 static void room_draw(void) {
     C2D_DrawImageAt(img_background, 0.0f, 0.0f, 0.0f, NULL, 1.0f, 1.0f);
-    if (gamestate_is_bathroom_shower_curtain_opened()) {
+    if (gamestate_get("bathroom_shower_curtain_opened")) {
         C2D_DrawImageAt(img_shower_opened, 5.0f, 30.0f, 0.2f, NULL, 1.0f, 1.0f);
     }
-    if (gamestate_is_bathroom_carpet_moved()) {
+    if (gamestate_get("bathroom_carpet_moved")) {
         C2D_DrawImageAt(img_carpet_moved, 0.0f, 186.0f, 0.3f, NULL, 1.0f, 1.0f);
     }
-    if (gamestate_are_bathroom_closet_doors_opened()) {
+    if (gamestate_get("bathroom_closet_doors_opened")) {
         C2D_DrawImageAt(img_doors_opened, 164.0f, 133.0f, 0.2f, NULL, 1.0f, 1.0f);
     }
-    if (gamestate_is_bathroom_closet_drawer_opened()) {
+    if (gamestate_get("bathroom_closet_drawer_opened")) {
         C2D_DrawImageAt(img_drawer_opened, 172.0f, 120.0f, 0.3f, NULL, 1.0f, 1.0f);
     }
     if (inventory_has(ITEM_PERFUME)) {
@@ -242,7 +246,6 @@ static void move_west(void) {
 static void west_action(void) {
     game_wait_for_sfx("romfs:/audio/door_open.raw", move_west);
 }
-
 
 Room bathroom = {
     .hotspots = hotspots,

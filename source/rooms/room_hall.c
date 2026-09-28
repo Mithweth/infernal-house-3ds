@@ -20,25 +20,25 @@ static C2D_Image img_message;
 
 
 static void left_closet_action(void) {
-    if (gamestate_is_hall_left_closet_opened()) {
+    if (gamestate_get("hall_left_closet_opened")) {
         sfx_play("romfs:/audio/closet_close.raw");
     } else {
         sfx_play("romfs:/audio/closet_open.raw");
     }
-    gamestate_open_hall_left_closet(!gamestate_is_hall_left_closet_opened());
+    gamestate_set("hall_left_closet_opened");
 }
 
 static void right_closet_action(void) {
-    if (gamestate_is_hall_right_closet_opened()) {
+    if (gamestate_get("hall_right_closet_opened")) {
         sfx_play("romfs:/audio/closet_close.raw");
     } else {
         sfx_play("romfs:/audio/closet_open.raw");
     }
-    gamestate_open_hall_right_closet(!gamestate_is_hall_right_closet_opened());
+    gamestate_set("hall_right_closet_opened");
 }
 
 static void carpet_action(void) {
-    gamestate_move_hall_carpet(!gamestate_is_hall_carpet_moved());
+    gamestate_set("hall_carpet_moved");
 }
 
 static void message_action(void) {
@@ -46,15 +46,15 @@ static void message_action(void) {
 }
 
 static bool message_is_active(void) {
-    return gamestate_is_hall_carpet_moved() && !inventory_has(ITEM_MESSAGE);
+    return gamestate_get("hall_carpet_moved") && !inventory_has(ITEM_MESSAGE);
 }
 
 static bool left_closet_contents_is_active(void) {
-    return gamestate_is_hall_left_closet_opened() && !inventory_has(ITEM_SCREWDRIVER);
+    return gamestate_get("hall_left_closet_opened") && !inventory_has(ITEM_SCREWDRIVER);
 }
 
 static bool right_closet_contents_is_active(void) {
-    return gamestate_is_hall_right_closet_opened() && !inventory_has(ITEM_FLASHLIGHT);
+    return gamestate_get("hall_right_closet_opened") && !inventory_has(ITEM_FLASHLIGHT);
 }
 
 static void left_closet_contents_action(void) {
@@ -75,7 +75,7 @@ static Hotspot hotspots[] = {
         .height = 70,
         .id = "HALL_CLOSET",
         .message_id = "HALL_LEFT_CLOSET_CONTENTS",
-        .is_active = left_closet_contents_is_active,
+        .condition = left_closet_contents_is_active,
         .action = left_closet_contents_action
     },
     {
@@ -85,7 +85,7 @@ static Hotspot hotspots[] = {
         .height = 70,
         .id = "HALL_CLOSET",
         .message_id = "HALL_RIGHT_CLOSET_CONTENTS",
-        .is_active = right_closet_contents_is_active,
+        .condition = right_closet_contents_is_active,
         .action = right_closet_contents_action
     },
     {
@@ -152,7 +152,7 @@ static Hotspot hotspots[] = {
         .width = 28,
         .height = 20,
         .id = "HALL_CARPET",
-        .is_active = message_is_active,
+        .condition = message_is_active,
         .message_id = "HALL_MESSAGE",
         .action = message_action
     },
@@ -180,21 +180,21 @@ static void room_init(void) {
 static void room_draw(void) {
     C2D_DrawImageAt(img_background, 0.0f, 0.0f, 0.0f, NULL, 1.0f, 1.0f);
 
-    if (gamestate_is_hall_right_closet_opened()) {
+    if (gamestate_get("hall_right_closet_opened")) {
         if (inventory_has(ITEM_FLASHLIGHT)) {
             C2D_DrawImageAt(img_right_closet_empty, 39.0f, 130.0f, 0.1f, NULL, 1.0f, 1.0f);
         } else {
             C2D_DrawImageAt(img_right_closet_opened, 39.0f, 129.0f, 0.1f, NULL, 1.0f, 1.0f);
         }
     }
-    if (gamestate_is_hall_left_closet_opened()) {
+    if (gamestate_get("hall_left_closet_opened")) {
         if (inventory_has(ITEM_SCREWDRIVER)) {
             C2D_DrawImageAt(img_left_closet_empty, 0.0f, 144.0f, 0.1f, NULL, 1.0f, 1.0f);
         } else {
             C2D_DrawImageAt(img_left_closet_opened, 0.0f, 144.0f, 0.1f, NULL, 1.0f, 1.0f);
         }
     }
-    if (gamestate_is_hall_carpet_moved()) {
+    if (gamestate_get("hall_carpet_moved")) {
         C2D_DrawImageAt(img_carpet_moved, 22.0f, 169.0f, 0.2f, NULL, 1.0f, 1.0f);
         if (!inventory_has(ITEM_MESSAGE)) {
             C2D_DrawImageAt(img_message, 124.0f, 200.0f, 0.3f, NULL, 1.0f, 1.0f);

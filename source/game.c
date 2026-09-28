@@ -62,6 +62,7 @@ void game_set_room(Room *room) {
     if (current_room && current_room->init) {
         current_room->init();
     }
+    printf("entering Room: %d hotspots found\n", current_room->hotspot_count);
 }
 
 void game_close(void) {
@@ -90,6 +91,7 @@ void game_over(GameOverId id) {
 }
 
 void game_init(void) {
+    gameover_close();
     hud_init();
     game_mode = GAME_TITLE;
     title_init();
@@ -99,7 +101,6 @@ void game_start(void) {
     title_close();
     inventory_reset();
     gamestate_reset();
-    gameover_close();
     hud_reset();
     game_mode = GAME_NORMAL;
     message_text = NULL;
@@ -122,7 +123,7 @@ static Hotspot *find_hotspot(int x, int y) {
     for (size_t i = 0; i < current_room->hotspot_count; i++) {
         Hotspot *hotspot = &current_room->hotspots[i];
 
-        if (hotspot->is_active && !hotspot->is_active()) {
+        if (hotspot->condition && !hotspot->condition()) {
             continue;
         }
 
@@ -172,6 +173,7 @@ void game_end_timeline(void) {
     game_mode = GAME_TITLE;
     title_init();
 }
+
 void game_start_intro(void) {
     title_close();
     if (!timeline_init("romfs:/timelines/intro")) {
@@ -182,8 +184,7 @@ void game_start_intro(void) {
     game_mode = GAME_TIMELINE;
 }
 
-static void update_movement(circlePosition analog)
-{
+static void update_movement(circlePosition analog) {
     const int DEADZONE = 60;
 
     int x = analog.dx;
@@ -254,6 +255,7 @@ static void update_touch(touchPosition touch) {
         return;
     }
 
+    printf("current hotspot: %s\n", hotspot->id);
     if (hotspot != active_hotspot) {
         active_hotspot = hotspot;
         target = hotspot;
@@ -270,11 +272,11 @@ static void update_touch(touchPosition touch) {
         hotspot->action();
     }
 
-    if (target && target->is_active && !target->is_active()) {
+    if (target && target->condition && !target->condition()) {
         target = NULL;
     }
 
-    if (active_hotspot && active_hotspot->is_active && !active_hotspot->is_active()) {
+    if (active_hotspot && active_hotspot->condition && !active_hotspot->condition()) {
         active_hotspot = NULL;
     }
 }
@@ -323,13 +325,16 @@ void game_play_piano(void) {
 }
 
 void game_stop_piano(bool success) {
+    if (success) {
+        if (!gamestate_get("livingroom_golden_statue_placed")) {
+            return;
+        }
+        gamestate_set("livingroom_secret_passage_opened");
+        game_show_message("LIVINGROOM_SECRET_PASSAGE_OPEN");
+    }
     piano_close();
     music_play("romfs:/audio/background.ogg");
     game_mode = GAME_NORMAL;
-    if (success) {
-        gamestate_open_livingroom_secret_passage();
-        game_show_message("LIVINGROOM_SECRET_PASSAGE_OPEN");
-    }
 }
 
 void game_end_simon(bool success) {
@@ -364,7 +369,7 @@ void game_update(u32 keys, circlePosition analog, touchPosition touch) {
             return;
 
         case GAME_TIMELINE:
-            timeline_update();
+            timeline_update(keys);
             return;
 
         case GAME_OVER:

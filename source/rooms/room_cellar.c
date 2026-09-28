@@ -18,8 +18,8 @@ static C2D_Image img_alarm_box_enabled;
 
 static bool alarm_box_use_item(ItemId item) {
     if (item == ITEM_SCREWDRIVER) {
-        if (!gamestate_is_cellar_alarm_box_unscrewed()) {
-            gamestate_unscrew_cellar_alarm_box();
+        if (!gamestate_get("cellar_alarm_box_unscrewed")) {
+            gamestate_set("cellar_alarm_box_unscrewed");
             game_show_message("CELLAR_OPEN_ALARM_BOX");
         } else {
             game_show_message("CELLAR_ALARM_BOX_ALREADY_OPENED");
@@ -30,13 +30,14 @@ static bool alarm_box_use_item(ItemId item) {
 }
 
 static void alarm_box_action(void) {
-    if (gamestate_is_cellar_alarm_box_unscrewed()) {
-        gamestate_open_cellar_alarm_box();
-    }}
+    if (gamestate_get("cellar_alarm_box_unscrewed")) {
+        gamestate_set("cellar_alarm_box_opened");
+    }
+}
 
 static void opened_alarm_box_action(void) {
-    gamestate_disable_diningroom_lasers(!gamestate_are_diningroom_lasers_disabled());
-    if (gamestate_are_diningroom_lasers_disabled()) {
+    gamestate_set("diningroom_lasers_disabled");
+    if (gamestate_get("diningroom_lasers_disabled")) {
         game_show_message("CELLAR_DISABLE_ALARM_BOX");
     } else {
         game_show_message("CELLAR_ENABLE_ALARM_BOX");
@@ -47,6 +48,10 @@ static void simon_action(void) {
     game_start_simon();
 }
 
+static bool cellar_alarm_box_opened(void) {
+    return gamestate_get("cellar_alarm_box_opened");
+}
+
 static Hotspot hotspots[] = {
     {
         .x = 129,
@@ -54,7 +59,7 @@ static Hotspot hotspots[] = {
         .width = 40,
         .height = 45,
         .id = "CELLAR_OPENED_ALARM_BOX",
-        .is_active = gamestate_is_cellar_alarm_box_opened,
+        .condition = cellar_alarm_box_opened,
         .action = opened_alarm_box_action
     },
     {
@@ -113,9 +118,9 @@ static void room_init(void) {
 
 static void room_draw(void) {
     C2D_DrawImageAt(img_background, 0.0f, 0.0f, 0.0f, NULL, 1.0f, 1.0f);
-    if (gamestate_are_diningroom_lasers_disabled()) {
+    if (gamestate_get("diningroom_lasers_disabled")) {
         C2D_DrawImageAt(img_alarm_box_enabled, 135.0f, 20.0f, 0.3f, NULL, 1.0f, 1.0f);
-    } else if (gamestate_is_cellar_alarm_box_opened()) {
+    } else if (gamestate_get("cellar_alarm_box_opened")) {
         C2D_DrawImageAt(img_alarm_box_opened, 135.0f, 20.0f, 0.3f, NULL, 1.0f, 1.0f);
     }
 }

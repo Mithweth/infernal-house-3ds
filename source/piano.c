@@ -5,7 +5,6 @@
 #include "gfx_piano.h"
 #include "lang.h"
 #include "game.h"
-#include "gamestate.h"
 
 #define PIANO_CHANNEL_FIRST  5
 #define PIANO_CHANNEL_LAST   10
@@ -147,9 +146,7 @@ static void piano_register_note(int note) {
     }
 
     if (piano_pattern_matches(pattern_octave3) || piano_pattern_matches(pattern_octave4)) {
-        if (gamestate_is_livingroom_golden_statue_placed()) {
-            game_stop_piano(true);
-        }
+        game_stop_piano(true);
     }
 }
 

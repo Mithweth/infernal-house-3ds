@@ -1,400 +1,154 @@
 // gamestate.c
 
-#include <stdbool.h>
+#include "gamestate.h"
+
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
-typedef struct {
-    bool diningroom_lasers_disabled;
-    bool diningroom_right_cabinet_door_opened;
-    bool diningroom_left_cabinet_door_opened;
-    bool diningroom_soup_opened;
-    bool hall_left_closet_opened;
-    bool hall_right_closet_opened;
-    bool hall_carpet_moved;
-    bool cellar_alarm_box_unscrewed;
-    bool cellar_alarm_box_opened;
-    bool livingroom_piano_opened;
-    bool livingroom_fireplace_hearth_opened;
-    bool livingroom_golden_statue_placed;
-    bool livingroom_secret_passage;
-    bool rope_used_in_livingroom_hearth;
-    bool library_secret_passage_opened;
-    bool library_statue_taken;
-    bool kitchen_refrigerator_opened;
-    bool kitchen_below_closet_opened;
-    bool kitchen_oven_opened;
-    bool kitchen_top_closet_opened;
-    bool kitchen_bottom_closet_opened;
-    bool kitchen_drawer_opened;
-    bool kitchen_dishwasher_opened;
-    bool firstfloor_carpet_moved;
-    bool secondfloor_door_unlocked;
-    bool firstbedroom_lights_on;
-    bool firstbedroom_closet_opened;
-    bool firstbedroom_left_nightstand_opened;
-    bool firstbedroom_right_nightstand_opened;
-    bool secondbedroom_left_nightstand_opened;
-    bool secondbedroom_left_closet_door_opened;
-    bool secondbedroom_right_closet_door_opened;
-    bool secondbedroom_closet_drawer_opened;
-    bool secondbedroom_lights_on;
-    bool secondbedroom_bedpost_pulled;
-    bool secondbedroom_key_taken;
-    bool underground_wall_broken;
-    bool underground_dug;
-    bool underground_card_taken;
-    bool bathroom_shower_curtain_opened;
-    bool bathroom_carpet_moved;
-    bool bathroom_closet_doors_opened;
-    bool bathroom_closet_drawer_opened;
-} GameState;
-
-static GameState game_state;
-
-bool gamestate_are_diningroom_lasers_disabled(void) {
-    return game_state.diningroom_lasers_disabled;
-}
-
-void gamestate_disable_diningroom_lasers(bool value) {
-    game_state.diningroom_lasers_disabled = value;
-}
-
-void gamestate_open_hall_left_closet(bool value) {
-    game_state.hall_left_closet_opened = value;
-}
-
-void gamestate_open_hall_right_closet(bool value) {
-    game_state.hall_right_closet_opened = value;
-}
-
-void gamestate_move_hall_carpet(bool value) {
-    game_state.hall_carpet_moved = value;
-}
-
-bool gamestate_is_hall_left_closet_opened(void) {
-    return game_state.hall_left_closet_opened;
-}
-
-bool gamestate_is_hall_right_closet_opened(void) {
-    return game_state.hall_right_closet_opened;
-}
-
-bool gamestate_is_hall_carpet_moved(void) {
-    return game_state.hall_carpet_moved;
-}
-
-bool gamestate_is_diningroom_right_cabinet_door_opened(void) {
-    return game_state.diningroom_right_cabinet_door_opened;
-}
-
-void gamestate_open_diningroom_right_cabinet_door(bool value) {
-    game_state.diningroom_right_cabinet_door_opened = value;
-}
-
-bool gamestate_is_diningroom_left_cabinet_door_opened(void) {
-    return game_state.diningroom_left_cabinet_door_opened;
-}
-
-void gamestate_open_diningroom_left_cabinet_door(bool value) {
-    game_state.diningroom_left_cabinet_door_opened = value;
-}
-
-bool gamestate_is_diningroom_soup_opened(void) {
-    return game_state.diningroom_soup_opened;
-}
-
-void gamestate_move_diningroom_soup(bool value) {
-    game_state.diningroom_soup_opened = value;
-}
-
-void gamestate_unscrew_cellar_alarm_box(void) {
-    game_state.cellar_alarm_box_unscrewed = true;
-}
-
-bool gamestate_is_cellar_alarm_box_unscrewed(void) {
-    return game_state.cellar_alarm_box_unscrewed;
-}
-
-void gamestate_open_cellar_alarm_box(void) {
-    game_state.cellar_alarm_box_opened = true;
-}
-
-bool gamestate_is_cellar_alarm_box_opened(void) {
-    return game_state.cellar_alarm_box_opened;
-}
-
-void gamestate_open_livingroom_piano(bool value) {
-    game_state.livingroom_piano_opened = value;
-}
-
-bool gamestate_is_livingroom_piano_opened(void) {
-    return game_state.livingroom_piano_opened;
-}
-
-void gamestate_open_livingroom_fireplace_hearth(void) {
-    game_state.livingroom_fireplace_hearth_opened = true;
-}
-
-bool gamestate_is_livingroom_fireplace_hearth_opened(void) {
-    return game_state.livingroom_fireplace_hearth_opened;
-}
-
-void gamestate_set_livingroom_golden_statue_placed(void) {
-    game_state.livingroom_golden_statue_placed = true;
-}
-
-bool gamestate_is_livingroom_golden_statue_placed(void) {
-    return game_state.livingroom_golden_statue_placed;
-}
-
-void gamestate_open_livingroom_secret_passage(void) {
-    game_state.livingroom_secret_passage = true;
-}
-
-bool gamestate_is_livingroom_secret_passage_opened(void) {
-    return game_state.livingroom_secret_passage;
-}
-
-void gamestate_bind_rope_used_in_livingroom_hearth(void) {
-    game_state.rope_used_in_livingroom_hearth = true;
-}
-
-bool gamestate_is_rope_used_in_livingroom_hearth(void) {
-    return game_state.rope_used_in_livingroom_hearth;
-}
-
-void gamestate_open_library_secret_passage(void) {
-    game_state.library_secret_passage_opened = true;
-}
-
-bool gamestate_is_library_secret_passage_opened(void) {
-    return game_state.library_secret_passage_opened;
-}
-
-void gamestate_take_library_statue(void) {
-    game_state.library_statue_taken = true;
-}
-
-bool gamestate_is_library_statue_taken(void) {
-    return game_state.library_statue_taken;
-}
+#define GAMESTATE_MAX 128
 
-void gamestate_open_kitchen_refrigerator(bool value) {
-    game_state.kitchen_refrigerator_opened = value;
-}
-
-bool gamestate_is_kitchen_refrigerator_opened(void) {
-    return game_state.kitchen_refrigerator_opened;
-}
-
-void gamestate_open_kitchen_below_closet(bool value) {
-    game_state.kitchen_below_closet_opened = value;
-}
-
-bool gamestate_is_kitchen_below_closet_opened(void) {
-    return game_state.kitchen_below_closet_opened;
-}
-
-void gamestate_open_kitchen_oven(bool value) {
-    game_state.kitchen_oven_opened = value;
-}
-
-bool gamestate_is_kitchen_oven_opened(void) {
-    return game_state.kitchen_oven_opened;
-}
-
-void gamestate_open_kitchen_top_closet(bool value) {
-    game_state.kitchen_top_closet_opened = value;
-}
-
-bool gamestate_is_kitchen_top_closet_opened(void) {
-    return game_state.kitchen_top_closet_opened;
-}
-
-void gamestate_open_kitchen_bottom_closet(bool value) {
-    game_state.kitchen_bottom_closet_opened = value;
-}
-
-bool gamestate_is_kitchen_bottom_closet_opened(void) {
-    return game_state.kitchen_bottom_closet_opened;
-}
-
-void gamestate_open_kitchen_dishwasher(bool value) {
-    game_state.kitchen_dishwasher_opened = value;
-}
-
-bool gamestate_is_kitchen_dishwasher_opened(void) {
-    return game_state.kitchen_dishwasher_opened;
-}
-
-void gamestate_open_kitchen_drawer(bool value) {
-    game_state.kitchen_drawer_opened = value;
-}
-
-bool gamestate_is_kitchen_drawer_opened(void) {
-    return game_state.kitchen_drawer_opened;
-}
-
-void gamestate_move_firstfloor_carpet(bool value) {
-    game_state.firstfloor_carpet_moved = value;
-}
-
-bool gamestate_is_firstfloor_carpet_moved(void) {
-    return game_state.firstfloor_carpet_moved;
-}
-
-void gamestate_unlock_secondfloor_door(void) {
-    game_state.secondfloor_door_unlocked = true;
-}
+static GameState states[GAMESTATE_MAX];
+static size_t state_count = 0;
 
-bool gamestate_is_secondfloor_door_unlocked(void) {
-    return game_state.secondfloor_door_unlocked;
-}
 
-void gamestate_turn_firstbedroom_lights_on(bool value) {
-    game_state.firstbedroom_lights_on = value;
-}
+static char *trim(char *str) {
+    while (*str && isspace((unsigned char)*str)) {
+        str++;
+    }
 
-bool gamestate_is_firstbedroom_lights_on(void) {
-    return game_state.firstbedroom_lights_on;
-}
+    if (*str == '\0') {
+        return str;
+    }
 
-void gamestate_open_firstbedroom_closet(bool value) {
-    game_state.firstbedroom_closet_opened = value;
-}
+    char *end = str + strlen(str) - 1;
 
-bool gamestate_is_firstbedroom_closet_opened(void) {
-    return game_state.firstbedroom_closet_opened;
-}
+    while (end > str && isspace((unsigned char)*end)) {
+        *end-- = '\0';
+    }
 
-void gamestate_open_firstbedroom_left_nightstand(bool value) {
-    game_state.firstbedroom_left_nightstand_opened = value;
+    return str;
 }
 
-bool gamestate_is_firstbedroom_left_nightstand_opened(void) {
-    return game_state.firstbedroom_left_nightstand_opened;
-}
+static GameState *gamestate_find(const char *name) {
+    for (size_t i = 0; i < state_count; i++) {
+        if (strcmp(states[i].name, name) == 0) {
+            return &states[i];
+        }
+    }
 
-void gamestate_open_firstbedroom_right_nightstand(bool value) {
-    game_state.firstbedroom_right_nightstand_opened = value;
+    return NULL;
 }
 
-bool gamestate_is_firstbedroom_right_nightstand_opened(void) {
-    return game_state.firstbedroom_right_nightstand_opened;
-}
+bool gamestate_init(const char *filename) {
+    FILE *file = fopen(filename, "r");
 
-void gamestate_break_underground_wall(void) {
-    game_state.underground_wall_broken = true;
-}
+    if (!file) {
+        printf("Cannot open %s\n", filename);
+        return false;
+    }
 
-bool gamestate_is_underground_wall_broken(void) {
-    return game_state.underground_wall_broken;
-}
+    char line[256];
+    size_t line_number = 0;
 
-void gamestate_open_secondbedroom_left_nightstand(bool value) {
-    game_state.secondbedroom_left_nightstand_opened = value;
-}
+    while (fgets(line, sizeof(line), file)) {
+        line_number++;
+        char *p = trim(line);
 
-bool gamestate_is_secondbedroom_left_nightstand_opened(void) {
-    return game_state.secondbedroom_left_nightstand_opened;
-}
+        if (*p == '\0' || *p == '#')
+            continue;
 
-void gamestate_open_secondbedroom_left_closet_door(bool value) {
-    game_state.secondbedroom_left_closet_door_opened = value;
-}
+        char *name = strtok(p, ";");
+        char *type = strtok(NULL, ";");
 
-bool gamestate_is_secondbedroom_left_closet_door_opened(void) {
-    return game_state.secondbedroom_left_closet_door_opened;
-}
+        if (!name || !type) {
+            printf("romfs:/game.state:%zu: syntax error\n", line_number);
+            fclose(file);
+            return false;
+        }
 
-void gamestate_open_secondbedroom_right_closet_door(bool value) {
-    game_state.secondbedroom_right_closet_door_opened = value;
-}
+        name = trim(name);
+        type = trim(type);
 
-bool gamestate_is_secondbedroom_right_closet_door_opened(void) {
-    return game_state.secondbedroom_right_closet_door_opened;
-}
+        if (state_count >= GAMESTATE_MAX) {
+            printf("romfs:/game.state:%zu: too many gamestates\n", line_number);
+            fclose(file);
+            return false;
+        }
 
-void gamestate_pull_secondbedroom_bedpost(bool value) {
-    game_state.secondbedroom_bedpost_pulled = value;
-}
+        GameStateType state_type;
 
-bool gamestate_is_secondbedroom_bedpost_pulled(void) {
-    return game_state.secondbedroom_bedpost_pulled;
-}
+        if (strcmp(type, "reversible") == 0) {
+            state_type = GAMESTATE_REVERSIBLE;
+        } else if (strcmp(type, "irreversible") == 0) {
+            state_type = GAMESTATE_IRREVERSIBLE;
+        } else {
+            printf("romfs:/game.state:%zu: unknown type: %s\n", line_number, type);
+            fclose(file);
+            return false;
+        }
 
-void gamestate_open_secondbedroom_closet_drawer(bool value) {
-    game_state.secondbedroom_closet_drawer_opened = value;
-}
+        if (gamestate_find(name)) {
+            printf("romfs:/game.state:%zu: duplicate gamestate: %s\n", line_number, name);
+            fclose(file);
+            return false;
+        }
 
-bool gamestate_is_secondbedroom_closet_drawer_opened(void) {
-    return game_state.secondbedroom_closet_drawer_opened;
-}
+        GameState *state = &states[state_count++];
 
-void gamestate_take_secondbedroom_key(void) {
-    game_state.secondbedroom_key_taken = true;
-}
+        state->name = strdup(name);
+        state->type = state_type;
+        state->value = false;
+    }
 
-bool gamestate_is_secondbedroom_key_taken(void) {
-    return game_state.secondbedroom_key_taken;
-}
+    fclose(file);
 
-void gamestate_turn_secondbedroom_lights_on(bool value) {
-    game_state.secondbedroom_lights_on = value;
-}
+    printf("Loaded %zu gamestates\n", state_count);
 
-bool gamestate_is_secondbedroom_lights_on(void) {
-    return game_state.secondbedroom_lights_on;
+    return true;
 }
 
-bool gamestate_is_bathroom_shower_curtain_opened(void) {
-    return game_state.bathroom_shower_curtain_opened;
-}
 
-bool gamestate_is_bathroom_carpet_moved(void) {
-    return game_state.bathroom_carpet_moved;
-}
+bool gamestate_get(const char *name) {
+    GameState *state = gamestate_find(name);
 
-bool gamestate_are_bathroom_closet_doors_opened(void) {
-    return game_state.bathroom_closet_doors_opened;
-}
+    if (!state) {
+        printf("Unknown gamestate: %s\n", name);
+        return false;
+    }
 
-bool gamestate_is_bathroom_closet_drawer_opened(void) {
-    return game_state.bathroom_closet_drawer_opened;
+    return state->value;
 }
 
-void gamestate_open_bathroom_shower_curtain(bool value) {
-    game_state.bathroom_shower_curtain_opened  = value;
-}
 
-void gamestate_move_bathroom_carpet(bool value) {
-    game_state.bathroom_carpet_moved  = value;
-}
+void gamestate_set(const char *name) {
+    GameState *state = gamestate_find(name);
 
-void gamestate_open_bathroom_closet_doors(bool value) {
-    game_state.bathroom_closet_doors_opened  = value;
-}
+    if (!state) {
+        printf("Unknown gamestate: %s\n", name);
+        return;
+    }
 
-void gamestate_open_bathroom_closet_drawer(bool value) {
-    game_state.bathroom_closet_drawer_opened  = value;
-}
+    if (state->type == GAMESTATE_IRREVERSIBLE && state->value) {
+        return;
+    }
 
-bool gamestate_is_underground_dug(void) {
-    return game_state.underground_dug;
+    state->value = !state->value;
 }
 
-bool gamestate_is_underground_card_taken(void) {
-    return game_state.underground_card_taken;
-}
 
-void gamestate_dig_underground(void) {
-    game_state.underground_dug  = true;
-}
+void gamestate_close(void) {
+    for (size_t i = 0; i < state_count; i++) {
+        free(states[i].name);
+        states[i].name = NULL;
+    }
 
-void gamestate_underground_take_card(void) {
-    game_state.underground_card_taken  = true;
+    state_count = 0;
 }
 
 void gamestate_reset(void) {
-    memset(&game_state, 0, sizeof(game_state));
+    for (size_t i = 0; i < state_count; i++) {
+        states[i].value = false;
+    }
 }

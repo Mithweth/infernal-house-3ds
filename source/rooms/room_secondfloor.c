@@ -14,12 +14,16 @@ static C2D_Image img_background;
 
 static bool door_use_item(ItemId item) {
     if (item == ITEM_KEY_ONE) {
-        gamestate_unlock_secondfloor_door();
+        gamestate_set("secondfloor_door_unlocked");
         inventory_remove(ITEM_KEY_ONE);
         game_show_message("SECONDFLOOR_DOOR_UNLOCK");
         return true;
     }
     return false;
+}
+
+static bool secondfloor_door_unlocked(void) {
+    return gamestate_get("secondfloor_door_unlocked");
 }
 
 static Hotspot hotspots[] = {
@@ -30,7 +34,7 @@ static Hotspot hotspots[] = {
         .height = 170,
         .message_id = "SECONDFLOOR_DOOR_UNLOCKED",
         .id = "SECONDFLOOR_DOOR",
-        .is_active = gamestate_is_secondfloor_door_unlocked
+        .condition = secondfloor_door_unlocked
     },
     {
         .x = 12,
@@ -76,7 +80,7 @@ Room secondfloor = {
     .hotspots = hotspots,
     .hotspot_count = sizeof(hotspots) / sizeof(hotspots[0]),
     .south = {.action = south_action},
-    .west = {.action = west_action, .condition = gamestate_is_secondfloor_door_unlocked},
+    .west = {.action = west_action, .condition = secondfloor_door_unlocked},
     .init = room_init,
     .draw = room_draw,
     .close = room_close

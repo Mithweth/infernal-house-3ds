@@ -28,22 +28,22 @@ static C2D_Image img_light_paint_opened;
 
 
 static void lamp_action(void) {
-    gamestate_turn_secondbedroom_lights_on(!gamestate_is_secondbedroom_lights_on());
-    if (gamestate_is_secondbedroom_lights_on()) {
+    gamestate_set("secondbedroom_lights_on");
+    if (gamestate_get("secondbedroom_lights_on")) {
         game_show_message("SECONDBEDROOM_LAMP_TURNEDON");
     }
 }
 
 static void closet_drawer_action(void) {
-    gamestate_open_secondbedroom_closet_drawer(!gamestate_is_secondbedroom_closet_drawer_opened());
+    gamestate_set("secondbedroom_closet_drawer_opened");
 }
 
 static void right_closet_action(void) {
-    gamestate_open_secondbedroom_right_closet_door(!gamestate_is_secondbedroom_right_closet_door_opened());
+    gamestate_set("secondbedroom_right_closet_door_opened");
 }
 
 static void left_closet_action(void) {
-    gamestate_open_secondbedroom_left_closet_door(!gamestate_is_secondbedroom_left_closet_door_opened());
+    gamestate_set("secondbedroom_left_closet_door_opened");
 }
 
 static void pocket_action() {
@@ -52,15 +52,15 @@ static void pocket_action() {
 }
 
 static bool pocket_is_active(void) {
-    return gamestate_is_secondbedroom_right_closet_door_opened() && !inventory_has(ITEM_CIGARETTES);
+    return gamestate_get("secondbedroom_right_closet_door_opened") && !inventory_has(ITEM_CIGARETTES);
 }
 
 static void nightstand_drawer_action(void) {
-    gamestate_open_secondbedroom_left_nightstand(!gamestate_is_secondbedroom_left_nightstand_opened());
+    gamestate_set("secondbedroom_left_nightstand_opened");
 }
 
 static bool nightstand_drawer_is_active(void) {
-    return gamestate_is_secondbedroom_left_nightstand_opened() && !inventory_has(ITEM_RUBBER);    
+    return gamestate_get("secondbedroom_left_nightstand_opened") && !inventory_has(ITEM_RUBBER);
 }
 
 static void nightstand_objects_action(void) {
@@ -78,19 +78,35 @@ static void move_right_painting(void) {
 }
 
 static void pull_bedpost_action(void) {
-    gamestate_pull_secondbedroom_bedpost(!gamestate_is_secondbedroom_bedpost_pulled());
-    if (gamestate_is_secondbedroom_bedpost_pulled()) {
+    gamestate_set("secondbedroom_bedpost_pulled");
+    if (gamestate_get("secondbedroom_bedpost_pulled")) {
         game_show_message("SECONDBEDROOM_BED_FOOT_PULLED");
     }
 }
 
 static bool opened_painting_and_key_not_taken(void) {
-    return gamestate_is_secondbedroom_bedpost_pulled() && !gamestate_is_secondbedroom_key_taken();
+    return gamestate_get("secondbedroom_bedpost_pulled") && !gamestate_get("secondbedroom_key_taken");
 }
 
 static void take_key_one_action(void) {
-    gamestate_take_secondbedroom_key();
+    gamestate_set("secondbedroom_key_taken");
     inventory_add(ITEM_KEY_ONE);
+}
+
+static bool left_closet_door_opened(void) {
+    return gamestate_get("secondbedroom_left_closet_door_opened");
+}
+
+static bool right_closet_door_opened(void) {
+    return gamestate_get("secondbedroom_right_closet_door_opened");
+}
+
+static bool bedpost_pulled(void) {
+    return gamestate_get("secondbedroom_bedpost_pulled");
+}
+
+static bool closet_drawer_opened(void) {
+    return gamestate_get("secondbedroom_closet_drawer_opened");
 }
 
 static Hotspot hotspots[] = {
@@ -107,8 +123,9 @@ static Hotspot hotspots[] = {
         .y = 136,
         .width = 22,
         .height = 29,
-        .id = "SECONDBEDROOM_NIGHTSTAND_DRAWER_OPENED",
-        .is_active = nightstand_drawer_is_active,
+        .id = "SECONDBEDROOM_NIGHTSTAND_DRAWER",
+        .message_id = "SECONDBEDROOM_NIGHTSTAND_DRAWER_OPENED",
+        .condition = nightstand_drawer_is_active,
         .action = nightstand_objects_action
     },
     {
@@ -134,7 +151,7 @@ static Hotspot hotspots[] = {
         .height = 26,
         .id = "SECONDBEDROOM_CLOSET",
         .message_id = "SECONDBEDROOM_LEFT_CLOSET_TOP",
-        .is_active = gamestate_is_secondbedroom_left_closet_door_opened,
+        .condition = left_closet_door_opened,
         .action = left_closet_action
     },
     {
@@ -144,7 +161,7 @@ static Hotspot hotspots[] = {
         .height = 26,
         .id = "SECONDBEDROOM_CLOSET",
         .message_id = "SECONDBEDROOM_LEFT_CLOSET_MIDDLE",
-        .is_active = gamestate_is_secondbedroom_left_closet_door_opened,
+        .condition = left_closet_door_opened,
         .action = left_closet_action
     },
     {
@@ -154,7 +171,7 @@ static Hotspot hotspots[] = {
         .height = 37,
         .id = "SECONDBEDROOM_CLOSET",
         .message_id = "SECONDBEDROOM_LEFT_CLOSET_BOTTOM",
-        .is_active = gamestate_is_secondbedroom_left_closet_door_opened,
+        .condition = left_closet_door_opened,
         .action = left_closet_action
     },
     {
@@ -172,7 +189,7 @@ static Hotspot hotspots[] = {
         .height = 76,
         .id = "SECONDBEDROOM_RIGHT_CLOSET",
         .message_id = "SECONDBEDROOM_RIGHT_CLOSET_POCKET",
-        .is_active = pocket_is_active,
+        .condition = pocket_is_active,
         .action = pocket_action
     },
     {
@@ -181,7 +198,7 @@ static Hotspot hotspots[] = {
         .width = 34,
         .height = 76,
         .id = "SECONDBEDROOM_RIGHT_CLOSET",
-        .is_active = gamestate_is_secondbedroom_right_closet_door_opened
+        .condition = right_closet_door_opened
     },
     {
         .x = 178,
@@ -198,7 +215,7 @@ static Hotspot hotspots[] = {
         .height = 53,
         .id = "SECONDBEDROOM_PAINTING_2",
         .message_id = "SECONDBEDROOM_PAINTING_2_MOVED",
-        .is_active = opened_painting_and_key_not_taken,
+        .condition = opened_painting_and_key_not_taken,
         .action = take_key_one_action
     },
     {
@@ -208,7 +225,7 @@ static Hotspot hotspots[] = {
         .height = 53,
         .id = "SECONDBEDROOM_PAINTING_2",
         .message_id = "SECONDBEDROOM_PAINTING_2_EMPTY",
-        .is_active = gamestate_is_secondbedroom_bedpost_pulled
+        .condition = bedpost_pulled
     },
     {
         .x = 222,
@@ -223,8 +240,9 @@ static Hotspot hotspots[] = {
         .y = 150,
         .width = 79,
         .height = 26,
-        .id = "SECONDBEDROOM_CLOSET_DRAWER_OPENED",
-        .is_active = gamestate_is_secondbedroom_closet_drawer_opened,
+        .id = "SECONDBEDROOM_CLOSET_DRAWER",
+        .message_id = "SECONDBEDROOM_CLOSET_DRAWER_OPENED",
+        .condition = closet_drawer_opened,
         .action = closet_drawer_action
     },
     {
@@ -289,45 +307,45 @@ static void room_init(void) {
 }
 
 static void room_draw(void) {
-    if (gamestate_is_secondbedroom_lights_on()) {
+    if (gamestate_get("secondbedroom_lights_on")) {
         C2D_DrawImageAt(img_light_background, 0.0f, 0.0f, 0.0f, NULL, 1.0f, 1.0f);
-        if (gamestate_is_secondbedroom_left_nightstand_opened()) {
+        if (gamestate_get("secondbedroom_left_nightstand_opened")) {
             C2D_DrawImageAt(img_light_nightstand_drawer, 6.0f, 138.0f, 0.3f, NULL, 1.0f, 1.0f);
         }
-        if (gamestate_is_secondbedroom_left_closet_door_opened()) {
+        if (gamestate_get("secondbedroom_left_closet_door_opened")) {
             C2D_DrawImageAt(img_light_closet_left_door, 127.0f, 40.0f, 0.3f, NULL, 1.0f, 1.0f);
         }
-        if (gamestate_is_secondbedroom_right_closet_door_opened()) {
+        if (gamestate_get("secondbedroom_right_closet_door_opened")) {
             C2D_DrawImageAt(img_light_closet_right_door, 177.0f, 40.0f, 0.6f, NULL, 1.0f, 1.0f);
         }
-        if (gamestate_is_secondbedroom_closet_drawer_opened()) {
+        if (gamestate_get("secondbedroom_closet_drawer_opened")) {
             C2D_DrawImageAt(img_light_closet_drawer, 144.0f, 151.0f, 0.3f, NULL, 1.0f, 1.0f);
         }
-        if (gamestate_is_secondbedroom_bedpost_pulled()) {
+        if (gamestate_get("secondbedroom_bedpost_pulled")) {
             C2D_DrawImageAt(img_light_bedpost, 113.0f, 95.0f, 0.3f, NULL, 1.0f, 1.0f);
             C2D_DrawImageAt(img_light_paint_opened, 218.0f, 54.0f, 0.4f, NULL, 1.0f, 1.0f);
-            if (gamestate_is_secondbedroom_key_taken()) {
+            if (gamestate_get("secondbedroom_key_taken")) {
                 C2D_DrawImageAt(img_light_paint_empty, 231.0f, 78.0f, 0.5f, NULL, 1.0f, 1.0f);
             }
         }
     } else {
         C2D_DrawImageAt(img_dark_background, 0.0f, 0.0f, 0.0f, NULL, 1.0f, 1.0f);
-        if (gamestate_is_secondbedroom_left_nightstand_opened()) {
+        if (gamestate_get("secondbedroom_left_nightstand_opened")) {
             C2D_DrawImageAt(img_dark_nightstand_drawer, 6.0f, 139.0f, 0.3f, NULL, 1.0f, 1.0f);
         }
-        if (gamestate_is_secondbedroom_left_closet_door_opened()) {
+        if (gamestate_get("secondbedroom_left_closet_door_opened")) {
             C2D_DrawImageAt(img_dark_closet_left_door, 126.0f, 40.0f, 0.3f, NULL, 1.0f, 1.0f);
         }
-        if (gamestate_is_secondbedroom_right_closet_door_opened()) {
+        if (gamestate_get("secondbedroom_right_closet_door_opened")) {
             C2D_DrawImageAt(img_dark_closet_right_door, 179.0f, 40.0f, 0.6f, NULL, 1.0f, 1.0f);
         }
-        if (gamestate_is_secondbedroom_closet_drawer_opened()) {
+        if (gamestate_get("secondbedroom_closet_drawer_opened")) {
             C2D_DrawImageAt(img_dark_closet_drawer, 144.0f, 150.0f, 0.3f, NULL, 1.0f, 1.0f);
         }
-        if (gamestate_is_secondbedroom_bedpost_pulled()) {
+        if (gamestate_get("secondbedroom_bedpost_pulled")) {
             C2D_DrawImageAt(img_dark_bedpost, 113.0f, 94.0f, 0.3f, NULL, 1.0f, 1.0f);
             C2D_DrawImageAt(img_dark_paint_opened, 218.0f, 54.0f, 0.4f, NULL, 1.0f, 1.0f);
-            if (gamestate_is_secondbedroom_key_taken()) {
+            if (gamestate_get("secondbedroom_key_taken")) {
                 C2D_DrawImageAt(img_dark_paint_empty, 231.0f, 75.0f, 0.5f, NULL, 1.0f, 1.0f);
             }
         }

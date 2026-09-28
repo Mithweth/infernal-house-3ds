@@ -21,12 +21,12 @@ static void play_piano_action(void) {
 }
 
 static void piano_action(void) {
-    if (gamestate_is_livingroom_piano_opened()) {
+    if (gamestate_get("livingroom_piano_opened")) {
         sfx_play("romfs:/audio/closet_close.raw");
     } else {
         sfx_play("romfs:/audio/closet_open.raw");
     }
-    gamestate_open_livingroom_piano(!gamestate_is_livingroom_piano_opened());
+    gamestate_set("livingroom_piano_opened");
 }
 
 static void lighter_action(void) {
@@ -42,7 +42,7 @@ static void fall_gameover(void) {
 }
 
 static void north_action(void) {
-    if (!gamestate_is_rope_used_in_livingroom_hearth()) {
+    if (!gamestate_get("livingroom_rope_in_hearth_bound")) {
         game_wait_for_sfx("romfs:/audio/falling_down.raw", fall_gameover);
     } else {
         //game_set_room(&laboratory);
@@ -51,7 +51,7 @@ static void north_action(void) {
 
 static bool fireplace_use_item(ItemId item) {
     if (item == ITEM_STATUE) {
-        gamestate_set_livingroom_golden_statue_placed();
+        gamestate_set("livingroom_golden_statue_placed");
         inventory_remove(ITEM_STATUE);
         game_show_message("LIVINGROOM_PLACE_STATUE");
         return true;
@@ -60,12 +60,12 @@ static bool fireplace_use_item(ItemId item) {
 }
 
 static bool hearth_opened_is_active(void) {
-    return gamestate_is_livingroom_secret_passage_opened() && !gamestate_is_rope_used_in_livingroom_hearth();
+    return gamestate_get("livingroom_secret_passage_opened") && !gamestate_get("livingroom_rope_in_hearth_bound");
 }
 
 static bool hearth_use_item(ItemId item) {
     if (item == ITEM_ROPE) {
-        gamestate_bind_rope_used_in_livingroom_hearth();
+        gamestate_set("livingroom_rope_in_hearth_bound");
         inventory_remove(ITEM_ROPE);
         game_show_message("LIVINGROOM_USE_ROPE");
         return true;
@@ -89,6 +89,14 @@ static bool lighter_use_item(ItemId item) {
     return false;
 }
 
+static bool livingroom_piano_opened(void) {
+    return gamestate_get("livingroom_piano_opened");
+}
+
+static bool livingroom_secret_passage_opened(void) {
+    return gamestate_get("livingroom_secret_passage_opened");
+}
+
 static Hotspot hotspots[] = {
     {
         .x = 146,
@@ -96,7 +104,7 @@ static Hotspot hotspots[] = {
         .width = 68,
         .height = 47,
         .id = "LIVINGROOM_FIREPLACE_HEARTH_OPENED",
-        .is_active = hearth_opened_is_active,
+        .condition = hearth_opened_is_active,
         .use_item = hearth_use_item
     },
     {
@@ -105,7 +113,7 @@ static Hotspot hotspots[] = {
         .width = 91,
         .height = 30,
         .id = "LIVINGROOM_PIANO",
-        .is_active = gamestate_is_livingroom_piano_opened,
+        .condition = livingroom_piano_opened,
         .action = play_piano_action
     },
     {
@@ -122,7 +130,7 @@ static Hotspot hotspots[] = {
         .width = 32,
         .height = 20,
         .id = "LIVINGROOM_LIGHTER",
-        .is_active = lighter_is_active,
+        .condition = lighter_is_active,
         .action = lighter_action,
         .use_item = lighter_use_item
     },
@@ -182,16 +190,16 @@ static void room_draw(void) {
     if (!inventory_has(ITEM_LIGHTER)) {
         C2D_DrawImageAt(img_lighter, 146.0f, 181.0f, 0.1f, NULL, 1.0f, 1.0f);
     }
-    if (gamestate_is_livingroom_piano_opened()) {
+    if (gamestate_get("livingroom_piano_opened")) {
         C2D_DrawImageAt(img_piano_opened, 2.0f, 102.0f, 0.1f, NULL, 1.0f, 1.0f); 
     }
-    if (gamestate_is_livingroom_secret_passage_opened()) {
+    if (gamestate_get("livingroom_secret_passage_opened")) {
         C2D_DrawImageAt(img_hearth_opened, 150.0f, 108.0f, 0.1f, NULL, 1.0f, 1.0f);
     }
-    if (gamestate_is_rope_used_in_livingroom_hearth()) {
+    if (gamestate_get("livingroom_rope_in_hearth_bound")) {
         C2D_DrawImageAt(img_hearth_prepared, 152.0f, 110.0f, 0.1f, NULL, 1.0f, 1.0f); 
     }
-    if (gamestate_is_livingroom_golden_statue_placed()) {
+    if (gamestate_get("livingroom_golden_statue_placed")) {
         C2D_DrawImageAt(img_statue, 162.0f, 54.0f, 0.1f, NULL, 1.0f, 1.0f); 
     }
 }
@@ -212,7 +220,7 @@ Room livingroom = {
     .hotspots = hotspots,
     .hotspot_count = sizeof(hotspots) / sizeof(hotspots[0]),
     .south = {.action = south_action},
-    .north = {.action = north_action, .condition = gamestate_is_livingroom_secret_passage_opened},
+    .north = {.action = north_action, .condition = livingroom_secret_passage_opened},
     .init = room_init,
     .draw = room_draw,
     .close = room_close

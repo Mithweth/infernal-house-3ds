@@ -20,31 +20,52 @@ static C2D_Image img_oven_opened;
 
 
 static void refrigerator_action(void) {
-    gamestate_open_kitchen_refrigerator(!gamestate_is_kitchen_refrigerator_opened());
+    gamestate_set("kitchen_refrigerator_opened");
 }
 
 static void below_closet_action(void) {
-    gamestate_open_kitchen_below_closet(!gamestate_is_kitchen_below_closet_opened());
+    gamestate_set("kitchen_below_closet_opened");
 }
 
 static void oven_action(void) {
-    gamestate_open_kitchen_oven(!gamestate_is_kitchen_oven_opened());
+    gamestate_set("kitchen_oven_opened");
 }
 
 static void dishwasher_action(void) {
-    gamestate_open_kitchen_dishwasher(!gamestate_is_kitchen_dishwasher_opened());
+    gamestate_set("kitchen_dishwasher_opened");
 }
 
 static void top_closet_action(void) {
-    gamestate_open_kitchen_top_closet(!gamestate_is_kitchen_top_closet_opened());
+    gamestate_set("kitchen_top_closet_opened");
 }
 
 static void bottom_closet_action(void) {
-    gamestate_open_kitchen_bottom_closet(!gamestate_is_kitchen_bottom_closet_opened());
+    gamestate_set("kitchen_bottom_closet_opened");
 }
 
 static void drawer_action(void) {
-    gamestate_open_kitchen_drawer(!gamestate_is_kitchen_drawer_opened());
+    gamestate_set("kitchen_drawer_opened");
+}
+
+static bool kitchen_below_closet_opened(void) {
+    return gamestate_get("kitchen_below_closet_opened");
+}
+
+static bool kitchen_refrigerator_opened(void) {
+    return gamestate_get("kitchen_refrigerator_opened");
+}
+
+static bool kitchen_dishwasher_opened(void) {
+    return gamestate_get("kitchen_dishwasher_opened");
+}
+static bool kitchen_drawer_opened(void) {
+    return gamestate_get("kitchen_drawer_opened");
+}
+static bool kitchen_top_closet_opened(void) {
+    return gamestate_get("kitchen_top_closet_opened");
+}
+static bool kitchen_bottom_closet_opened(void) {
+    return gamestate_get("kitchen_top_closet_opened");
 }
 
 static Hotspot hotspots[] = {
@@ -55,7 +76,7 @@ static Hotspot hotspots[] = {
         .height = 20,
         .id = "KITCHEN_REFRIGERATOR",
         .message_id = "KITCHEN_REFRIGERATOR_OPENED_1",
-        .is_active = gamestate_is_kitchen_refrigerator_opened,
+        .condition = kitchen_refrigerator_opened,
         .action = refrigerator_action
     },
     {
@@ -65,7 +86,7 @@ static Hotspot hotspots[] = {
         .height = 19,
         .id = "KITCHEN_REFRIGERATOR",
         .message_id = "KITCHEN_REFRIGERATOR_OPENED_2",
-        .is_active = gamestate_is_kitchen_refrigerator_opened,
+        .condition = kitchen_refrigerator_opened,
         .action = refrigerator_action
     },
     {
@@ -75,7 +96,7 @@ static Hotspot hotspots[] = {
         .height = 19,
         .id = "KITCHEN_REFRIGERATOR",
         .message_id = "KITCHEN_REFRIGERATOR_OPENED_3",
-        .is_active = gamestate_is_kitchen_refrigerator_opened,
+        .condition = kitchen_refrigerator_opened,
         .action = refrigerator_action
     },
     {
@@ -85,7 +106,7 @@ static Hotspot hotspots[] = {
         .height = 21,
         .id = "KITCHEN_REFRIGERATOR",
         .message_id = "KITCHEN_REFRIGERATOR_OPENED_4",
-        .is_active = gamestate_is_kitchen_refrigerator_opened,
+        .condition = kitchen_refrigerator_opened,
         .action = refrigerator_action
     },
     {
@@ -95,7 +116,7 @@ static Hotspot hotspots[] = {
         .height = 48,
         .id = "KITCHEN_REFRIGERATOR",
         .message_id = "KITCHEN_REFRIGERATOR_OPENED_5",
-        .is_active = gamestate_is_kitchen_refrigerator_opened,
+        .condition = kitchen_refrigerator_opened,
         .action = refrigerator_action
     },
     {
@@ -113,7 +134,7 @@ static Hotspot hotspots[] = {
         .height = 64,
         .id = "KITCHEN_CLOSET",
         .message_id = "KITCHEN_CLOSET_BELOW_OPENED",
-        .is_active = gamestate_is_kitchen_below_closet_opened,
+        .condition = kitchen_below_closet_opened,
         .action = below_closet_action
     },
     {
@@ -139,7 +160,7 @@ static Hotspot hotspots[] = {
         .height = 70,
         .id = "KITCHEN_DISHWASHER",
         .message_id = "KITCHEN_DISHWASHER_OPENED",
-        .is_active = gamestate_is_kitchen_dishwasher_opened,
+        .condition = kitchen_dishwasher_opened,
         .action = dishwasher_action
     },
     {
@@ -157,7 +178,7 @@ static Hotspot hotspots[] = {
         .height = 119,
         .id = "KITCHEN_CLOSET",
         .message_id = "KITCHEN_TOP_CLOSET_OPENED",
-        .is_active = gamestate_is_kitchen_top_closet_opened,
+        .condition = kitchen_top_closet_opened,
         .action = top_closet_action
     },
     {
@@ -175,7 +196,7 @@ static Hotspot hotspots[] = {
         .height = 19,
         .id = "KITCHEN_DRAWER",
         .message_id = "KITCHEN_DRAWER_OPENED",
-        .is_active = gamestate_is_kitchen_drawer_opened,
+        .condition = kitchen_drawer_opened,
         .action = drawer_action
     },
     {
@@ -193,7 +214,7 @@ static Hotspot hotspots[] = {
         .height = 64,
         .id = "KITCHEN_CLOSET",
         .message_id = "KITCHEN_BOTTOM_CLOSET_OPENED",
-        .is_active = gamestate_is_kitchen_bottom_closet_opened,
+        .condition = kitchen_bottom_closet_opened,
         .action = bottom_closet_action
     },
     {
@@ -242,25 +263,25 @@ static void room_init(void) {
 
 static void room_draw(void) {
     C2D_DrawImageAt(img_background, 0.0f, 0.0f, 0.0f, NULL, 1.0f, 1.0f);
-    if (gamestate_is_kitchen_refrigerator_opened()) {
+    if (gamestate_get("kitchen_refrigerator_opened")) {
         C2D_DrawImageAt(img_fridge_opened, 0.0f, 40.0f, 0.3f, NULL, 1.0f, 1.0f);
     }
-    if (gamestate_is_kitchen_below_closet_opened()) {
+    if (gamestate_get("kitchen_below_closet_opened")) {
         C2D_DrawImageAt(img_closet_below_opened, 49.0f, 128.0f, 0.3f, NULL, 1.0f, 1.0f);
     }
-    if (gamestate_is_kitchen_oven_opened()) {
+    if (gamestate_get("kitchen_oven_opened")) {
         C2D_DrawImageAt(img_oven_opened, 109.0f, 137.0f, 0.4f, NULL, 1.0f, 1.0f);
     }
-    if (gamestate_is_kitchen_dishwasher_opened()) {
+    if (gamestate_get("kitchen_dishwasher_opened")) {
         C2D_DrawImageAt(img_dishwasher_opened, 166.0f, 128.0f, 0.5f, NULL, 1.0f, 1.0f);
     }
-    if (gamestate_is_kitchen_top_closet_opened()) {
+    if (gamestate_get("kitchen_top_closet_opened")) {
         C2D_DrawImageAt(img_top_closet_opened, 260.0f, 0.0f, 0.3f, NULL, 1.0f, 1.0f);
     }
-    if (gamestate_is_kitchen_drawer_opened()) {
+    if (gamestate_get("kitchen_drawer_opened")) {
         C2D_DrawImageAt(img_drawer_opened, 252.0f, 120.0f, 0.4f, NULL, 1.0f, 1.0f);
     }
-    if (gamestate_is_kitchen_bottom_closet_opened()) {
+    if (gamestate_get("kitchen_bottom_closet_opened")) {
         C2D_DrawImageAt(img_bottom_closet_opened, 262.0f, 136.0f, 0.3f, NULL, 1.0f, 1.0f);
     }
 }

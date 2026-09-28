@@ -33,7 +33,7 @@ static bool sledgehammer_is_active(void) {
 }
 
 static bool target_is_active(void) {
-    return !gamestate_is_underground_dug();
+    return !gamestate_get("underground_dug");
 }
 
 static bool x_form_use_item(ItemId item) {
@@ -46,7 +46,7 @@ static bool x_form_use_item(ItemId item) {
 
 static bool target_use_item(ItemId item) {
     if (item == ITEM_SHOVEL) {
-        gamestate_dig_underground();
+        gamestate_set("underground_dug");
         game_show_message("UNDERGROUND_DIG");
         return true;
     }
@@ -62,11 +62,11 @@ static bool ground_use_item(ItemId item) {
 }
 
 static bool magnetic_card_is_active(void) {
-    return !gamestate_is_underground_card_taken() && gamestate_is_underground_dug();
+    return !gamestate_get("underground_card_taken") && gamestate_get("underground_dug");
 }
 
 static void magnetic_card_action(void) {
-    gamestate_underground_take_card();
+    gamestate_set("underground_card_taken");
     inventory_add(ITEM_MAGNETIC_CARD);
 }
 
@@ -77,16 +77,16 @@ static Hotspot hotspots[] = {
         .width = 24,
         .height = 14,
         .id = "UNDERGROUND_MAGNETIC_CARD",
-        .is_active = magnetic_card_is_active,
+        .condition = magnetic_card_is_active,
         .action = magnetic_card_action
     },
     {
-        .x = 288,
-        .y = 180,
-        .width = 8,
-        .height = 8,
+        .x = 284,
+        .y = 176,
+        .width = 12,
+        .height = 12,
         .id = "UNDERGROUND_GROUND",
-        .is_active = target_is_active,
+        .condition = target_is_active,
         .use_item = target_use_item
     },
     {
@@ -111,7 +111,7 @@ static Hotspot hotspots[] = {
         .width = 37,
         .height = 100,
         .id = "UNDERGROUND_SHOVEL",
-        .is_active = shovel_is_active,
+        .condition = shovel_is_active,
         .action = shovel_action
     },
     {
@@ -120,7 +120,7 @@ static Hotspot hotspots[] = {
         .width = 35,
         .height = 102,
         .id = "UNDERGROUND_SLEDGEHAMMER",
-        .is_active = sledgehammer_is_active,
+        .condition = sledgehammer_is_active,
         .action = sledgehammer_action
     },
     {
@@ -150,8 +150,8 @@ static void room_draw(void) {
     if (inventory_has(ITEM_SLEDGEHAMMER)) {
         C2D_DrawImageAt(img_sledgehammer_taken, 46.0f, 83.0f, 0.2f, NULL, 1.0f, 1.0f);
     }
-    if (gamestate_is_underground_dug()) {
-        if (gamestate_is_underground_card_taken()) {
+    if (gamestate_get("underground_dug")) {
+        if (gamestate_get("underground_card_taken")) {
             C2D_DrawImageAt(img_hole_empty, 265.0f, 175.0f, 0.3f, NULL, 1.0f, 1.0f);
         } else {
             C2D_DrawImageAt(img_hole_dug, 261.0f, 174.0f, 0.3f, NULL, 1.0f, 1.0f);

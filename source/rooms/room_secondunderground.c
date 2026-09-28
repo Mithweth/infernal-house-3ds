@@ -14,17 +14,17 @@ static C2D_Image img_background;
 static C2D_Image img_wall_open;
 
 static bool broken_wall_is_active(void) {
-    return gamestate_is_underground_wall_broken();
+    return gamestate_get("underground_wall_broken");
 }
 
 static bool wall_is_active(void) {
-    return !gamestate_is_underground_wall_broken();
+    return !gamestate_get("underground_wall_broken");
 }
 
 static bool wall_use_item(ItemId item) {
     if (item == ITEM_SLEDGEHAMMER) {
-        if (!gamestate_is_underground_wall_broken()) {
-            gamestate_break_underground_wall();
+        if (!gamestate_get("underground_wall_broken")) {
+            gamestate_set("underground_wall_broken");
             game_show_message("UNDERGROUND_BREAK_WALL");
         } else {
             game_show_message("UNDERGROUND_WALL_ALREADY_BROKEN");
@@ -70,7 +70,7 @@ static Hotspot hotspots[] = {
         .height = 139,
         .id = "UNDERGROUND_WALL",
         .message_id = "UNDERGROUND_WALL_MESSAGE",
-        .is_active = wall_is_active,
+        .condition = wall_is_active,
         .use_item = wall_use_item
     },
     {
@@ -79,7 +79,7 @@ static Hotspot hotspots[] = {
         .width = 96,
         .height = 139,
         .id = "UNDERGROUND_WALL_BROKEN",
-        .is_active = broken_wall_is_active
+        .condition = broken_wall_is_active
     },
 };
 
@@ -96,7 +96,7 @@ static void room_init(void) {
 
 static void room_draw(void) {
     C2D_DrawImageAt(img_background, 0.0f, 0.0f, 0.0f, NULL, 1.0f, 1.0f);
-    if (gamestate_is_underground_wall_broken()) {
+    if (gamestate_get("underground_wall_broken")) {
         C2D_DrawImageAt(img_wall_open, 103.0f, 37.0f, 0.0f, NULL, 1.0f, 1.0f);
     }
 }
@@ -113,7 +113,7 @@ Room secondunderground = {
     .hotspots = hotspots,
     .hotspot_count = sizeof(hotspots) / sizeof(hotspots[0]),
     .west = {.action = west_action},
-    .north = {.action = north_action, .condition = gamestate_is_underground_wall_broken},
+    .north = {.action = north_action, .condition = broken_wall_is_active},
     .init = room_init,
     .draw = room_draw,
     .close = room_close

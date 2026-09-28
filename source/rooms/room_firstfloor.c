@@ -18,7 +18,7 @@ static C2D_Image img_background;
 static C2D_Image img_carpet_moved;
 
 static void carpet_action(void) {
-    gamestate_move_firstfloor_carpet(!gamestate_is_firstfloor_carpet_moved());
+    gamestate_set("firstfloor_carpet_moved");
 }
 
 static Hotspot hotspots[] = {
@@ -54,7 +54,7 @@ static void room_init(void) {
 
 static void room_draw(void) {
     C2D_DrawImageAt(img_background, 0.0f, 0.0f, 0.0f, NULL, 1.0f, 1.0f);
-    if (gamestate_is_firstfloor_carpet_moved()) {
+    if (gamestate_get("firstfloor_carpet_moved")) {
         C2D_DrawImageAt(img_carpet_moved, 181.0f, 151.0f, 0.3f, NULL, 1.0f, 1.0f);
     }
 }

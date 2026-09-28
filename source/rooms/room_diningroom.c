@@ -12,10 +12,6 @@
 #include "gamestate.h"
 #include "gameover.h"
 
-// static bool left_closet_opened = false;
-// static bool right_closet_opened = false;
-// static bool tureen_opened = false;
-
 static C2D_SpriteSheet room_scene;
 static C2D_Image img_background;
 static C2D_Image img_left_closet_opened;
@@ -25,37 +21,45 @@ static C2D_Image img_soup_empty;
 static C2D_Image img_soup_opened;
 
 static void right_cabinet_door_action(void) {
-    if (gamestate_is_diningroom_right_cabinet_door_opened()) {
+    if (gamestate_get("diningroom_right_cabinet_door_opened")) {
         sfx_play("romfs:/audio/closet_close.raw");
     } else {
         sfx_play("romfs:/audio/closet_open.raw");
     }
-    gamestate_open_diningroom_right_cabinet_door(!gamestate_is_diningroom_right_cabinet_door_opened());
+    gamestate_set("diningroom_right_cabinet_door_opened");
 }
 
 static void left_cabinet_door_action(void) {
-    if (gamestate_is_diningroom_left_cabinet_door_opened()) {
+    if (gamestate_get("diningroom_left_cabinet_door_opened")) {
         sfx_play("romfs:/audio/closet_close.raw");
     } else {
         sfx_play("romfs:/audio/closet_open.raw");
     }
-    gamestate_open_diningroom_left_cabinet_door(!gamestate_is_diningroom_left_cabinet_door_opened());
+    gamestate_set("diningroom_left_cabinet_door_opened");
 }
 
 static void soup_cover_action(void) {
-    gamestate_move_diningroom_soup(!gamestate_is_diningroom_soup_opened());
+    gamestate_set("diningroom_soup_opened");
 }
 
 static bool soup_message_is_active(void) {
-    return gamestate_is_diningroom_soup_opened() && !inventory_has(ITEM_SCORE);
+    return gamestate_get("diningroom_soup_opened") && !inventory_has(ITEM_SCORE);
 }
 
 static bool lasers_are_active(void) {
-    return !gamestate_are_diningroom_lasers_disabled();
+    return !gamestate_get("diningroom_lasers_disabled");
 }
 
 static void soup_contents_action(void) {
     inventory_add(ITEM_SCORE);
+}
+
+static bool left_cabinet_door_opened(void) {
+    return gamestate_get("diningroom_left_cabinet_door_opened");
+}
+
+static bool right_cabinet_door_opened(void) {
+    return gamestate_get("diningroom_right_cabinet_door_opened");
 }
 
 static Hotspot hotspots[] = {
@@ -66,7 +70,7 @@ static Hotspot hotspots[] = {
         .height = 168,
         .id = "DINING_STAIRS",
         .message_id = "DINING_LASERS",
-        .is_active = lasers_are_active
+        .condition = lasers_are_active
     },
     {
         .x = 130,
@@ -82,7 +86,7 @@ static Hotspot hotspots[] = {
         .height = 30,
         .id = "DINING_SOUP",
         .message_id = "DINING_SOUP_CONTENTS",
-        .is_active = soup_message_is_active,
+        .condition = soup_message_is_active,
         .action = soup_contents_action,
     },
     {
@@ -100,7 +104,7 @@ static Hotspot hotspots[] = {
         .height = 75,
         .id = "DINING_CABINET",
         .message_id = "DINING_LEFT_CABINET_CONTENTS",
-        .is_active = gamestate_is_diningroom_left_cabinet_door_opened,
+        .condition = left_cabinet_door_opened,
         .action = left_cabinet_door_action
     },
     {
@@ -110,7 +114,7 @@ static Hotspot hotspots[] = {
         .height = 60,
         .id = "DINING_CABINET",
         .message_id = "DINING_RIGHT_CABINET_CONTENTS",
-        .is_active = gamestate_is_diningroom_right_cabinet_door_opened,
+        .condition = right_cabinet_door_opened,
         .action = right_cabinet_door_action
     },
     {
@@ -165,16 +169,16 @@ static void room_init(void) {
 
 static void room_draw(void) {
     C2D_DrawImageAt(img_background, 0.0f, 0.0f, 0.0f, NULL, 1.0f, 1.0f);
-    if (gamestate_are_diningroom_lasers_disabled()) {
+    if (gamestate_get("diningroom_lasers_disabled")) {
         C2D_DrawImageAt(img_laser_disabled, 132.0f, 22.0f, 0.1f, NULL, 1.0f, 1.0f);
     }
-    if (gamestate_is_diningroom_left_cabinet_door_opened()) {
+    if (gamestate_get("diningroom_left_cabinet_door_opened")) {
        C2D_DrawImageAt(img_left_closet_opened, 5.0f, 135.0f, 0.1f, NULL, 1.0f, 1.0f);
     }
-    if (gamestate_is_diningroom_right_cabinet_door_opened()) {
+    if (gamestate_get("diningroom_right_cabinet_door_opened")) {
        C2D_DrawImageAt(img_right_closet_opened, 68.0f, 133.0f, 0.1f, NULL, 1.0f, 1.0f);
     }
-    if (gamestate_is_diningroom_soup_opened()) {
+    if (gamestate_get("diningroom_soup_opened")) {
         if (!inventory_has(ITEM_SCORE)) {
             C2D_DrawImageAt(img_soup_opened, 26.0f, 106.0f, 0.2f, NULL, 1.0f, 1.0f);
         } else {
@@ -208,7 +212,7 @@ static void move_north(void) {
 }
 
 static void north_action(void) {
-    if (!gamestate_are_diningroom_lasers_disabled()) {
+    if (!gamestate_get("diningroom_lasers_disabled")) {
         game_wait_for_sfx("romfs:/audio/police_siren.raw", lasers_gameover);
     } else {
         game_wait_for_sfx("romfs:/audio/wooden_stairs.raw", move_north);
