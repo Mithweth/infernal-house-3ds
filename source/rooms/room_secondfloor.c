@@ -5,6 +5,7 @@
 #include "room_secondfloor.h"
 #include "room_firstfloor.h"
 #include "gfx_secondfloor.h"
+#include "room_laboratory.h"
 #include "inventory.h"
 #include "gamestate.h"
 
@@ -61,7 +62,7 @@ static void room_close(void) {
 }
 
 static void move_west(void) {
-    //game_set_room(&firstbedroom);
+    game_set_room(&laboratory);
 }
 
 static void west_action(void) {

@@ -79,10 +79,10 @@ bool gamestate_init(const char *filename) {
 
         GameStateType state_type;
 
-        if (strcmp(type, "reversible") == 0) {
-            state_type = GAMESTATE_REVERSIBLE;
-        } else if (strcmp(type, "irreversible") == 0) {
-            state_type = GAMESTATE_IRREVERSIBLE;
+        if (strcmp(type, "TOGGLE") == 0) {
+            state_type = GAMESTATE_TOGGLE;
+        } else if (strcmp(type, "KEEP") == 0) {
+            state_type = GAMESTATE_KEEP;
         } else {
             printf("romfs:/game.state:%zu: unknown type: %s\n", line_number, type);
             fclose(file);
@@ -130,7 +130,7 @@ void gamestate_set(const char *name) {
         return;
     }
 
-    if (state->type == GAMESTATE_IRREVERSIBLE && state->value) {
+    if (state->type == GAMESTATE_KEEP && state->value) {
         return;
     }
 

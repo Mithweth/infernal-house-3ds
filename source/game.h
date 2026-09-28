@@ -14,18 +14,14 @@ typedef struct {
     int height;
     const char *id;
     const char *message_id;
-    const char *condition_state;
     bool (*condition)(void);
     void (*action)(void);
     bool (*use_item)(ItemId item);
 } Hotspot;
 
-typedef void (*PathAction)(void);
-typedef bool (*PathCondition)(void);
-
 typedef struct {
-    PathAction action;
-    PathCondition condition;
+    void (*action)(void);
+    bool (*condition)(void);
 } Path;
 
 typedef struct Room {

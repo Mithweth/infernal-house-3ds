@@ -36,6 +36,7 @@ typedef enum {
     ITEM_TOOTHPASTE,
     ITEM_RAZOR,
     ITEM_MAGNETIC_CARD,
+    ITEM_SYRINGE,
     ITEM_COUNT
 } ItemId;
 

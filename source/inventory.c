@@ -252,6 +252,12 @@ void inventory_init(void) {
         .name_id = "ITEM_MAGNETIC_CARD",
         .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_magnetic_card_idx)
     };
+    items[ITEM_SYRINGE] = (Item) {
+        .id = ITEM_SYRINGE,
+        .name_id = "ITEM_SYRINGE",
+        .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_syringe_idx),
+        .examinable = true
+    };
     inventory_count = 0;
     selected = 0;
 }

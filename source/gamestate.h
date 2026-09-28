@@ -5,8 +5,8 @@
 #include <stdbool.h>
 
 typedef enum {
-    GAMESTATE_REVERSIBLE,
-    GAMESTATE_IRREVERSIBLE
+    GAMESTATE_TOGGLE,
+    GAMESTATE_KEEP
 } GameStateType;
 
 typedef struct {
