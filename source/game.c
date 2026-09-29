@@ -24,7 +24,47 @@ static C2D_TextBuf text_buf;
 static C2D_Text text;
 static void (*game_busy_callback)(void) = NULL;
 static int game_busy_sfx_channel = -1;
+static size_t callback_count = 0;
+static GameCallbackEntry callbacks[GAME_CALLBACK_MAX];
+static uint8_t secret_code[4];
 
+
+void game_secret_code(void) {
+    char code[5];
+    code[0] = '0' + secret_code[0];
+    code[1] = '0' + secret_code[1];
+    code[2] = '0' + secret_code[2];
+    code[3] = '0' + secret_code[3];
+    code[4] = '\0';
+    C2D_TextParse(&text, text_buf, code);
+    C2D_TextOptimize(&text);
+    C2D_DrawText(&text, C2D_WithColor, 10.0f, 100.0f, 0.9f, 0.5f, 0.5f, C2D_Color32(255, 255, 255, 255));
+}
+
+static void game_generate_secret_code(void) {
+    for (size_t i = 0; i < 4; i++) {
+        secret_code[i] = rand() % 10;
+    }
+}
+
+void game_callback_register(const char *name, void (*callback)(void)) {
+    if (callback_count >= GAME_CALLBACK_MAX) {
+        return;
+    }
+
+    callbacks[callback_count].name = name;
+    callbacks[callback_count].callback = callback;
+    callback_count++;
+}
+
+void (*game_callback_find(const char *name))(void) {
+    for (size_t i = 0; i < callback_count; i++) {
+        if (strcmp(callbacks[i].name, name) == 0) {
+            return callbacks[i].callback;
+        }
+    }
+    return NULL;
+}
 
 static bool path_is_available(const Path *path) {
     if (!path || !path->action) {
@@ -65,8 +105,9 @@ void game_set_room(Room *room) {
 }
 
 void game_close(void) {
-    if (current_room && current_room->close)
+    if (current_room && current_room->close) {
         current_room->close();
+    }
 
     current_room = NULL;
 
@@ -97,6 +138,8 @@ void game_over(const char *timeline) {
 void game_init(void) {
     timeline_close();
     music_stop();
+    callback_count = 0;
+    game_callback_register("secret_code", game_secret_code);
     hud_init();
     game_mode = GAME_TITLE;
     title_init();
@@ -107,6 +150,7 @@ void game_start(void) {
     inventory_reset();
     gamestate_reset();
     hud_reset();
+    game_generate_secret_code();
     game_mode = GAME_NORMAL;
     message_text = NULL;
     active_hotspot = NULL;

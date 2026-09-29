@@ -10,12 +10,10 @@ typedef struct {
     char *name_id;
     char *examine_text;
     C2D_Image image;
-    bool examinable;
     C2D_Image detail_image;
     float detail_x;
     float detail_y;
     void (*callback)(void);
-    char *callback_name;
 } Item;
 
 typedef enum {

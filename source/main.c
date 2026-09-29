@@ -1,5 +1,6 @@
 // main.c
 #include <citro2d.h>
+#include <stdlib.h>
 #include <3ds.h>
 
 #include "game.h"
@@ -62,6 +63,7 @@ int main(int argc, char **argv) {
     if (!gamestate_init("romfs:/states/game.state")) {
         return 1;
     }
+    srand(time(NULL));
     C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
     C2D_Init(C2D_DEFAULT_MAX_OBJECTS);
     C2D_Prepare();

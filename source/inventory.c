@@ -204,6 +204,17 @@ static bool load_inventory(const char *filename) {
                 item->examine_text = strdup(text);
                 continue;
             }
+            if (strcmp(command, "CALL") == 0) {
+                char *cb = strtok(NULL, " ");
+                if (!cb) {
+                    printf("%s:%zu: syntax error\n", filename, line_number);
+                    fclose(f);
+                    item_count = 0;
+                    return false;
+                }
+                item->callback = game_callback_find(cb);
+                continue;
+            }
             if (strcmp(command, "DETAIL") == 0) {
                 char *image_id = strtok(NULL, " ");
                 if (!image_id) {
@@ -292,18 +303,6 @@ static bool load_inventory(const char *filename) {
     return true;
 }
 
-static void description_draw_action(Item *item) {
-    C2D_TextBufClear(text_buf);
-    C2D_TextParse(&text, text_buf, lang_get(item->examine_text));
-    C2D_TextOptimize(&text);
-    C2D_DrawText(&text, C2D_WithColor, 20.0f, 62.0f, 0.5f, 0.55f, 0.55f, C2D_Color32(192, 192, 192, 255));
-}
-
-static void draw_action(Item *item) {
-    C2D_DrawImageAt(item->detail_image, item->detail_x, item->detail_y, 0.55f, NULL, 0.85f, 0.85f);
-}
-
-
 bool inventory_update(u32 keys) {
     if (inventory_mode == INVENTORY_ACTION) {
         if ((keys & KEY_X) || (keys & KEY_B)) {
@@ -354,7 +353,7 @@ bool inventory_update(u32 keys) {
 
     Item *item = inventory[selected];
     if (keys & KEY_X) {    
-        if (item->detail_image.tex || item->examine_text) {
+        if (item->detail_image.tex || item->examine_text || item->callback) {
             inventory_mode = INVENTORY_ACTION;
         }
         return true;
@@ -376,9 +375,16 @@ void inventory_draw(void) {
         Item *item = inventory[selected];
         C2D_DrawImageAt(img_background, 7.0f, 49.0f, 0.4f, NULL, 1.0f, 1.0f);
         if (item->detail_image.tex) {
-            draw_action(item);
-        } else {
-            description_draw_action(item);
+            C2D_DrawImageAt(item->detail_image, item->detail_x, item->detail_y, 0.55f, NULL, 0.85f, 0.85f);
+        }
+        if (item->examine_text) {
+            C2D_TextBufClear(text_buf);
+            C2D_TextParse(&text, text_buf, lang_get(item->examine_text));
+            C2D_TextOptimize(&text);
+            C2D_DrawText(&text, C2D_WithColor, 20.0f, 62.0f, 0.5f, 0.55f, 0.55f, C2D_Color32(192, 192, 192, 255));
+        }
+        if (item->callback) {
+            item->callback();
         }
         return;
     }

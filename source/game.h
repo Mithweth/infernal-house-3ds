@@ -7,6 +7,12 @@
 #include <stddef.h>
 #include "inventory.h"
 
+# define GAME_CALLBACK_MAX 8
+typedef struct {
+    const char *name;
+    void (*callback)(void);
+} GameCallbackEntry;
+
 typedef struct {
     int x;
     int y;
@@ -79,3 +85,6 @@ void game_end_simon(bool success);
 bool game_use_item(const char *id);
 void game_show_message(const char *message_id);
 void game_wait_for_sfx(const char *sfx, void (*callback)(void));
+void game_callback_register(const char *name, void (*callback)(void));
+void (*game_callback_find(const char *name))(void);
+void game_secret_code(void);
