@@ -226,6 +226,7 @@ static bool load_inventory(const char *filename) {
 
                 char *x  = strtok(NULL, " ");
                 char *y  = strtok(NULL, " ");
+                char *fmt = strtok(NULL, " ");
 
                 if ((!x) || (!y)) {
                     printf("%s:%zu: syntax error\n", filename, line_number);
@@ -233,7 +234,9 @@ static bool load_inventory(const char *filename) {
                     item_count = 0;
                     return false;
                 }
-
+                if ((fmt) && (strcmp(fmt, "FULLSCREEN") == 0)) {
+                    item->detail_fullscreen = true;
+                }
                 item->detail_image = get_image(image_id);
 
                 if (!item->detail_image.tex) {
@@ -374,18 +377,26 @@ void inventory_draw(void) {
     if (inventory_mode == INVENTORY_ACTION) {
         Item *item = inventory[selected];
         C2D_DrawImageAt(img_background, 7.0f, 49.0f, 0.4f, NULL, 1.0f, 1.0f);
+        //printf("has: ");
         if (item->detail_image.tex) {
-            C2D_DrawImageAt(item->detail_image, item->detail_x, item->detail_y, 0.55f, NULL, 0.85f, 0.85f);
+        //    printf("image, ");
+            if (item->detail_fullscreen) {
+                C2D_DrawRectSolid(0.0f, 0.0f, 0.8f, 400.0f, 240.0f, C2D_Color32(0, 0, 0, 255));
+            }
+            C2D_DrawImageAt(item->detail_image, item->detail_x, item->detail_y, 0.9f, NULL, 1.0f, 1.0f);
         }
         if (item->examine_text) {
+        //    printf("text, ");
             C2D_TextBufClear(text_buf);
             C2D_TextParse(&text, text_buf, lang_get(item->examine_text));
             C2D_TextOptimize(&text);
             C2D_DrawText(&text, C2D_WithColor, 20.0f, 62.0f, 0.5f, 0.55f, 0.55f, C2D_Color32(192, 192, 192, 255));
         }
         if (item->callback) {
+        //    printf("callback, ");
             item->callback();
         }
+        //printf("\n");
         return;
     }
     int selected_row = selected / INVENTORY_COLUMNS;

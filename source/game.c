@@ -38,7 +38,7 @@ void game_secret_code(void) {
     code[4] = '\0';
     C2D_TextParse(&text, text_buf, code);
     C2D_TextOptimize(&text);
-    C2D_DrawText(&text, C2D_WithColor, 10.0f, 100.0f, 0.9f, 0.5f, 0.5f, C2D_Color32(255, 255, 255, 255));
+    C2D_DrawText(&text, C2D_WithColor, 40.0f, 100.0f, 0.9f, 0.55f, 0.55f, C2D_Color32(192, 192, 192, 255));
 }
 
 static void game_generate_secret_code(void) {
@@ -154,6 +154,7 @@ void game_start(void) {
     game_mode = GAME_NORMAL;
     message_text = NULL;
     active_hotspot = NULL;
+    inventory_add("LIGHTBULB");
     music_play("romfs:/audio/background.ogg");
     game_set_room(&hall);
 }
@@ -299,6 +300,7 @@ static void update_touch(touchPosition touch) {
 
     printf("current hotspot: %s\n", hotspot->id);
     if (hotspot != active_hotspot) {
+    //if (strcmp(active_hotspot->id, hotspot->id) != 0) {
         active_hotspot = hotspot;
         target = hotspot;
         
@@ -314,9 +316,9 @@ static void update_touch(touchPosition touch) {
         hotspot->action();
     }
 
-    if (target && target->condition && !target->condition()) {
-        target = NULL;
-    }
+    // if (target && target->condition && !target->condition()) {
+    //     target = NULL;
+    // }
 
     if (active_hotspot && active_hotspot->condition && !active_hotspot->condition()) {
         active_hotspot = NULL;

@@ -11,6 +11,7 @@ typedef struct {
     char *examine_text;
     C2D_Image image;
     C2D_Image detail_image;
+    bool detail_fullscreen;
     float detail_x;
     float detail_y;
     void (*callback)(void);

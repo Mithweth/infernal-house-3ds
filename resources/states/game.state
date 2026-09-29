@@ -50,3 +50,5 @@ study_bottom_drawer_opened TOGGLE
 study_closet_opened TOGGLE
 study_board_pulled TOGGLE
 study_lights_on KEEP
+study_lightbulb_screwed KEEP
+

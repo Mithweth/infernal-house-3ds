@@ -149,7 +149,8 @@ static Hotspot hotspots[] = {
         .y = 127,
         .width = 24,
         .height = 27,
-        .id = "FIRSTBEDROOM_LEFT_NIGHTSTAND_OPENED",
+        .id = "FIRSTBEDROOM_NIGHTSTAND",
+        .message_id = "FIRSTBEDROOM_LEFT_NIGHTSTAND_OPENED",
         .condition = left_nightstand_is_active,
         .action = revolver_action
     },
@@ -175,7 +176,8 @@ static Hotspot hotspots[] = {
         .y = 74,
         .width = 41,
         .height = 72,
-        .id = "FIRSTBEDROOM_CLOSET_OPENED",
+        .id = "FIRSTBEDROOM_CLOSET",
+        .message_id = "FIRSTBEDROOM_CLOSET_OPENED",
         .condition = firstbedroom_closet_opened,
         .action = closet_action
     },
