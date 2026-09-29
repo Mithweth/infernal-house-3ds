@@ -44,3 +44,9 @@ underground_dug KEEP
 underground_card_taken KEEP
 underground_rope_taken KEEP
 laboratory_syringe_taken KEEP
+study_top_drawer_opened TOGGLE
+study_middle_drawer_opened TOGGLE
+study_bottom_drawer_opened TOGGLE
+study_closet_opened TOGGLE
+study_board_pulled TOGGLE
+study_lights_on KEEP

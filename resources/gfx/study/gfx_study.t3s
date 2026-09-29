@@ -1,0 +1,10 @@
+--atlas -f rgba8888 -z auto
+background.png
+book_taken.png
+bottom_drawer_opened.png
+closet_open.png
+dark_background.png
+middle_drawer_opened.png
+paper_taken.png
+sliding_board.png
+top_drawer_opened.png

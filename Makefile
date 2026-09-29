@@ -97,11 +97,9 @@ MEM_T3XFILES	:=	$(notdir $(MEMGFX:.t3s=.t3x))
 MEM_HFILES	:=	$(notdir $(MEMGFX:.t3s=.h))
 
 # Graphics generated into RomFS.
-ROM_T3XFILES	:=	$(foreach file,$(ROMGFX),\
-				$(ROMFS)/gfx/$(notdir $(file:.t3s=.t3x)))
+ROM_T3XFILES	:=	$(foreach file,$(ROMGFX),$(ROMFS)/gfx/$(notdir $(file:.t3s=.t3x)))
 
-ROM_HFILES	:=	$(foreach file,$(ROMGFX),\
-				$(BUILD)/$(notdir $(file:.t3s=.h)))
+ROM_HFILES	:=	$(foreach file,$(ROMGFX),$(BUILD)/$(notdir $(file:.t3s=.h)))
 
 T3XHFILES	:=	$(MEM_HFILES:%=$(BUILD)/%) $(ROM_HFILES)
 
@@ -154,9 +152,7 @@ endif
 #---------------------------------------------------------------------------------
 # Object files
 #---------------------------------------------------------------------------------
-export OFILES_SOURCES :=	$(CPPFILES:.cpp=.o) \
-				$(CFILES:.c=.o) \
-				$(SFILES:.s=.o)
+export OFILES_SOURCES :=	$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
 
 # IMPORTANT:
 # Only MEM_T3XFILES is converted with bin2o and linked into the executable.

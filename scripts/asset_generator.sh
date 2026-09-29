@@ -11,11 +11,13 @@ shift $((OPTIND-1))
 ROOT_DIR=$(dirname "$(cd "$(dirname "$0")" && pwd)")
 NAME=$1
 
-mkdir -p $ROOT_DIR/gfx/$NAME 
-echo "--atlas -f rgba8888 -z auto" > $ROOT_DIR/gfx/$NAME/gfx_$NAME.t3s
+GFX_DIR=$ROOT_DIR/resources/gfx/$NAME
 
-for i in $ROOT_DIR/gfx/$NAME/*.png; do
-	basename "$i" >> $ROOT_DIR/gfx/$NAME/gfx_$NAME.t3s
+mkdir -p $GFX_DIR 
+echo "--atlas -f rgba8888 -z auto" > $GFX_DIR/gfx_$NAME.t3s
+
+for i in $GFX_DIR/*.png; do
+	basename "$i" >> $GFX_DIR/gfx_$NAME.t3s
 done
 
 if [ ! -f $ROOT_DIR/source/rooms/room_$NAME.c ] || $FORCE; then
@@ -31,7 +33,7 @@ if [ ! -f $ROOT_DIR/source/rooms/room_$NAME.c ] || $FORCE; then
 
 static C2D_SpriteSheet room_scene;
 EOF
-	for i in $ROOT_DIR/gfx/$NAME/*.png; do
+	for i in $GFX_DIR/*.png; do
 		img=$(basename $i .png)
 		echo "static C2D_Image img_$img;" >> "$ROOT_DIR/source/rooms/room_$NAME.c"
 	done
@@ -42,7 +44,7 @@ static Hotspot hotspots[] = {};
 static void room_init(void) {
     room_scene = C2D_SpriteSheetLoad("romfs:/gfx/gfx_$NAME.t3x");
 EOF
-	for i in $ROOT_DIR/gfx/$NAME/*.png; do
+	for i in $GFX_DIR/*.png; do
 		img=$(basename $i .png)
 		echo "    img_${img} = C2D_SpriteSheetGetImage(room_scene, gfx_${NAME}_${img}_idx);" >> "$ROOT_DIR/source/rooms/room_$NAME.c"
 	done
@@ -51,7 +53,7 @@ EOF
 
 static void room_draw(void) {
 EOF
-	for i in $ROOT_DIR/gfx/$NAME/*.png; do
+	for i in $GFX_DIR/*.png; do
 		img=$(basename $i .png)
 		echo "    C2D_DrawImageAt(img_$img, 0.0f, 0.0f, 0.0f, NULL, 1.0f, 1.0f);" >> "$ROOT_DIR/source/rooms/room_$NAME.c"
 	done

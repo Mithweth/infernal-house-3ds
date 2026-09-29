@@ -4,6 +4,7 @@
 #include "game.h"
 #include "room_library.h"
 #include "room_corridor.h"
+#include "room_study.h"
 #include "gfx_library.h"
 #include "inventory.h"
 #include "gamestate.h"
@@ -200,7 +201,7 @@ static Hotspot hotspots[] = {
 };
 
 static void north_action(void) {
-    //game_set_room(&corridor);
+    game_set_room(&study);
 }
 
 static void southeast_action(void) {
