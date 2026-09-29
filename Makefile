@@ -23,7 +23,7 @@ ROMFS		:=	romfs
 
 # Graphics that must be linked directly into the executable.
 # Everything else under GRAPHICS will be placed in RomFS.
-MEMGFX		:=	gfx/inventory/gfx_inventory.t3s gfx/hud/gfx_hud.t3s
+MEMGFX		:=	gfx/hud/gfx_hud.t3s
 
 #---------------------------------------------------------------------------------
 # options for code generation
@@ -105,6 +105,10 @@ ROM_T3XFILES	:=	$(foreach file,$(ROMGFX),\
 T3XHFILES := $(foreach file,$(filter-out gfx/timelines/%,$(GFXFILES)),\
 				$(BUILD)/$(notdir $(file:.t3s=.h)))
 
+INVENTORY_FILES := \
+	$(ROMFS)/inventory/inventory \
+	$(ROMFS)/inventory/gfx.t3x \
+	$(ROMFS)/inventory/gfx.h
 
 #---------------------------------------------------------------------------------
 # Search paths
@@ -193,7 +197,7 @@ endif
 #---------------------------------------------------------------------------------
 # Main outer target
 #---------------------------------------------------------------------------------
-all: $(BUILD) $(ROMFS)/gfx $(MEM_T3XFILES:%=$(BUILD)/%) $(ROM_T3XFILES) $(T3XHFILES) $(TIMELINE_FILES)
+all: $(BUILD) $(ROMFS)/gfx $(MEM_T3XFILES:%=$(BUILD)/%) $(ROM_T3XFILES) $(T3XHFILES) $(TIMELINE_FILES) $(INVENTORY_FILES)
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
 
 #---------------------------------------------------------------------------------
@@ -210,7 +214,7 @@ $(ROMFS)/gfx:
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(TARGET).3dsx $(OUTPUT).smdh $(TARGET).elf $(ROMFS)/timelines
+	@rm -fr $(BUILD) $(TARGET).3dsx $(OUTPUT).smdh $(TARGET).elf $(ROMFS)/timelines $(ROMFS)/inventory
 	@rm -f $(ROMFS)/gfx/*.t3x
 
 #---------------------------------------------------------------------------------
@@ -241,6 +245,18 @@ $(ROMFS)/timelines/%/gfx.t3x $(ROMFS)/timelines/%/gfx.h &: gfx/timelines/%/gfx.t
 
 $(ROMFS)/timelines/%/timeline: gfx/timelines/%/timeline
 	@mkdir -p $(ROMFS)/timelines/$*
+	@cp $< $@
+
+$(ROMFS)/inventory/gfx.t3x $(ROMFS)/inventory/gfx.h &: inventory/gfx.t3s
+	@echo $(notdir $<)
+	@mkdir -p $(ROMFS)/inventory
+	@tex3ds -i $< \
+		-H $(ROMFS)/inventory/gfx.h \
+		-d $(DEPSDIR)/gfx_inventory.d \
+		-o $(ROMFS)/inventory/gfx.t3x
+
+$(ROMFS)/inventory/inventory: inventory/inventory
+	@mkdir -p $(ROMFS)/inventory
 	@cp $< $@
 
 #---------------------------------------------------------------------------------
