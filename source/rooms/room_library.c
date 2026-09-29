@@ -50,7 +50,7 @@ static bool book_is_active(void) {
 static void book_action(void) {
     gamestate_set("library_secret_passage_opened");
     sfx_play("romfs:/audio/book_pushed.raw");
-    game_show_message("LIBRARY_SECRET_PASSAGE");
+    game_show_message("LIBRARY_SECRET_PASSAGE_MESSAGE");
 }
 
 static bool secret_passage_opened(void) {
@@ -141,6 +141,14 @@ static Hotspot hotspots[] = {
         .width = 30,
         .height = 25,
         .id = "LIBRARY_BOOK"
+    },
+    {
+        .x = 144,
+        .y = 49,
+        .width = 39,
+        .height = 84,
+        .id = "LIBRARY_SECRET_PASSAGE",
+        .condition = secret_passage_opened
     },
     {
         .x = 144,

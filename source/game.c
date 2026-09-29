@@ -30,13 +30,18 @@ static uint8_t secret_code[4];
 
 
 void game_secret_code(void) {
+    static C2D_TextBuf secret_code_text_buf;
     char code[5];
     code[0] = '0' + secret_code[0];
     code[1] = '0' + secret_code[1];
     code[2] = '0' + secret_code[2];
     code[3] = '0' + secret_code[3];
     code[4] = '\0';
-    C2D_TextParse(&text, text_buf, code);
+    if (!secret_code_text_buf) {
+        secret_code_text_buf = C2D_TextBufNew(32);
+    }
+    C2D_TextBufClear(secret_code_text_buf);
+    C2D_TextParse(&text, secret_code_text_buf, code);
     C2D_TextOptimize(&text);
     C2D_DrawText(&text, C2D_WithColor, 40.0f, 100.0f, 0.9f, 0.55f, 0.55f, C2D_Color32(192, 192, 192, 255));
 }
@@ -185,6 +190,24 @@ static Hotspot *find_hotspot(int x, int y) {
     return NULL;
 }
 
+static Hotspot *find_hotspot_by_id(const char *id) {
+    for (size_t i = 0; i < current_room->hotspot_count; i++) {
+        Hotspot *hotspot = &current_room->hotspots[i];
+
+        if (strcmp(hotspot->id, id) != 0) {
+            continue;
+        }
+
+        if (hotspot->condition && !hotspot->condition()) {
+            continue;
+        }
+
+        return hotspot;
+    }
+
+    return NULL;
+}
+
 bool game_can_move_north(void) {
     return current_room && path_is_available(&current_room->north);
 }
@@ -300,25 +323,24 @@ static void update_touch(touchPosition touch) {
 
     printf("current hotspot: %s\n", hotspot->id);
     if (hotspot != active_hotspot) {
-    //if (strcmp(active_hotspot->id, hotspot->id) != 0) {
         active_hotspot = hotspot;
         target = hotspot;
         
         if (hotspot->message_id) {
             game_show_message(hotspot->message_id);
-            //return;
+            return;
         }
 
-        return;
+        //return;
     }
 
     if (hotspot->action) {
         hotspot->action();
     }
 
-    // if (target && target->condition && !target->condition()) {
-    //     target = NULL;
-    // }
+    if (target && target->condition && !target->condition()) {
+        target = find_hotspot_by_id(target->id);
+    }
 
     if (active_hotspot && active_hotspot->condition && !active_hotspot->condition()) {
         active_hotspot = NULL;
