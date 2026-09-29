@@ -32,11 +32,11 @@ static void shower_action(void) {
 }
 
 static bool perfume_is_active(void) {
-    return !inventory_has(ITEM_PERFUME);
+    return !inventory_has("PERFUME");
 }
 
 static void perfume_action(void) {
-    inventory_add(ITEM_PERFUME);
+    inventory_add("PERFUME");
 }
 
 static void use_paper_action(void) {
@@ -56,21 +56,21 @@ static void drawer_action(void) {
 }
 
 static void drawer_take(void) {
-    inventory_add(ITEM_TOOTHPASTE);
-    inventory_add(ITEM_COMB);
-    inventory_add(ITEM_RAZOR);
+    inventory_add("TOOTHPASTE");
+    inventory_add("COMB");
+    inventory_add("RAZOR");
 }
 
 static bool drawer_is_active(void) {
-    return gamestate_get("bathroom_closet_drawer_opened") && !inventory_has(ITEM_TOOTHPASTE);
+    return gamestate_get("bathroom_closet_drawer_opened") && !inventory_has("TOOTHPASTE");
 }
 
 static void soap_action(void) {
-    inventory_add(ITEM_SOAP);
+    inventory_add("SOAP");
 }
 
 static bool soap_is_active(void) {
-    return !inventory_has(ITEM_SOAP);
+    return !inventory_has("SOAP");
 }
 
 static bool are_bathroom_closet_doors_opened(void) {
@@ -227,10 +227,10 @@ static void room_draw(void) {
     if (gamestate_get("bathroom_closet_drawer_opened")) {
         C2D_DrawImageAt(img_drawer_opened, 172.0f, 120.0f, 0.3f, NULL, 1.0f, 1.0f);
     }
-    if (inventory_has(ITEM_PERFUME)) {
+    if (inventory_has("PERFUME")) {
         C2D_DrawImageAt(img_perfume_taken, 217.0f, 103.0f, 0.3f, NULL, 1.0f, 1.0f);
     }
-    if (inventory_has(ITEM_SOAP)) {
+    if (inventory_has("SOAP")) {
         C2D_DrawImageAt(img_soap_taken, 129.0f, 94.0f, 0.2f, NULL, 1.0f, 1.0f);
     }
 }

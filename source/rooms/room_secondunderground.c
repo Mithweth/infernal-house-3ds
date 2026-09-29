@@ -21,8 +21,8 @@ static bool wall_is_active(void) {
     return !gamestate_get("underground_wall_broken");
 }
 
-static bool wall_use_item(ItemId item) {
-    if (item == ITEM_SLEDGEHAMMER) {
+static bool wall_use_item(const char *id) {
+    if (strcmp(id, "SLEDGEHAMMER") == 0) {
         if (!gamestate_get("underground_wall_broken")) {
             gamestate_set("underground_wall_broken");
             game_show_message("UNDERGROUND_BREAK_WALL");

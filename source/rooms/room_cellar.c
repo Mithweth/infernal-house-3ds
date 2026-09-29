@@ -16,8 +16,8 @@ static C2D_Image img_background;
 static C2D_Image img_alarm_box_opened;
 static C2D_Image img_alarm_box_enabled;
 
-static bool alarm_box_use_item(ItemId item) {
-    if (item == ITEM_SCREWDRIVER) {
+static bool alarm_box_use_item(const char *id) {
+    if (strcmp(id, "SCREWDRIVER") == 0) {
         if (!gamestate_get("cellar_alarm_box_unscrewed")) {
             gamestate_set("cellar_alarm_box_unscrewed");
             game_show_message("CELLAR_OPEN_ALARM_BOX");

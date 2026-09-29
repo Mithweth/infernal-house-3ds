@@ -42,7 +42,7 @@ static void soup_cover_action(void) {
 }
 
 static bool soup_message_is_active(void) {
-    return gamestate_get("diningroom_soup_opened") && !inventory_has(ITEM_SCORE);
+    return gamestate_get("diningroom_soup_opened") && !inventory_has("SCORE");
 }
 
 static bool lasers_are_active(void) {
@@ -50,7 +50,7 @@ static bool lasers_are_active(void) {
 }
 
 static void soup_contents_action(void) {
-    inventory_add(ITEM_SCORE);
+    inventory_add("SCORE");
 }
 
 static bool left_cabinet_door_opened(void) {
@@ -178,7 +178,7 @@ static void room_draw(void) {
        C2D_DrawImageAt(img_right_closet_opened, 68.0f, 133.0f, 0.1f, NULL, 1.0f, 1.0f);
     }
     if (gamestate_get("diningroom_soup_opened")) {
-        if (!inventory_has(ITEM_SCORE)) {
+        if (!inventory_has("SCORE")) {
             C2D_DrawImageAt(img_soup_opened, 26.0f, 106.0f, 0.2f, NULL, 1.0f, 1.0f);
         } else {
             C2D_DrawImageAt(img_soup_empty, 26.0f, 106.0f, 0.2f, NULL, 1.0f, 1.0f);

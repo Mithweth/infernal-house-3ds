@@ -16,7 +16,7 @@ typedef struct {
     const char *message_id;
     bool (*condition)(void);
     void (*action)(void);
-    bool (*use_item)(ItemId item);
+    bool (*use_item)(const char *id);
 } Hotspot;
 
 typedef struct {
@@ -76,6 +76,6 @@ void game_stop_measure(void);
 void game_play_piano(void);
 void game_stop_piano(bool success);
 void game_end_simon(bool success);
-bool game_use_item(ItemId item);
+bool game_use_item(const char *id);
 void game_show_message(const char *message_id);
 void game_wait_for_sfx(const char *sfx, void (*callback)(void));

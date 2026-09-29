@@ -30,11 +30,11 @@ static void piano_action(void) {
 }
 
 static void lighter_action(void) {
-    inventory_add(ITEM_LIGHTER);
+    inventory_add("LIGHTER");
 }
 
 static bool lighter_is_active(void) {
-    return !inventory_has(ITEM_LIGHTER);
+    return !inventory_has("LIGHTER");
 }
 
 static void fall_gameover(void) {
@@ -49,10 +49,10 @@ static void north_action(void) {
     }
 }
 
-static bool fireplace_use_item(ItemId item) {
-    if (item == ITEM_STATUE) {
+static bool fireplace_use_item(const char *id) {
+    if (strcmp(id, "STATUE") == 0) {
         gamestate_set("livingroom_golden_statue_placed");
-        inventory_remove(ITEM_STATUE);
+        inventory_remove("STATUE");
         game_show_message("LIVINGROOM_PLACE_STATUE");
         return true;
     }
@@ -63,26 +63,26 @@ static bool hearth_opened_is_active(void) {
     return gamestate_get("livingroom_secret_passage_opened") && !gamestate_get("livingroom_rope_in_hearth_bound");
 }
 
-static bool hearth_use_item(ItemId item) {
-    if (item == ITEM_ROPE) {
+static bool hearth_use_item(const char *id) {
+    if (strcmp(id, "ROPE") == 0) {
         gamestate_set("livingroom_rope_in_hearth_bound");
-        inventory_remove(ITEM_ROPE);
+        inventory_remove("ROPE");
         game_show_message("LIVINGROOM_USE_ROPE");
         return true;
     }
     return false;
 }
 
-static bool wood_use_item(ItemId item) {
-    if (item == ITEM_LIGHTER) {
+static bool wood_use_item(const char *id) {
+    if (strcmp(id, "LIGHTER") == 0) {
         game_show_message("LIVINGROOM_USE_LIGHTER");
         return true;
     }
     return false;
 }
 
-static bool lighter_use_item(ItemId item) {
-    if (item == ITEM_MAGNIFYING_GLASS) {
+static bool lighter_use_item(const char *id) {
+    if (strcmp(id, "MAGNIFYING_GLASS") == 0) {
         game_show_message("LIVINGROOM_USE_MAGNIFYING_GLASS");
         return true;
     }
@@ -187,7 +187,7 @@ static void room_init(void) {
 
 static void room_draw(void) {
     C2D_DrawImageAt(img_background, 0.0f, 0.0f, 0.0f, NULL, 1.0f, 1.0f);
-    if (!inventory_has(ITEM_LIGHTER)) {
+    if (!inventory_has("LIGHTER")) {
         C2D_DrawImageAt(img_lighter, 146.0f, 181.0f, 0.1f, NULL, 1.0f, 1.0f);
     }
     if (gamestate_get("livingroom_piano_opened")) {

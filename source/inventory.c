@@ -1,334 +1,308 @@
 // inventory.c
-#include <3ds.h>
 #include <citro2d.h>
 #include <stdbool.h>
-
-#include "lang.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 #include "inventory.h"
 #include "game.h"
-#include "gfx_inventory.h"
-#include "gfx_inventory_t3x.h"
+#include "lang.h"
 
+#define ITEM_MAX       64
+#define ITEM_NAME_MAX  96
+#define INVENTORY_MAX_IMAGES 128
 #define INVENTORY_COLUMNS  6
 #define INVENTORY_ROWS     2
 #define ITEM_SIZE       32.0f
 #define ITEM_INNER_SPACING       4.0f
-
 #define ITEM_OUTER_SPACING_X    14.0f
 #define ITEM_OUTER_SPACING_Y    10.0f
 #define ITEM_Y          75.0f
 #define ITEM_X          20.0f
 
-
-static Item items[ITEM_COUNT];
-static Item *inventory[ITEM_COUNT];
-static size_t inventory_count = 0;
+static Item items[ITEM_MAX];
+static size_t item_count = 0;
 static size_t selected = 0;
+
+static Item *inventory[ITEM_MAX];
+static size_t inventory_count = 0;
+
+typedef struct {
+    char name[ITEM_NAME_MAX];
+    int index;
+} InventoryImageIndex;
+
+static InventoryImageIndex image_indexes[INVENTORY_MAX_IMAGES];
+static size_t image_index_count = 0;
+static C2D_SpriteSheet inventory_assets;
 static C2D_TextBuf text_buf;
 static C2D_Text text;
-static C2D_SpriteSheet inventory_assets = NULL;
-static InventoryMode inventory_mode = INVENTORY_NORMAL;
-static C2D_Image object_details;
 static C2D_Image img_selected;
 static C2D_Image img_background;
+static InventoryMode inventory_mode = INVENTORY_NORMAL;
+
+static char *trim(char *str) {
+    while (*str && isspace((unsigned char)*str)) {
+        str++;
+    }
+
+    if (*str == '\0') {
+        return str;
+    }
+
+    char *end = str + strlen(str) - 1;
+
+    while (end > str && isspace((unsigned char)*end)) {
+        *end-- = '\0';
+    }
+
+    return str;
+}
+
+static int get_image_index(const char *name) {
+    for (size_t i = 0; i < image_index_count; i++) {
+        if (strcmp(image_indexes[i].name, name) == 0) {
+            return image_indexes[i].index;
+        }
+    }
+    return -1;
+}
+
+static bool load_gfx_header(const char *filename) {
+    FILE *f = fopen(filename, "r");
+    if (!f) {
+        printf("Cannot open %s\n", filename);
+        return false;
+    }
+
+    image_index_count = 0;
+
+    char line[256];
+
+    while (fgets(line, sizeof(line), f)) {
+        char directive[32];
+        char name[ITEM_NAME_MAX];
+        char value[32];
+
+        if (sscanf(line, "%31s %95s %31s", directive, name, value) != 3) {
+            continue;
+        }
+
+        if (strcmp(directive, "#define") != 0) {
+            continue;
+        }
+
+        size_t len = strlen(name);
+
+        if (len < 4 || strcmp(name + len - 4, "_idx") != 0) {
+            continue;
+        }
+        int index = atoi(value);
+
+        if (image_index_count >= INVENTORY_MAX_IMAGES) {
+            printf("Too many images in %s\n", filename);
+            fclose(f);
+            return false;
+        }
+
+        InventoryImageIndex *entry = &image_indexes[image_index_count++];
+
+        strcpy(entry->name, name);
+        entry->index = index;
+    }
+
+    fclose(f);
+    return true;
+}
+
+static C2D_Image get_image(const char *name) {
+    int index = get_image_index(name);
+
+    if (index < 0) {
+        return (C2D_Image){0};
+    }
+
+    return C2D_SpriteSheetGetImage(inventory_assets, index);
+}
+
+static Item *inventory_find(const char *id) {
+    for (size_t i = 0; i < item_count; i++) {
+        if (strcmp(items[i].id, id) == 0) {
+            return &items[i];
+        }
+    }
+
+    return NULL;
+}
+
+static Item *add_item(const char *id, const char *name_id) {
+    if (item_count >= ITEM_MAX) {
+        return NULL;
+    }
+    Item *item = &items[item_count++];
+    memset(item, 0, sizeof(*item));
+    item->id = strdup(id);
+    item->name_id = strdup(name_id);
+    return item;
+}
+
+static bool load_inventory(const char *filename) {
+    FILE *f = fopen(filename, "r");
+
+    if (!f) {
+        printf("Cannot open inventory: %s\n", filename);
+        return false;
+    }
+
+    item_count = 0;
+
+    char line[256];
+    size_t line_number = 0;
+    Item *item = NULL;
+
+    while (fgets(line, sizeof(line), f)) {
+        line_number++;
+        char *p = trim(line);
+
+        if (*p == '\0' || *p == '#') {
+            continue;
+        }
+
+        char *command = strtok(p, " ");
+
+        if (!command) {
+            continue;
+        }
+
+        if (item) {
+            if (strcmp(command, "IMAGE") == 0) {
+                char *image_id = strtok(NULL, " ");
+                if (!image_id) {
+                    printf("%s:%zu: syntax error\n", filename, line_number);
+                    fclose(f);
+                    item_count = 0;
+                    return false;
+                }
+                item->image = get_image(image_id);
+                if (!item->image.tex) {
+                    printf("%s:%zu: unknown image: %s\n", filename, line_number, image_id);
+                    fclose(f);
+                    item_count = 0;
+                    return false;
+                }
+                continue;
+            }
+            if (strcmp(command, "EXAMINE") == 0) {
+                char *text = strtok(NULL, " ");
+                if (!text) {
+                    printf("%s:%zu: syntax error\n", filename, line_number);
+                    fclose(f);
+                    item_count = 0;
+                    return false;
+                }
+                item->examine_text = strdup(text);
+                continue;
+            }
+            if (strcmp(command, "DETAIL") == 0) {
+                char *image_id = strtok(NULL, " ");
+                if (!image_id) {
+                    printf("%s:%zu: syntax error\n", filename, line_number);
+                    fclose(f);
+                    item_count = 0;
+                    return false;
+                }
+
+                char *x  = strtok(NULL, " ");
+                char *y  = strtok(NULL, " ");
+
+                if ((!x) || (!y)) {
+                    printf("%s:%zu: syntax error\n", filename, line_number);
+                    fclose(f);
+                    item_count = 0;
+                    return false;
+                }
+
+                item->detail_image = get_image(image_id);
+
+                if (!item->detail_image.tex) {
+                    printf("%s:%zu: unknown image: %s\n", filename, line_number, image_id);
+                    fclose(f);
+                    item_count = 0;
+                    return false;
+                }
+                item->detail_x = atof(x);
+                item->detail_y = atof(y);
+                continue;
+            }
+            if (strcmp(command, "END_ITEM") == 0) {
+                if (!item->image.tex) {
+                    printf("%s:%zu: syntax error\n", filename, line_number);
+                    fclose(f);
+                    item_count = 0;
+                    return false;
+                }
+                item = NULL;
+                continue;
+            }
+            printf("%s:%zu: syntax error: %s\n", filename, line_number, command);
+            fclose(f);
+            item_count = 0;
+            return false;
+        }
+        if (strcmp(command, "ITEM") == 0) {
+            char *item_id = strtok(NULL, " ");
+            char *name_id = strtok(NULL, " ");
+            if ((!item_id) || (!name_id)) {
+                printf("%s:%zu: syntax error\n", filename, line_number);
+                fclose(f);
+                item_count = 0;
+                return false;
+            }
+            if (inventory_find(item_id)) {
+                printf("%s:%zu: already exists: %s\n", filename, line_number, item_id);
+                fclose(f);
+                item_count = 0;
+                return false;
+            }
+            item = add_item(item_id, name_id);
+            if (!item) {
+                printf("%s:%zu: too many items\n", filename, line_number);
+                fclose(f);
+                item_count = 0;
+                return false;
+            }
+            continue;
+        }
+        printf("%s:%zu: syntax error\n", filename, line_number);
+        fclose(f);
+        item_count = 0;
+        return false;
+    }
+
+    if (item) {
+        printf("%s:%zu: missing END_ITEM\n", filename, line_number);
+        fclose(f);
+        item_count = 0;
+        return false;
+    }
+
+    fclose(f);
+    printf("Loaded %zu inventory items\n", item_count);
+    return true;
+}
 
 static void description_draw_action(Item *item) {
-    char description_id[128];
-    snprintf(description_id, sizeof(description_id), "%s_EXAMINE", item->name_id);
-
     C2D_TextBufClear(text_buf);
-    C2D_TextParse(&text, text_buf, lang_get(description_id));
+    C2D_TextParse(&text, text_buf, lang_get(item->examine_text));
     C2D_TextOptimize(&text);
     C2D_DrawText(&text, C2D_WithColor, 20.0f, 62.0f, 0.5f, 0.55f, 0.55f, C2D_Color32(192, 192, 192, 255));
 }
 
-static void score_draw_action(Item *item) {
-    object_details = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_partition_details_idx);
-    C2D_DrawImageAt(object_details, 22.0f, 56.0f, 0.55f, NULL, 0.85f, 0.85f);
+static void draw_action(Item *item) {
+    C2D_DrawImageAt(item->detail_image, item->detail_x, item->detail_y, 0.55f, NULL, 0.85f, 0.85f);
 }
 
-static void invoice_draw_action(Item *item) {
-    object_details = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_invoice_details_idx);
-    C2D_DrawImageAt(object_details, 33.0f, 60.0f, 0.5f, NULL, 0.9f, 0.9f);
-}
-
-bool inventory_is_active(void) {
-    return inventory_mode == INVENTORY_ACTION;
-}
-
-void inventory_init(void) {
-    inventory_assets = C2D_SpriteSheetLoadFromMem(gfx_inventory_t3x, gfx_inventory_t3x_size);
-    img_selected = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_selected_idx);
-    img_background = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_background_idx);
-
-    if (!inventory_assets) {
-        return;
-    }
-
-    if (!text_buf) {
-        text_buf = C2D_TextBufNew(4096);
-    }
-
-    items[ITEM_MESSAGE] = (Item) {
-        .id = ITEM_MESSAGE,
-        .name_id = "ITEM_MESSAGE",
-        .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_message_idx),
-        .examinable = true
-    };
-
-    items[ITEM_MAGNIFYING_GLASS] = (Item) {
-        .id = ITEM_MAGNIFYING_GLASS,
-        .name_id = "ITEM_MAGNIFYING_GLASS",
-        .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_magnify_glass_idx),
-    };
-
-    items[ITEM_SCREWDRIVER] = (Item) {
-        .id = ITEM_SCREWDRIVER,
-        .name_id = "ITEM_SCREWDRIVER",
-        .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_screwdriver_idx),
-    };
-
-    items[ITEM_BINOCULARS] = (Item) {
-        .id = ITEM_BINOCULARS,
-        .name_id = "ITEM_BINOCULARS",
-        .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_binoculars_idx),
-    };
-
-    items[ITEM_FLASHLIGHT] = (Item) {
-        .id = ITEM_FLASHLIGHT,
-        .name_id = "ITEM_FLASHLIGHT",
-        .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_flashlight_idx),
-    };
-
-    items[ITEM_SCORE] = (Item) {
-        .id = ITEM_SCORE,
-        .name_id = "ITEM_SCORE",
-        .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_partition_idx),
-        .draw_action = score_draw_action
-    };
-
-    items[ITEM_LIGHTER] = (Item) {
-        .id = ITEM_LIGHTER,
-        .name_id = "ITEM_LIGHTER",
-        .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_lighter_idx),
-    };
-
-    items[ITEM_STATUE] = (Item) {
-        .id = ITEM_STATUE,
-        .name_id = "ITEM_STATUE",
-        .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_statue_idx),
-        .examinable = true
-    };
-
-    items[ITEM_CUP] = (Item) {
-        .id = ITEM_CUP,
-        .name_id = "ITEM_CUP",
-        .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_cup_idx),
-        .examinable = true
-    };
-    items[ITEM_CLOCK] = (Item) {
-        .id = ITEM_CLOCK,
-        .name_id = "ITEM_CLOCK",
-        .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_clock_idx),
-    };
-    items[ITEM_GLASSES] = (Item) {
-        .id = ITEM_GLASSES,
-        .name_id = "ITEM_GLASSES",
-        .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_glasses_idx),
-    };
-    items[ITEM_STAIN_REMOVER] = (Item) {
-        .id = ITEM_STAIN_REMOVER,
-        .name_id = "ITEM_STAIN_REMOVER",
-        .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_stain_remover_idx),
-    };
-
-    items[ITEM_REVOLVER] = (Item) {
-        .id = ITEM_REVOLVER,
-        .name_id = "ITEM_REVOLVER",
-        .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_revolver_idx),
-    };
-
-    items[ITEM_INVOICE] = (Item) {
-        .id = ITEM_INVOICE,
-        .name_id = "ITEM_INVOICE",
-        .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_invoice_idx),
-        .draw_action = invoice_draw_action
-    };
-
-    items[ITEM_SHOVEL] = (Item) {
-        .id = ITEM_SHOVEL,
-        .name_id = "ITEM_SHOVEL",
-        .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_shovel_idx),
-    };
-
-    items[ITEM_SLEDGEHAMMER] = (Item) {
-        .id = ITEM_SLEDGEHAMMER,
-        .name_id = "ITEM_SLEDGEHAMMER",
-        .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_sledgehammer_idx),
-    };
-
-    items[ITEM_ROPE] = (Item) {
-        .id = ITEM_ROPE,
-        .name_id = "ITEM_ROPE",
-        .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_rope_idx),
-    };
-
-    items[ITEM_RING] = (Item) {
-        .id = ITEM_RING,
-        .name_id = "ITEM_RING",
-        .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_ring_idx),
-        .examinable = true
-    };
-
-    items[ITEM_RUBBER] = (Item) {
-        .id = ITEM_RUBBER,
-        .name_id = "ITEM_RUBBER",
-        .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_rubber_idx)
-    };
-
-    items[ITEM_LIGHTBULB] = (Item) {
-        .id = ITEM_LIGHTBULB,
-        .name_id = "ITEM_LIGHTBULB",
-        .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_lightbulb_idx)
-    };
-
-    items[ITEM_MEASURING_TAPE] = (Item) {
-        .id = ITEM_MEASURING_TAPE,
-        .name_id = "ITEM_MEASURING_TAPE",
-        .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_measuring_tape_idx)
-    };
-
-    items[ITEM_CIGARETTES] = (Item) {
-        .id = ITEM_CIGARETTES,
-        .name_id = "ITEM_CIGARETTES",
-        .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_cigarettes_idx)
-    };
-
-    items[ITEM_BRACELET] = (Item) {
-        .id = ITEM_BRACELET,
-        .name_id = "ITEM_BRACELET",
-        .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_bracelet_idx),
-        .examinable = true
-    };
-
-    items[ITEM_KEY_ONE] = (Item) {
-        .id = ITEM_KEY_ONE,
-        .name_id = "ITEM_KEY_ONE",
-        .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_key_one_idx)
-    };
-
-    items[ITEM_SOAP] = (Item) {
-        .id = ITEM_SOAP,
-        .name_id = "ITEM_SOAP",
-        .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_soap_idx)
-    };
-
-    items[ITEM_PERFUME] = (Item) {
-        .id = ITEM_PERFUME,
-        .name_id = "ITEM_PERFUME",
-        .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_perfume_idx)
-    };
-
-    items[ITEM_RAZOR] = (Item) {
-        .id = ITEM_RAZOR,
-        .name_id = "ITEM_RAZOR",
-        .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_razor_idx)
-    };
-
-    items[ITEM_COMB] = (Item) {
-        .id = ITEM_COMB,
-        .name_id = "ITEM_COMB",
-        .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_comb_idx)
-    };
-
-    items[ITEM_TOOTHPASTE] = (Item) {
-        .id = ITEM_TOOTHPASTE,
-        .name_id = "ITEM_TOOTHPASTE",
-        .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_toothpaste_idx)
-    };
-
-    items[ITEM_MAGNETIC_CARD] = (Item) {
-        .id = ITEM_MAGNETIC_CARD,
-        .name_id = "ITEM_MAGNETIC_CARD",
-        .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_magnetic_card_idx)
-    };
-    items[ITEM_SYRINGE] = (Item) {
-        .id = ITEM_SYRINGE,
-        .name_id = "ITEM_SYRINGE",
-        .image = C2D_SpriteSheetGetImage(inventory_assets, gfx_inventory_syringe_idx),
-        .examinable = true
-    };
-    inventory_count = 0;
-    selected = 0;
-}
-
-void inventory_close(void) {
-    if (inventory_assets) {
-        C2D_SpriteSheetFree(inventory_assets);
-        inventory_assets = NULL;
-    }
-    if (text_buf) {
-        C2D_TextBufDelete(text_buf);
-        text_buf = NULL;
-    }
-
-    inventory_count = 0;
-    selected = 0;
-}
-
-void inventory_reset(void) {
-    inventory_count = 0;
-    selected = 0;
-    inventory_mode = INVENTORY_NORMAL;
-}
-
-
-bool inventory_has(ItemId id) {
-    for (size_t i = 0; i < inventory_count; i++) {
-        if (inventory[i]->id == id)
-            return true;
-    }
-    return false;
-}
-
-void inventory_add(ItemId id) {
-    if (id < 0 || id >= ITEM_COUNT) {
-        return;
-    }
-
-    if (inventory_count >= ITEM_COUNT) {
-        return;
-    }
-
-    if (inventory_has(id)) {
-        return;
-    }
-
-    inventory[inventory_count++] = &items[id];
-    selected = inventory_count - 1;
-}
-
-void inventory_remove(ItemId id) {
-    for (size_t i = 0; i < inventory_count; i++) {
-        if (inventory[i]->id != id) {
-            continue;
-        }
-
-        for (size_t j = i; j < inventory_count - 1; j++) {
-            inventory[j] = inventory[j + 1];
-        }
-
-        inventory_count--;
-
-        if (inventory_count == 0) {
-            selected = 0;
-        } else if (selected >= inventory_count) {
-            selected = inventory_count - 1;
-        }
-
-        return;
-    }
-}
 
 bool inventory_update(u32 keys) {
     if (inventory_mode == INVENTORY_ACTION) {
@@ -380,7 +354,7 @@ bool inventory_update(u32 keys) {
 
     Item *item = inventory[selected];
     if (keys & KEY_X) {    
-        if (item->draw_action || item->examinable) {
+        if (item->detail_image.tex || item->examine_text) {
             inventory_mode = INVENTORY_ACTION;
         }
         return true;
@@ -401,8 +375,8 @@ void inventory_draw(void) {
     if (inventory_mode == INVENTORY_ACTION) {
         Item *item = inventory[selected];
         C2D_DrawImageAt(img_background, 7.0f, 49.0f, 0.4f, NULL, 1.0f, 1.0f);
-        if (item->draw_action) {
-            item->draw_action(item);
+        if (item->detail_image.tex) {
+            draw_action(item);
         } else {
             description_draw_action(item);
         }
@@ -432,4 +406,142 @@ void inventory_draw(void) {
 
 const Item *inventory_get_selected(void) {
     return inventory[selected];
+}
+
+
+bool inventory_is_active(void) {
+    return inventory_mode == INVENTORY_ACTION;
+}
+
+void inventory_reset(void) {
+    inventory_count = 0;
+    selected = 0;
+    inventory_mode = INVENTORY_NORMAL;
+}
+
+bool inventory_has(const char *id) {
+    Item *item = inventory_find(id);
+
+    if (!item) {
+        return false;
+    }
+
+    for (size_t i = 0; i < inventory_count; i++) {
+        if (inventory[i] == item)
+            return true;
+    }
+
+    return false;
+}
+
+void inventory_add(const char *id) {
+    Item *item = inventory_find(id);
+
+    if (!item) {
+        printf("Unknown inventory item: %s\n", id);
+        return;
+    }
+
+    if (inventory_count >= ITEM_MAX) {
+        return;
+    }
+
+    if (inventory_has(id)) {
+        return;
+    }
+
+    inventory[inventory_count++] = item;
+    selected = inventory_count - 1;
+}
+
+void inventory_remove(const char *id) {
+    Item *item = inventory_find(id);
+
+    if (!item) {
+        return;
+    }
+
+    for (size_t i = 0; i < inventory_count; i++) {
+        if (inventory[i] != item) {
+            continue;
+        }
+
+        for (size_t j = i; j < inventory_count - 1; j++)
+            inventory[j] = inventory[j + 1];
+
+        inventory_count--;
+
+        if (inventory_count == 0) {
+            selected = 0;
+        } else if (selected >= inventory_count) {
+            selected = inventory_count - 1;
+        }
+        return;
+    }
+}
+
+bool inventory_init(void) {
+    inventory_assets = C2D_SpriteSheetLoad("romfs:/inventory/gfx.t3x");
+    if (!inventory_assets) {
+        return false;
+    }
+
+    if (!load_gfx_header("romfs:/inventory/gfx.h")) {
+        printf("Cannot load gfx headers\n");
+        C2D_SpriteSheetFree(inventory_assets);
+        inventory_assets = NULL;
+        return false;
+    }
+
+    if (!load_inventory("romfs:/inventory/inventory")) {
+        printf("Cannot load inventory\n");
+        C2D_SpriteSheetFree(inventory_assets);
+        inventory_assets = NULL;
+        return false;
+    }
+
+    int img_idx = get_image_index("gfx_selected_idx");
+    if (img_idx < 0) {
+        printf("unknown image: gfx_selected_idx\n");
+        C2D_SpriteSheetFree(inventory_assets);
+        inventory_assets = NULL;
+        return false;
+    }
+    img_selected = C2D_SpriteSheetGetImage(inventory_assets, img_idx);
+
+    img_idx = get_image_index("gfx_background_idx");
+    if (img_idx < 0) {
+        printf("unknown image: gfx_background_idx\n");
+        C2D_SpriteSheetFree(inventory_assets);
+        inventory_assets = NULL;
+        return false;
+    }
+    img_background = C2D_SpriteSheetGetImage(inventory_assets, img_idx);
+
+    if (!text_buf) {
+        text_buf = C2D_TextBufNew(4096);
+    }
+
+    inventory_count = 0;
+    selected = 0;
+
+    return true;
+}
+
+void inventory_close(void) {
+    for (size_t i = 0; i < item_count; i++) {
+        free(items[i].id);
+        free(items[i].name_id);
+        free(items[i].examine_text);
+    }
+    if (inventory_assets) {
+        C2D_SpriteSheetFree(inventory_assets);
+        inventory_assets = NULL;
+    }
+    if (text_buf) {
+        C2D_TextBufDelete(text_buf);
+        text_buf = NULL;
+    }
+    inventory_count = 0;
+    selected = 0;
 }

@@ -14,7 +14,7 @@ static C2D_Image img_syringe_taken;
 
 static void syringe_action(void) {
     gamestate_set("laboratory_syringe_taken");
-    inventory_add(ITEM_SYRINGE);
+    inventory_add("SYRINGE");
 }
 
 static bool syringe_is_here(void) {

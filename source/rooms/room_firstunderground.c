@@ -17,35 +17,35 @@ static C2D_Image img_hole_dug;
 static C2D_Image img_hole_empty;
 
 static void shovel_action(void) {
-    inventory_add(ITEM_SHOVEL);
+    inventory_add("SHOVEL");
 }
 
 static bool shovel_is_active(void) {
-    return !inventory_has(ITEM_SHOVEL);
+    return !inventory_has("SHOVEL");
 }
 
 static void sledgehammer_action(void) {
-    inventory_add(ITEM_SLEDGEHAMMER);
+    inventory_add("SLEDGEHAMMER");
 }
 
 static bool sledgehammer_is_active(void) {
-    return !inventory_has(ITEM_SLEDGEHAMMER);
+    return !inventory_has("SLEDGEHAMMER");
 }
 
 static bool target_is_active(void) {
     return !gamestate_get("underground_dug");
 }
 
-static bool x_form_use_item(ItemId item) {
-    if (item == ITEM_MEASURING_TAPE) {
+static bool x_form_use_item(const char *id) {
+    if (strcmp(id, "MEASURING_TAPE") == 0) {
         game_start_measure();
         return true;
     }
     return false;
 }
 
-static bool target_use_item(ItemId item) {
-    if (item == ITEM_SHOVEL) {
+static bool target_use_item(const char *id) {
+    if (strcmp(id, "SHOVEL") == 0) {
         gamestate_set("underground_dug");
         game_show_message("UNDERGROUND_DIG");
         return true;
@@ -53,8 +53,8 @@ static bool target_use_item(ItemId item) {
     return false;
 }
 
-static bool ground_use_item(ItemId item) {
-    if (item == ITEM_SHOVEL) {
+static bool ground_use_item(const char *id) {
+    if (strcmp(id, "SHOVEL") == 0) {
         game_show_message("UNDERGROUND_DIG_ANYWHERE");
         return true;
     }
@@ -67,7 +67,7 @@ static bool magnetic_card_is_active(void) {
 
 static void magnetic_card_action(void) {
     gamestate_set("underground_card_taken");
-    inventory_add(ITEM_MAGNETIC_CARD);
+    inventory_add("MAGNETIC_CARD");
 }
 
 static Hotspot hotspots[] = {
@@ -144,10 +144,10 @@ static void room_init(void) {
 
 static void room_draw(void) {
     C2D_DrawImageAt(img_bg, 0.0f, 0.0f, 0.0f, NULL, 1.0f, 1.0f);
-    if (inventory_has(ITEM_SHOVEL)) {
+    if (inventory_has("SHOVEL")) {
         C2D_DrawImageAt(img_shovel_taken, 15.0f, 85.0f, 0.2f, NULL, 1.0f, 1.0f);
     }
-    if (inventory_has(ITEM_SLEDGEHAMMER)) {
+    if (inventory_has("SLEDGEHAMMER")) {
         C2D_DrawImageAt(img_sledgehammer_taken, 46.0f, 83.0f, 0.2f, NULL, 1.0f, 1.0f);
     }
     if (gamestate_get("underground_dug")) {

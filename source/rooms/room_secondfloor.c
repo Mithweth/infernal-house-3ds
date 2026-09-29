@@ -13,10 +13,10 @@ static C2D_SpriteSheet room_scene;
 static C2D_Image img_background;
 
 
-static bool door_use_item(ItemId item) {
-    if (item == ITEM_KEY_ONE) {
+static bool door_use_item(const char *id) {
+    if (strcmp(id, "KEY_ONE") == 0) {
         gamestate_set("secondfloor_door_unlocked");
-        inventory_remove(ITEM_KEY_ONE);
+        inventory_remove("KEY_ONE");
         game_show_message("SECONDFLOOR_DOOR_UNLOCK");
         return true;
     }

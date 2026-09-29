@@ -122,8 +122,7 @@ static TimelineTextColor parse_color(const char *str) {
     return TIMELINE_COLOR_WHITE;
 }
 
-static int get_image_index(const char *name)
-{
+static int get_image_index(const char *name) {
     for (size_t i = 0; i < image_index_count; i++) {
         if (strcmp(image_indexes[i].name, name) == 0) {
             return image_indexes[i].index;

@@ -14,15 +14,15 @@ static C2D_Image img_ring_taken;
 static C2D_Image img_rope_taken;
 
 static void ring_action(void) {
-    inventory_add(ITEM_RING);
+    inventory_add("RING");
 }
 
 static bool ring_is_active(void) {
-    return !inventory_has(ITEM_RING);
+    return !inventory_has("RING");
 }
 
 static void rope_action(void) {
-    inventory_add(ITEM_ROPE);
+    inventory_add("ROPE");
     gamestate_set("underground_rope_taken");
 }
 
@@ -98,7 +98,7 @@ static void room_init(void) {
 
 static void room_draw(void) {
     C2D_DrawImageAt(img_background, 0.0f, 0.0f, 0.0f, NULL, 1.0f, 1.0f);
-    if (inventory_has(ITEM_RING)) {
+    if (inventory_has("RING")) {
         C2D_DrawImageAt(img_ring_taken, 191.0f, 8.0f, 0.2f, NULL, 1.0f, 1.0f);
     }
     if (gamestate_get("underground_rope_taken")) {

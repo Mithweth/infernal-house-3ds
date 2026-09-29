@@ -83,7 +83,6 @@ static void background_draw(void) {
     draw_bold_text(&text, 115.0f, 52.0f, 0.3f, 0.5f, 0.5f, C2D_Color32(0, 0, 0, 255));
 }
 
-
 static void timer_draw() {
     int total_seconds = TIME_MAX_SECONDS - elapsed_time / 1000;
     int hours   = (total_seconds / 3600) % 100;
@@ -132,7 +131,9 @@ static void movement_draw(void) {
 }
 
 void hud_init(void) {
-    inventory_init();
+    if (!inventory_init()) {
+        return;
+    }
     hud_assets = C2D_SpriteSheetLoadFromMem(gfx_hud_t3x, gfx_hud_t3x_size);
     img_background = C2D_SpriteSheetGetImage(hud_assets, gfx_hud_background_idx);
     img_inventory = C2D_SpriteSheetGetImage(hud_assets, gfx_hud_inventory_idx);

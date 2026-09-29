@@ -23,23 +23,23 @@ static bool statue_is_active(void) {
 
 static void statue_action(void) {
     gamestate_set("library_statue_taken");
-    inventory_add(ITEM_STATUE);
+    inventory_add("STATUE");
 }
 
 static bool clock_is_active(void) {
-    return !inventory_has(ITEM_CLOCK);
+    return !inventory_has("CLOCK");
 }
 
 static void clock_action(void) {
-    inventory_add(ITEM_CLOCK);
+    inventory_add("CLOCK");
 }
 
 static bool cup_is_active(void) {
-    return !inventory_has(ITEM_CUP);
+    return !inventory_has("CUP");
 }
 
 static void cup_action(void) {
-    inventory_add(ITEM_CUP);
+    inventory_add("CUP");
 }
 
 static bool book_is_active(void) {
@@ -222,10 +222,10 @@ static void room_draw(void) {
     if (gamestate_get("library_statue_taken")) {
         C2D_DrawImageAt(img_statue_taken, 13.0f, 39.0f, 0.3f, NULL, 1.0f, 1.0f);
     }
-    if (inventory_has(ITEM_CLOCK)) {
+    if (inventory_has("CLOCK")) {
         C2D_DrawImageAt(img_clock_taken, 11.0f, 71.0f, 0.3f, NULL, 1.0f, 1.0f);
     }
-    if (inventory_has(ITEM_CUP)) {
+    if (inventory_has("CUP")) {
         C2D_DrawImageAt(img_cup_taken, 103.0f, 62.0f, 0.3f, NULL, 1.0f, 1.0f);
     }
     if (gamestate_get("library_secret_passage_opened")) {

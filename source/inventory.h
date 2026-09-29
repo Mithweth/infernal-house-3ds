@@ -5,47 +5,17 @@
 #include <citro2d.h>
 #include <stdbool.h>
 
-typedef enum {
-    ITEM_MESSAGE,
-    ITEM_MAGNIFYING_GLASS,
-    ITEM_SCREWDRIVER,
-    ITEM_BINOCULARS,
-    ITEM_FLASHLIGHT,
-    ITEM_SCORE,
-    ITEM_LIGHTER,
-    ITEM_STATUE,
-    ITEM_CUP,
-    ITEM_CLOCK,
-    ITEM_GLASSES,
-    ITEM_INVOICE,
-    ITEM_STAIN_REMOVER,
-    ITEM_REVOLVER,
-    ITEM_SHOVEL,
-    ITEM_SLEDGEHAMMER,
-    ITEM_RING,
-    ITEM_ROPE,
-    ITEM_RUBBER,
-    ITEM_LIGHTBULB,
-    ITEM_MEASURING_TAPE,
-    ITEM_CIGARETTES,
-    ITEM_BRACELET,
-    ITEM_KEY_ONE,
-    ITEM_PERFUME,
-    ITEM_COMB,
-    ITEM_SOAP,
-    ITEM_TOOTHPASTE,
-    ITEM_RAZOR,
-    ITEM_MAGNETIC_CARD,
-    ITEM_SYRINGE,
-    ITEM_COUNT
-} ItemId;
-
-typedef struct Item {
-    ItemId id;
-    const char *name_id;
+typedef struct {
+    char *id;
+    char *name_id;
+    char *examine_text;
     C2D_Image image;
     bool examinable;
-    void (*draw_action)(struct Item *item);
+    C2D_Image detail_image;
+    float detail_x;
+    float detail_y;
+    void (*callback)(void);
+    char *callback_name;
 } Item;
 
 typedef enum {
@@ -53,11 +23,11 @@ typedef enum {
     INVENTORY_ACTION
 } InventoryMode;
 
-void inventory_init(void);
+bool inventory_init(void);
 void inventory_close(void);
-void inventory_add(ItemId id);
-bool inventory_has(ItemId id);
-void inventory_remove(ItemId id);
+void inventory_add(const char *id);
+bool inventory_has(const char *id);
+void inventory_remove(const char *id);
 bool inventory_update(u32 keys);
 void inventory_draw(void);
 bool inventory_is_active(void);

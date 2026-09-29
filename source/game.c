@@ -343,12 +343,12 @@ void game_end_simon(bool success) {
     }
 }
 
-bool game_use_item(ItemId item) {
+bool game_use_item(const char *id) {
     if (!target) {
         return false;
     }
-
-    if (target->use_item && target->use_item(item)) {
+    printf("Use item: %s\n", id);
+    if (target->use_item && target->use_item(id)) {
         return true;
     }
     game_show_message("GENERIC_USE");

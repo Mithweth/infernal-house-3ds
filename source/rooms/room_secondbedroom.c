@@ -47,12 +47,12 @@ static void left_closet_action(void) {
 }
 
 static void pocket_action() {
-    inventory_add(ITEM_BRACELET);
-    inventory_add(ITEM_CIGARETTES);
+    inventory_add("BRACELET");
+    inventory_add("CIGARETTES");
 }
 
 static bool pocket_is_active(void) {
-    return gamestate_get("secondbedroom_right_closet_door_opened") && !inventory_has(ITEM_CIGARETTES);
+    return gamestate_get("secondbedroom_right_closet_door_opened") && !inventory_has("CIGARETTES");
 }
 
 static void nightstand_drawer_action(void) {
@@ -60,13 +60,13 @@ static void nightstand_drawer_action(void) {
 }
 
 static bool nightstand_drawer_is_active(void) {
-    return gamestate_get("secondbedroom_left_nightstand_opened") && !inventory_has(ITEM_RUBBER);
+    return gamestate_get("secondbedroom_left_nightstand_opened") && !inventory_has("RUBBER");
 }
 
 static void nightstand_objects_action(void) {
-    inventory_add(ITEM_RUBBER);
-    inventory_add(ITEM_LIGHTBULB);
-    inventory_add(ITEM_MEASURING_TAPE);
+    inventory_add("RUBBER");
+    inventory_add("LIGHTBULB");
+    inventory_add("MEASURING_TAPE");
 }
 
 static void move_left_painting(void) {
@@ -90,7 +90,7 @@ static bool opened_painting_and_key_not_taken(void) {
 
 static void take_key_one_action(void) {
     gamestate_set("secondbedroom_key_taken");
-    inventory_add(ITEM_KEY_ONE);
+    inventory_add("KEY_ONE");
 }
 
 static bool left_closet_door_opened(void) {
