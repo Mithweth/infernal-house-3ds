@@ -204,7 +204,7 @@ static bool load_inventory(const char *filename) {
                 item->examine_text = strdup(text);
                 continue;
             }
-            if (strcmp(command, "CALL") == 0) {
+            if (strcmp(command, "EXAMINE_CALLBACK") == 0) {
                 char *cb = strtok(NULL, " ");
                 if (!cb) {
                     printf("%s:%zu: syntax error\n", filename, line_number);
@@ -212,7 +212,18 @@ static bool load_inventory(const char *filename) {
                     item_count = 0;
                     return false;
                 }
-                item->callback = game_callback_find(cb);
+                item->examine_callback = game_callback_find(cb);
+                continue;
+            }
+            if (strcmp(command, "USE_CALLBACK") == 0) {
+                char *cb = strtok(NULL, " ");
+                if (!cb) {
+                    printf("%s:%zu: syntax error\n", filename, line_number);
+                    fclose(f);
+                    item_count = 0;
+                    return false;
+                }
+                item->use_callback = game_callback_find(cb);
                 continue;
             }
             if (strcmp(command, "DETAIL") == 0) {
@@ -356,9 +367,14 @@ bool inventory_update(u32 keys) {
 
     Item *item = inventory[selected];
     if (keys & KEY_X) {    
-        if (item->detail_image.tex || item->examine_text || item->callback) {
+        if (item->detail_image.tex || item->examine_text || item->examine_callback) {
             inventory_mode = INVENTORY_ACTION;
         }
+        return true;
+    }
+
+    if (item && item->use_callback) {
+        item->use_callback();
         return true;
     }
 
@@ -389,8 +405,8 @@ void inventory_draw(void) {
             C2D_TextOptimize(&text);
             C2D_DrawText(&text, C2D_WithColor, 20.0f, 62.0f, 0.5f, 0.55f, 0.55f, C2D_Color32(192, 192, 192, 255));
         }
-        if (item->callback) {
-            item->callback();
+        if (item->examine_callback) {
+            item->examine_callback();
         }
         return;
     }

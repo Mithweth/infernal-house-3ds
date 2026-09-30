@@ -14,7 +14,8 @@ typedef struct {
     bool detail_fullscreen;
     float detail_x;
     float detail_y;
-    void (*callback)(void);
+    void (*examine_callback)(void);
+    void (*use_callback)(void);
 } Item;
 
 typedef enum {

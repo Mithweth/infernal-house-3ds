@@ -84,6 +84,7 @@ void game_stop_piano(bool success);
 void game_end_simon(bool success);
 bool game_use_item(const char *id);
 void game_show_message(const char *message_id);
+void game_show_image(C2D_Image image);
 void game_wait_for_sfx(const char *sfx, void (*callback)(void));
 void game_callback_register(const char *name, void (*callback)(void));
 void (*game_callback_find(const char *name))(void);

@@ -51,4 +51,4 @@ study_closet_opened TOGGLE
 study_board_pulled TOGGLE
 study_lights_on KEEP
 study_lightbulb_screwed KEEP
-
+item_syringe_injected KEEP

@@ -20,6 +20,7 @@ static bool circle_ready = true;
 static Hotspot *active_hotspot = NULL;
 static Hotspot *target = NULL;
 static const char *message_text = NULL;
+static C2D_Image examine_image;
 static C2D_TextBuf text_buf;
 static C2D_Text text;
 static void (*game_busy_callback)(void) = NULL;
@@ -44,6 +45,12 @@ void game_secret_code(void) {
     C2D_TextParse(&text, secret_code_text_buf, code);
     C2D_TextOptimize(&text);
     C2D_DrawText(&text, C2D_WithColor, 40.0f, 100.0f, 0.9f, 0.55f, 0.55f, C2D_Color32(192, 192, 192, 255));
+}
+
+void game_use_syringe(void) {
+    inventory_remove("SYRINGE");
+    gamestate_set("item_syringe_injected");
+    game_show_message("ITEM_SYRINGE_USED");
 }
 
 static void game_generate_secret_code(void) {
@@ -145,8 +152,10 @@ void game_init(void) {
     music_stop();
     callback_count = 0;
     game_callback_register("secret_code", game_secret_code);
+    game_callback_register("use_syringe", game_use_syringe);
     hud_init();
     game_mode = GAME_TITLE;
+    examine_image = (C2D_Image){0};
     title_init();
 }
 
@@ -311,6 +320,7 @@ static void update_movement(circlePosition analog) {
 static void update_touch(touchPosition touch) {
     if (game_mode == GAME_MESSAGE) {
         game_mode = GAME_NORMAL;
+        examine_image = (C2D_Image){0};
         return;
     }
 
@@ -354,15 +364,22 @@ static void room_draw(void) {
     }
 
     if (game_mode == GAME_MESSAGE) {
-        C2D_TextBufClear(text_buf);
-        C2D_TextParse(&text, text_buf, message_text);
-        C2D_TextOptimize(&text);
-        float width, height;
-        C2D_TextGetDimensions(&text, 0.5f, 0.5f, &width, &height);
-        float box_height = height + 20.0f;
-        float box_y = 240.0f - box_height - 10.0f;
-        C2D_DrawRectSolid(10.0f, box_y, 0.8f, 300.0f, box_height, C2D_Color32(0, 0, 0, 180));
-        C2D_DrawText(&text, C2D_WithColor, 20.0f, box_y + 10.0f, 0.9f, 0.5f, 0.5f, C2D_Color32(255, 255, 255, 255));
+        if (examine_image.tex) {
+            float x = (320 - examine_image.subtex->width) / 2;
+            float y = (240 - examine_image.subtex->height) / 2;
+            C2D_DrawRectSolid(0.0f, 0.0f, 0.8f, 320, 240, C2D_Color32(0, 0, 0, 180));
+            C2D_DrawImageAt(examine_image, x, y, 0.9f, NULL, 1.0f, 1.0f);
+        } else {
+            C2D_TextBufClear(text_buf);
+            C2D_TextParse(&text, text_buf, message_text);
+            C2D_TextOptimize(&text);
+            float width, height;
+            C2D_TextGetDimensions(&text, 0.5f, 0.5f, &width, &height);
+            float box_height = height + 20.0f;
+            float box_y = 240.0f - box_height - 10.0f;
+            C2D_DrawRectSolid(10.0f, box_y, 0.8f, 300.0f, box_height, C2D_Color32(0, 0, 0, 180));
+            C2D_DrawText(&text, C2D_WithColor, 20.0f, box_y + 10.0f, 0.9f, 0.5f, 0.5f, C2D_Color32(255, 255, 255, 255));
+        }
     }
 }
 
@@ -416,13 +433,18 @@ bool game_use_item(const char *id) {
     if (target->use_item && target->use_item(id)) {
         return true;
     }
-    game_show_message("GENERIC_USE");
+    game_show_message("GAME_CANNOT_USE_MESSAGE");
     return false;
 }
 
 void game_show_message(const char *message_id) {
     message_text = lang_get(message_id);
     printf("Print: %s\n", message_id);
+    game_mode = GAME_MESSAGE;
+}
+
+void game_show_image(C2D_Image image) {
+    examine_image = image;
     game_mode = GAME_MESSAGE;
 }
 
@@ -473,6 +495,7 @@ void game_update(u32 keys, circlePosition analog, touchPosition touch) {
 
     if ((keys & KEY_A) && (game_mode == GAME_MESSAGE)) {
         game_mode = GAME_NORMAL;
+        examine_image = (C2D_Image){0};
         return;
     }
 
