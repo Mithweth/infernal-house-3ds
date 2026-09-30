@@ -13,19 +13,19 @@ static C2D_Text text;
 static touchPosition start;
 static touchPosition current;
 
-void measure_init(float x, float y) {
+void measure_init(void) {
     if (!text_buf) {
         text_buf = C2D_TextBufNew(1024);
     }
-    start.px = x;
-    start.py = y;
-    current.px = x;
-    current.py = y;
+    start.px = 151.0f;
+    start.py = 197.0f;
+    current.px = 151.0f;
+    current.py = 197.0f;
 }
 
 void measure_update(u32 keys, touchPosition touch) {
 	if ((keys & KEY_A) || (keys & KEY_B)) {
-	    game_stop_measure();
+	    game_minigame_stop();
 	    return;
 	}
     if ((touch.px == 0) && (touch.py == 0)) {
@@ -58,8 +58,8 @@ void measure_draw(void) {
     C2D_TextBufClear(text_buf);
     C2D_TextParse(&text, text_buf, buf);
     C2D_TextOptimize(&text);
-    C2D_DrawRectSolid(10.0f, 10.0f, 0.8f, 300.0f, 35, C2D_Color32(0, 0, 0, 180));
-    C2D_DrawText(&text, C2D_WithColor, 20.0f, 20.0f, 0.9f, 0.5f, 0.5f, C2D_Color32(255, 255, 255, 255));
+    C2D_DrawRectSolid(10.0f, 10.0f, 0.95f, 300.0f, 35, C2D_Color32(0, 0, 0, 180));
+    C2D_DrawText(&text, C2D_WithColor, 20.0f, 20.0f, 0.96f, 0.5f, 0.5f, C2D_Color32(255, 255, 255, 255));
 
     float dx = current.px - start.px;
     float dy = current.py - start.py;
@@ -78,14 +78,14 @@ void measure_draw(void) {
     float nx = -uy;
     float ny = ux;
 
-    C2D_DrawLine(start.px, start.py, C2D_Color32(40, 30, 0, 255), current.px, current.py, C2D_Color32(40, 30, 0, 255), 7.0f, 0.6f);
-    C2D_DrawLine(start.px, start.py, C2D_Color32(240, 200, 40, 255), current.px, current.py, C2D_Color32(240, 200, 40, 255), 5.0f, 0.61f);
+    C2D_DrawLine(start.px, start.py, C2D_Color32(40, 30, 0, 255), current.px, current.py, C2D_Color32(40, 30, 0, 255), 7.0f, 0.9f);
+    C2D_DrawLine(start.px, start.py, C2D_Color32(240, 200, 40, 255), current.px, current.py, C2D_Color32(240, 200, 40, 255), 5.0f, 0.91f);
 
     for (float d = 8.0f; d < len; d += 8.0f) {
         float x = start.px + ux * d;
         float y = start.py + uy * d;
         float tick = 2.0f;
-        C2D_DrawLine(x - nx * tick, y - ny * tick, C2D_Color32(40, 30, 0, 255), x + nx * tick, y + ny * tick, C2D_Color32(40, 30, 0, 255), 1.0f, 0.62f);
+        C2D_DrawLine(x - nx * tick, y - ny * tick, C2D_Color32(40, 30, 0, 255), x + nx * tick, y + ny * tick, C2D_Color32(40, 30, 0, 255), 1.0f, 0.92f);
     }
 }
 
@@ -96,3 +96,10 @@ void measure_close(void) {
     }
 }
 
+
+MiniGame minigame_measure = {
+    .init = measure_init,
+    .draw = measure_draw,
+    .update = measure_update,
+    .close = measure_close
+};

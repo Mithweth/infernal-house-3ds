@@ -9,7 +9,6 @@
 #include "hud.h"
 #include "audio.h"
 #include "title.h"
-#include "measure.h"
 #include "timeline.h"
 
 # define GAME_CALLBACK_MAX 8
@@ -188,6 +187,7 @@ void game_start(void) {
     message_text = NULL;
     active_hotspot = NULL;
     music_play("romfs:/audio/background.ogg");
+    inventory_add("MEASURING_TAPE");
     game_set_room(&hall);
 }
 
@@ -400,29 +400,6 @@ static void room_draw(void) {
             C2D_DrawText(&text, C2D_WithColor, 20.0f, box_y + 10.0f, 0.9f, 0.5f, 0.5f, C2D_Color32(255, 255, 255, 255));
         }
     }
-}
-
-void game_start_simon(void) {
-//    simon_init();
-//    game_mode = GAME_SIMON;
-}
-
-void game_start_measure(void) {
-//    measure_init(151.0f, 197.0f);
-//    game_mode = GAME_MEASURE;
-}
-
-void game_stop_measure(void) {
-//    measure_close();
-//    game_mode = GAME_NORMAL;
-}
-
-void game_end_simon(bool success) {
-//    simon_close();
-//    game_mode = GAME_NORMAL;
-//    if (success) {
-//        game_show_message("CELLAR_SIMON_WIN");
-//    }
 }
 
 bool game_use_item(const char *id) {
