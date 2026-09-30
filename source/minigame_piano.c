@@ -1,10 +1,12 @@
-// piano.c
+// minigame_piano.c
 
 #include <3ds.h>
 #include <citro2d.h>
 #include "gfx_piano.h"
 #include "lang.h"
 #include "game.h"
+#include "gamestate.h"
+#include "audio.h"
 
 #define PIANO_CHANNEL_FIRST  5
 #define PIANO_CHANNEL_LAST   10
@@ -134,6 +136,14 @@ static bool piano_pattern_matches(const int *pattern) {
     return true;
 }
 
+static void piano_stop(bool success) {
+    game_minigame_stop();
+    if (success && gamestate_get("livingroom_golden_statue_placed")) {
+        gamestate_set("livingroom_secret_passage_opened");
+        game_show_message("LIVINGROOM_SECRET_PASSAGE_OPEN");
+    }
+}
+
 static void piano_register_note(int note) {
     if (note_count < PIANO_PATTERN_LENGTH) {
         note_history[note_count++] = note;
@@ -146,7 +156,7 @@ static void piano_register_note(int note) {
     }
 
     if (piano_pattern_matches(pattern_octave3) || piano_pattern_matches(pattern_octave4)) {
-        game_stop_piano(true);
+        piano_stop(true);
     }
 }
 
@@ -175,12 +185,12 @@ static void piano_play_note(int note) {
     }
 }
 
-void piano_update(u32 keys, touchPosition touch) {
+static void piano_update(u32 keys, touchPosition touch) {
     if (!(keys & KEY_TOUCH)) {
         return;
     }
     if (touch.py > 200) {
-        game_stop_piano(false);
+        piano_stop(false);
         return;
     }
     PianoKey *pressed = find_piano_key(touch.px, touch.py);
@@ -191,15 +201,16 @@ void piano_update(u32 keys, touchPosition touch) {
     piano_register_note(pressed->note);
 }
 
-void piano_draw_bottom(void) {
-    C2D_DrawImageAt(img_background, 0.0f, 0.0f, 0.0f, NULL, 1.0f, 1.0f);
+static void piano_draw_bottom(void) {
+    C2D_DrawRectSolid(0.0f, 0.0f, 0.9f, 320, 240, C2D_Color32(0, 0, 0, 255));
+    C2D_DrawImageAt(img_background, 0.0f, 0.0f, 0.91f, NULL, 1.0f, 1.0f);
     C2D_TextBufClear(text_buf);
     C2D_TextParse(&text, text_buf, lang_get("PIANO_BACK_TO_GAME"));
     C2D_TextOptimize(&text);
-    C2D_DrawText(&text, C2D_WithColor | C2D_AlignCenter, 160.0f, 220.0f, 0.5f, 0.65f, 0.65f, C2D_Color32(164, 164, 164, 255));
+    C2D_DrawText(&text, C2D_WithColor | C2D_AlignCenter, 160.0f, 220.0f, 0.92f, 0.65f, 0.65f, C2D_Color32(164, 164, 164, 255));
 }
 
-void piano_init(void) {
+static void piano_init(void) {
     piano_assets = C2D_SpriteSheetLoad("romfs:/gfx/gfx_piano.t3x");
     img_background = C2D_SpriteSheetGetImage(piano_assets, gfx_piano_background_idx);
     if (!text_buf) {
@@ -233,7 +244,7 @@ void piano_init(void) {
     }
 }
 
-void piano_close(void) {
+static void piano_close(void) {
     if (piano_assets) {
         C2D_SpriteSheetFree(piano_assets);
         piano_assets = NULL;
@@ -248,3 +259,11 @@ void piano_close(void) {
         sample = NULL;
     }
 }
+
+
+MiniGame minigame_piano = {
+    .init = piano_init,
+    .draw = piano_draw_bottom,
+    .update = piano_update,
+    .close = piano_close
+};

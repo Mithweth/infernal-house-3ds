@@ -7,6 +7,7 @@
 #include "inventory.h"
 #include "gamestate.h"
 #include "audio.h"
+#include "minigame_piano.h"
 
 static C2D_SpriteSheet room_scene;
 static C2D_Image img_background;
@@ -17,7 +18,7 @@ static C2D_Image img_hearth_prepared;
 static C2D_Image img_statue;
 
 static void play_piano_action(void) {
-    game_play_piano();
+    game_minigame_start(&minigame_piano);
 }
 
 static void piano_action(void) {

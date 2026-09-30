@@ -1,9 +1,9 @@
-// simon.c
+// minigame_simon.c
 
 #include <3ds.h>
 #include <citro2d.h>
 #include <stdlib.h>
-#include "simon.h"
+#include "minigame_simon.h"
 #include "game.h"
 #include "audio.h"
 #include "gfx_simon.h"
@@ -24,6 +24,7 @@ typedef enum {
 } SimonColor;
 
 #define SIMON_MAX_ROUNDS 10
+#define SIMON_ROUND_DELAY 500
 #define COLOR_WIDTH   85
 #define COLOR_HEIGHT  75
 #define SWITCH_WIDTH  36
@@ -94,6 +95,14 @@ static void simon_start(void) {
     }
 
     simon_show_sequence();
+    next_event_time = osGetTime() + SIMON_ROUND_DELAY;
+}
+
+static void simon_stop(bool success) {
+    game_minigame_stop();
+    if (success) {
+        game_show_message("CELLAR_SIMON_WIN");
+    }
 }
 
 static bool touch_inside(touchPosition touch, int x, int y, int width, int height) {
@@ -139,19 +148,20 @@ static void simon_update_player_flash(void) {
     }
 
     if (game_round >= SIMON_MAX_ROUNDS) {
-        game_end_simon(true);
+        simon_stop(true);
         return;
     }
 
     game_round++;
     position = 0;
     simon_show_sequence();
+    next_event_time = osGetTime() + SIMON_ROUND_DELAY;
 }
 
 void simon_update(u32 keys, touchPosition touch) {
     if (keys & KEY_TOUCH) {
         if (touch_inside(touch, 161, 111, SWITCH_WIDTH, SWITCH_HEIGHT)) {
-            game_end_simon(false);
+            simon_stop(false);
             return;
         }
     }
@@ -211,20 +221,20 @@ void simon_update(u32 keys, touchPosition touch) {
 }
 
 void simon_draw_bottom(void) {
-    C2D_DrawImageAt(img_background, 0.0f, 0.0f, 0.0f, NULL, 1.0f, 1.0f);
+    C2D_DrawImageAt(img_background, 0.0f, 0.0f, 0.9f, NULL, 1.0f, 1.0f);
     if (light_on) {
         switch (lit_color) {
             case SIMON_YELLOW:
-                C2D_DrawImageAt(img_yellow, 55.0f, 14.0f, 0.5f, NULL, 1.0f, 1.0f);
+                C2D_DrawImageAt(img_yellow, 55.0f, 14.0f, 0.91f, NULL, 1.0f, 1.0f);
                 break;
             case SIMON_RED:
-                C2D_DrawImageAt(img_red, 166.0f, 14.0f, 0.5f, NULL, 1.0f, 1.0f);
+                C2D_DrawImageAt(img_red, 166.0f, 14.0f, 0.91f, NULL, 1.0f, 1.0f);
                 break;
             case SIMON_GREEN:
-                C2D_DrawImageAt(img_green, 55.0f, 117.0f, 0.5f, NULL, 1.0f, 1.0f);
+                C2D_DrawImageAt(img_green, 55.0f, 117.0f, 0.91f, NULL, 1.0f, 1.0f);
                 break;
             case SIMON_BLUE:
-                C2D_DrawImageAt(img_blue, 166.0f, 117.0f, 0.5f, NULL, 1.0f, 1.0f);
+                C2D_DrawImageAt(img_blue, 166.0f, 117.0f, 0.91f, NULL, 1.0f, 1.0f);
                 break;
             default:
                 break;
@@ -248,3 +258,10 @@ void simon_close(void) {
         simon_assets = NULL;
     }
 }
+
+MiniGame minigame_simon = {
+    .init = simon_init,
+    .draw = simon_draw_bottom,
+    .update = simon_update,
+    .close = simon_close
+};

@@ -9,10 +9,10 @@
 #include "hud.h"
 #include "audio.h"
 #include "title.h"
-#include "simon.h"
-#include "piano.h"
 #include "measure.h"
 #include "timeline.h"
+
+# define GAME_CALLBACK_MAX 8
 
 static Room *current_room = NULL;
 static GameMode game_mode = GAME_NORMAL;
@@ -24,6 +24,7 @@ static C2D_Image examine_image;
 static C2D_TextBuf text_buf;
 static C2D_Text text;
 static void (*game_busy_callback)(void) = NULL;
+static MiniGame *active_minigame = NULL;
 static int game_busy_sfx_channel = -1;
 static size_t callback_count = 0;
 static GameCallbackEntry callbacks[GAME_CALLBACK_MAX];
@@ -76,6 +77,24 @@ void (*game_callback_find(const char *name))(void) {
         }
     }
     return NULL;
+}
+
+void game_minigame_start(MiniGame *minigame) {
+    active_minigame = minigame;
+    music_stop();
+    if (active_minigame->init) {
+        active_minigame->init();
+    }
+    game_mode = GAME_MINIGAME;
+}
+
+void game_minigame_stop(void) {
+    if (active_minigame && active_minigame->close) {
+        active_minigame->close();
+    }
+    music_play("romfs:/audio/background.ogg");
+    active_minigame = NULL;
+    game_mode = GAME_NORMAL;
 }
 
 static bool path_is_available(const Path *path) {
@@ -384,45 +403,26 @@ static void room_draw(void) {
 }
 
 void game_start_simon(void) {
-    simon_init();
-    game_mode = GAME_SIMON;
+//    simon_init();
+//    game_mode = GAME_SIMON;
 }
 
 void game_start_measure(void) {
-    measure_init(151.0f, 197.0f);
-    game_mode = GAME_MEASURE;
+//    measure_init(151.0f, 197.0f);
+//    game_mode = GAME_MEASURE;
 }
 
 void game_stop_measure(void) {
-    measure_close();
-    game_mode = GAME_NORMAL;
-}
-
-void game_play_piano(void) {
-    music_stop();
-    piano_init();
-    game_mode = GAME_PIANO;
-}
-
-void game_stop_piano(bool success) {
-    if (success) {
-        if (!gamestate_get("livingroom_golden_statue_placed")) {
-            return;
-        }
-        gamestate_set("livingroom_secret_passage_opened");
-        game_show_message("LIVINGROOM_SECRET_PASSAGE_OPEN");
-    }
-    piano_close();
-    music_play("romfs:/audio/background.ogg");
-    game_mode = GAME_NORMAL;
+//    measure_close();
+//    game_mode = GAME_NORMAL;
 }
 
 void game_end_simon(bool success) {
-    simon_close();
-    game_mode = GAME_NORMAL;
-    if (success) {
-        game_show_message("CELLAR_SIMON_WIN");
-    }
+//    simon_close();
+//    game_mode = GAME_NORMAL;
+//    if (success) {
+//        game_show_message("CELLAR_SIMON_WIN");
+//    }
 }
 
 bool game_use_item(const char *id) {
@@ -458,19 +458,11 @@ void game_update(u32 keys, circlePosition analog, touchPosition touch) {
             timeline_update(keys);
             return;
 
-        case GAME_SIMON:
+        case GAME_MINIGAME:
             hud_update();
-            simon_update(keys, touch);
-            return;
-
-        case GAME_PIANO:
-            hud_update();
-            piano_update(keys, touch);
-            return;
-
-        case GAME_MEASURE:
-            hud_update();
-            measure_update(keys, touch);
+            if (active_minigame && active_minigame->update) {
+                active_minigame->update(keys, touch);
+            }
             return;
 
         case GAME_BUSY:
@@ -528,24 +520,12 @@ void game_draw(C3D_RenderTarget *top, C3D_RenderTarget *bottom) {
             timeline_draw_bottom();
             break;
 
-        case GAME_SIMON:
-            C2D_SceneBegin(bottom);
-            simon_draw_bottom();
-            C2D_SceneBegin(top);
-            hud_draw();
-            break;
-
-        case GAME_PIANO:
-            C2D_SceneBegin(bottom);
-            piano_draw_bottom();
-            C2D_SceneBegin(top);
-            hud_draw();
-            break;
-
-        case GAME_MEASURE:
+        case GAME_MINIGAME:
             C2D_SceneBegin(bottom);
             room_draw();
-            measure_draw();
+            if (active_minigame && active_minigame->draw) {
+                active_minigame->draw();
+            }
             C2D_SceneBegin(top);
             hud_draw();
             break;
