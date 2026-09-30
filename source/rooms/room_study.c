@@ -19,15 +19,6 @@ static C2D_Image img_paper_taken;
 static C2D_Image img_sliding_board;
 static C2D_Image img_top_drawer_opened;
 
-// STUDY_CALENDAR=Un calendrier de 1990
-// STUDY_BOOK=Un livre
-// STUDY_BOOK_MESSAGE=Un livre bien épais et qui,\npourtant, n'a pas de titre
-// STUDY_FOLDER=Un classeur
-// STUDY_BIN=Une corbeille à papier
-// STUDY_BIN_MESSAGE=A l'interieur, il n'y a que\nquelques papiers sans importance
-// STUDY_CLOSET=Une armoire
-// STUDY_CLOSET_OPENED=Dans ce placard,\nvous trouvez de nombreux papiers personnels\net pourtant sans valeur.
-
 static bool book_is_active(void) {
     return !inventory_has("BOOK");
 }
@@ -107,6 +98,22 @@ static bool paper_is_active(void) {
 
 static void paper_action(void) {
     inventory_add("PAPER");
+}
+
+static bool closet_opened(void) {
+    return gamestate_get("study_closet_opened");
+}
+
+static void closet_action(void) {
+    gamestate_set("study_closet_opened");
+}
+
+static bool closet_use_item(const char *id) {
+    if (strcmp(id, "KEY_ONE") == 0) {
+        game_show_message("STUDY_CLOSET_WITH_KEY");
+        return true;
+    }
+    return false;
 }
 
 static Hotspot hotspots[] = {
@@ -229,6 +236,62 @@ static Hotspot hotspots[] = {
         .id = "STUDY_BOARD",
         .action = board_action
     },
+    {
+        .x = 13,
+        .y = 23,
+        .width = 32,
+        .height = 80,
+        .id = "STUDY_CALENDAR"
+    },
+    {
+        .x = 228,
+        .y = 77,
+        .width = 22,
+        .height = 46,
+        .id = "STUDY_FOLDER"
+    },
+    {
+        .x = 250,
+        .y = 79,
+        .width = 64,
+        .height = 44,
+        .id = "STUDY_BOOK"
+    },
+    {
+        .x = 185,
+        .y = 166,
+        .width = 25,
+        .height = 38,
+        .message_id = "STUDY_BIN_MESSAGE",
+        .id = "STUDY_BIN"
+    },
+    {
+        .x = 215,
+        .y = 3,
+        .width = 102,
+        .height = 65,
+        .message_id = "STUDY_CLOSET_OPENED",
+        .id = "STUDY_CLOSET",
+        .condition = closet_opened,
+        .action = closet_action
+    },
+    {
+        .x = 215,
+        .y = 3,
+        .width = 102,
+        .height = 65,
+        .id = "STUDY_CLOSET",
+        .action = closet_action
+    },
+    {
+        .x = 215,
+        .y = 128,
+        .width = 102,
+        .height = 63,
+        .message_id = "STUDY_CLOSET_BOTTOM",
+        .id = "STUDY_CLOSET",
+        .use_item = closet_use_item
+    }
 };
 
 static void room_init(void) {

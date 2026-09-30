@@ -159,7 +159,6 @@ void game_start(void) {
     game_mode = GAME_NORMAL;
     message_text = NULL;
     active_hotspot = NULL;
-    inventory_add("LIGHTBULB");
     music_play("romfs:/audio/background.ogg");
     game_set_room(&hall);
 }
@@ -330,8 +329,6 @@ static void update_touch(touchPosition touch) {
             game_show_message(hotspot->message_id);
             return;
         }
-
-        //return;
     }
 
     if (hotspot->action) {

@@ -167,7 +167,8 @@ static Hotspot hotspots[] = {
         .y = 113,
         .width = 10,
         .height = 12,
-        .id = "FIRSTBEDROOM_CLOSET_INVOICE",
+        .id = "FIRSTBEDROOM_CLOSET",
+        .message_id = "FIRSTBEDROOM_CLOSET_INVOICE",
         .condition = invoice_is_active,
         .action = invoice_action
     },
