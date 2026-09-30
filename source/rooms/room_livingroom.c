@@ -2,6 +2,7 @@
 #include <citro2d.h>
 #include "game.h"
 #include "room_livingroom.h"
+#include "room_cryoroom.h"
 #include "room_corridor.h"
 #include "gfx_livingroom.h"
 #include "inventory.h"
@@ -42,11 +43,15 @@ static void fall_gameover(void) {
     game_over("falldown");
 }
 
+static void move_north(void) {
+    game_set_room(&cryoroom);
+}
+
 static void north_action(void) {
     if (!gamestate_get("livingroom_rope_in_hearth_bound")) {
         game_wait_for_sfx("romfs:/audio/falling_down.raw", fall_gameover);
     } else {
-        //game_set_room(&laboratory);
+        game_wait_for_sfx("romfs:/audio/rope_climbing.raw", move_north);
     }
 }
 

@@ -47,16 +47,20 @@ void game_secret_code(void) {
     C2D_DrawText(&text, C2D_WithColor, 40.0f, 100.0f, 0.9f, 0.55f, 0.55f, C2D_Color32(192, 192, 192, 255));
 }
 
-void game_use_syringe(void) {
-    inventory_remove("SYRINGE");
-    gamestate_set("item_syringe_injected");
-    game_show_message("ITEM_SYRINGE_USED");
+const uint8_t *game_get_secret_code(void) {
+    return secret_code;
 }
 
 static void game_generate_secret_code(void) {
     for (size_t i = 0; i < 4; i++) {
         secret_code[i] = rand() % 10;
     }
+}
+
+void game_use_syringe(void) {
+    inventory_remove("SYRINGE");
+    gamestate_set("item_syringe_injected");
+    game_show_message("ITEM_SYRINGE_USED");
 }
 
 void game_callback_register(const char *name, void (*callback)(void)) {
@@ -76,6 +80,10 @@ void (*game_callback_find(const char *name))(void) {
         }
     }
     return NULL;
+}
+
+void game_ending(void) {
+    // END
 }
 
 void game_minigame_start(MiniGame *minigame) {
@@ -187,7 +195,6 @@ void game_start(void) {
     message_text = NULL;
     active_hotspot = NULL;
     music_play("romfs:/audio/background.ogg");
-    inventory_add("MEASURING_TAPE");
     game_set_room(&hall);
 }
 

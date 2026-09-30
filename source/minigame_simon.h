@@ -1,4 +1,4 @@
-// minigame_piano.h
+// minigame_simon.h
 #pragma once
 
 #include "game.h"
