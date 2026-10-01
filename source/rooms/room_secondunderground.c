@@ -1,15 +1,15 @@
 // room_secondunderground.c
 
 #include <citro2d.h>
+#include "gfxmap.h"
 #include "game.h"
 #include "room_secondunderground.h"
 #include "room_firstunderground.h"
 #include "room_deadroom.h"
-#include "gfx_secondunderground.h"
 #include "inventory.h"
 #include "gamestate.h"
 
-static C2D_SpriteSheet room_scene;
+static C2D_SpriteSheet assets;
 static C2D_Image img_background;
 static C2D_Image img_wall_open;
 
@@ -89,9 +89,11 @@ static void north_action(void) {
 }
 
 static void room_init(void) {
-    room_scene = C2D_SpriteSheetLoad("romfs:/gfx/gfx_secondunderground.t3x");
-    img_background = C2D_SpriteSheetGetImage(room_scene, gfx_secondunderground_background_idx);
-    img_wall_open = C2D_SpriteSheetGetImage(room_scene, gfx_secondunderground_wall_open_idx);
+    if (!gfxmap_load_assets("romfs:/gfx/secondunderground", &assets)) {
+        return;
+    }
+    img_background = gfxmap_get_image(assets, "gfx_background_idx");
+    img_wall_open = gfxmap_get_image(assets, "gfx_wall_open_idx");
 }
 
 static void room_draw(void) {
@@ -102,7 +104,7 @@ static void room_draw(void) {
 }
 
 static void room_close(void) {
-    C2D_SpriteSheetFree(room_scene);
+    C2D_SpriteSheetFree(assets);
 }
 
 static void west_action(void) {

@@ -1,7 +1,0 @@
---atlas -f rgba8888 -z auto
-bg.png
-clock_taken.png
-cup_taken.png
-passage_opened.png
-pushed_book.png
-statue_taken.png

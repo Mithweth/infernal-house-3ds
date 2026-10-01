@@ -1,14 +1,14 @@
 // room_secondbedroom.c
 
 #include <citro2d.h>
+#include "gfxmap.h"
 #include "game.h"
 #include "room_secondbedroom.h"
 #include "room_firstfloor.h"
-#include "gfx_secondbedroom.h"
 #include "inventory.h"
 #include "gamestate.h"
 
-static C2D_SpriteSheet room_scene;
+static C2D_SpriteSheet assets;
 static C2D_Image img_dark_background;
 static C2D_Image img_dark_closet_drawer;
 static C2D_Image img_dark_closet_left_door;
@@ -287,23 +287,25 @@ static Hotspot hotspots[] = {
 
 
 static void room_init(void) {
-    room_scene = C2D_SpriteSheetLoad("romfs:/gfx/gfx_secondbedroom.t3x");
-    img_dark_background = C2D_SpriteSheetGetImage(room_scene, gfx_secondbedroom_dark_background_idx);
-    img_dark_closet_drawer = C2D_SpriteSheetGetImage(room_scene, gfx_secondbedroom_dark_closet_drawer_idx);
-    img_dark_closet_left_door = C2D_SpriteSheetGetImage(room_scene, gfx_secondbedroom_dark_closet_left_door_idx);
-    img_dark_closet_right_door = C2D_SpriteSheetGetImage(room_scene, gfx_secondbedroom_dark_closet_right_door_idx);
-    img_dark_nightstand_drawer = C2D_SpriteSheetGetImage(room_scene, gfx_secondbedroom_dark_nightstand_drawer_idx);
-    img_dark_bedpost = C2D_SpriteSheetGetImage(room_scene, gfx_secondbedroom_dark_bedpost_idx);
-    img_dark_paint_empty = C2D_SpriteSheetGetImage(room_scene, gfx_secondbedroom_dark_paint_empty_idx);
-    img_dark_paint_opened = C2D_SpriteSheetGetImage(room_scene, gfx_secondbedroom_dark_paint_opened_idx);
-    img_light_background = C2D_SpriteSheetGetImage(room_scene, gfx_secondbedroom_light_background_idx);
-    img_light_closet_drawer = C2D_SpriteSheetGetImage(room_scene, gfx_secondbedroom_light_closet_drawer_idx);
-    img_light_closet_left_door = C2D_SpriteSheetGetImage(room_scene, gfx_secondbedroom_light_closet_left_door_idx);
-    img_light_closet_right_door = C2D_SpriteSheetGetImage(room_scene, gfx_secondbedroom_light_closet_right_door_idx);
-    img_light_nightstand_drawer = C2D_SpriteSheetGetImage(room_scene, gfx_secondbedroom_light_nightstand_drawer_idx);
-    img_light_bedpost = C2D_SpriteSheetGetImage(room_scene, gfx_secondbedroom_light_bedpost_idx);
-    img_light_paint_empty = C2D_SpriteSheetGetImage(room_scene, gfx_secondbedroom_light_paint_empty_idx);
-    img_light_paint_opened = C2D_SpriteSheetGetImage(room_scene, gfx_secondbedroom_light_paint_opened_idx);
+    if (!gfxmap_load_assets("romfs:/gfx/secondbedroom", &assets)) {
+        return;
+    }
+    img_dark_background = gfxmap_get_image(assets, "gfx_dark_background_idx");
+    img_dark_closet_drawer = gfxmap_get_image(assets, "gfx_dark_closet_drawer_idx");
+    img_dark_closet_left_door = gfxmap_get_image(assets, "gfx_dark_closet_left_door_idx");
+    img_dark_closet_right_door = gfxmap_get_image(assets, "gfx_dark_closet_right_door_idx");
+    img_dark_nightstand_drawer = gfxmap_get_image(assets, "gfx_dark_nightstand_drawer_idx");
+    img_dark_bedpost = gfxmap_get_image(assets, "gfx_dark_bedpost_idx");
+    img_dark_paint_empty = gfxmap_get_image(assets, "gfx_dark_paint_empty_idx");
+    img_dark_paint_opened = gfxmap_get_image(assets, "gfx_dark_paint_opened_idx");
+    img_light_background = gfxmap_get_image(assets, "gfx_light_background_idx");
+    img_light_closet_drawer = gfxmap_get_image(assets, "gfx_light_closet_drawer_idx");
+    img_light_closet_left_door = gfxmap_get_image(assets, "gfx_light_closet_left_door_idx");
+    img_light_closet_right_door = gfxmap_get_image(assets, "gfx_light_closet_right_door_idx");
+    img_light_nightstand_drawer = gfxmap_get_image(assets, "gfx_light_nightstand_drawer_idx");
+    img_light_bedpost = gfxmap_get_image(assets, "gfx_light_bedpost_idx");
+    img_light_paint_empty = gfxmap_get_image(assets, "gfx_light_paint_empty_idx");
+    img_light_paint_opened = gfxmap_get_image(assets, "gfx_light_paint_opened_idx");
 }
 
 static void room_draw(void) {
@@ -353,7 +355,7 @@ static void room_draw(void) {
 }
 
 static void room_close(void) {
-    C2D_SpriteSheetFree(room_scene);
+    C2D_SpriteSheetFree(assets);
 }
 
 static void move_east(void) {

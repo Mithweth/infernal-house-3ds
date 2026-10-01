@@ -1,17 +1,17 @@
 // room_diningroom.c
 #include <citro2d.h>
 
+#include "gfxmap.h"
 #include "game.h"
 #include "audio.h"
 #include "room_diningroom.h"
 #include "room_firstfloor.h"
-#include "gfx_diningroom.h"
 #include "inventory.h"
 #include "room_hall.h"
 #include "room_corridor.h"
 #include "gamestate.h"
 
-static C2D_SpriteSheet room_scene;
+static C2D_SpriteSheet assets;
 static C2D_Image img_background;
 static C2D_Image img_left_closet_opened;
 static C2D_Image img_right_closet_opened;
@@ -157,13 +157,15 @@ static Hotspot hotspots[] = {
 };
 
 static void room_init(void) {
-    room_scene = C2D_SpriteSheetLoad("romfs:/gfx/gfx_diningroom.t3x");
-    img_background = C2D_SpriteSheetGetImage(room_scene, gfx_diningroom_bg_idx);
-    img_laser_disabled = C2D_SpriteSheetGetImage(room_scene, gfx_diningroom_laser_disabled_idx);
-    img_left_closet_opened = C2D_SpriteSheetGetImage(room_scene, gfx_diningroom_left_closet_opened_idx);
-    img_right_closet_opened = C2D_SpriteSheetGetImage(room_scene, gfx_diningroom_right_closet_opened_idx);
-    img_soup_empty = C2D_SpriteSheetGetImage(room_scene, gfx_diningroom_soup_empty_idx);
-    img_soup_opened = C2D_SpriteSheetGetImage(room_scene, gfx_diningroom_soup_opened_idx);
+    if (!gfxmap_load_assets("romfs:/gfx/diningroom", &assets)) {
+        return;
+    }
+    img_background = gfxmap_get_image(assets, "gfx_bg_idx");
+    img_laser_disabled = gfxmap_get_image(assets, "gfx_laser_disabled_idx");
+    img_left_closet_opened = gfxmap_get_image(assets, "gfx_left_closet_opened_idx");
+    img_right_closet_opened = gfxmap_get_image(assets, "gfx_right_closet_opened_idx");
+    img_soup_empty = gfxmap_get_image(assets, "gfx_soup_empty_idx");
+    img_soup_opened = gfxmap_get_image(assets, "gfx_soup_opened_idx");
 }
 
 static void room_draw(void) {
@@ -187,7 +189,7 @@ static void room_draw(void) {
 }
 
 static void room_close(void) {
-    C2D_SpriteSheetFree(room_scene);
+    C2D_SpriteSheetFree(assets);
 }
 
 static void move_right(void) {

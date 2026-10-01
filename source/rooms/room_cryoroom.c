@@ -1,16 +1,16 @@
 // room_cryoroom.c
 
 #include <citro2d.h>
+#include "gfxmap.h"
 #include "game.h"
 #include "room_cryoroom.h"
 #include "room_livingroom.h"
 #include "minigame_digicode.h"
-#include "gfx_cryoroom.h"
 #include "inventory.h"
 #include "gamestate.h"
 #include "audio.h"
 
-static C2D_SpriteSheet room_scene;
+static C2D_SpriteSheet assets;
 static C2D_Image img_background;
 static C2D_Image img_hangar;
 static C2D_Image img_lever;
@@ -158,11 +158,13 @@ static Hotspot hotspots[] = {
 };
 
 static void room_init(void) {
-    room_scene = C2D_SpriteSheetLoad("romfs:/gfx/gfx_cryoroom.t3x");
-    img_background = C2D_SpriteSheetGetImage(room_scene, gfx_cryoroom_background_idx);
-    img_hangar = C2D_SpriteSheetGetImage(room_scene, gfx_cryoroom_hangar_idx);
-    img_lever = C2D_SpriteSheetGetImage(room_scene, gfx_cryoroom_lever_idx);
-    img_rust_cleaned = C2D_SpriteSheetGetImage(room_scene, gfx_cryoroom_rust_cleaned_idx);
+    if (!gfxmap_load_assets("romfs:/gfx/cryoroom", &assets)) {
+        return;
+    }
+    img_background = gfxmap_get_image(assets, "gfx_background_idx");
+    img_hangar = gfxmap_get_image(assets, "gfx_hangar_idx");
+    img_lever = gfxmap_get_image(assets, "gfx_lever_idx");
+    img_rust_cleaned = gfxmap_get_image(assets, "gfx_rust_cleaned_idx");
 }
 
 static void room_draw(void) {
@@ -177,7 +179,7 @@ static void room_draw(void) {
 }
 
 static void room_close(void) {
-    C2D_SpriteSheetFree(room_scene);
+    C2D_SpriteSheetFree(assets);
 }
 
 static void move_north(void) {

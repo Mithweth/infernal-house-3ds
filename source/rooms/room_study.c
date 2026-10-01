@@ -1,14 +1,14 @@
 // room_study.c
 
 #include <citro2d.h>
+#include "gfxmap.h"
 #include "game.h"
 #include "room_study.h"
 #include "room_library.h"
-#include "gfx_study.h"
 #include "inventory.h"
 #include "gamestate.h"
 
-static C2D_SpriteSheet room_scene;
+static C2D_SpriteSheet assets;
 static C2D_Image img_background;
 static C2D_Image img_book_taken;
 static C2D_Image img_bottom_drawer_opened;
@@ -295,16 +295,18 @@ static Hotspot hotspots[] = {
 };
 
 static void room_init(void) {
-    room_scene = C2D_SpriteSheetLoad("romfs:/gfx/gfx_study.t3x");
-    img_background = C2D_SpriteSheetGetImage(room_scene, gfx_study_background_idx);
-    img_book_taken = C2D_SpriteSheetGetImage(room_scene, gfx_study_book_taken_idx);
-    img_bottom_drawer_opened = C2D_SpriteSheetGetImage(room_scene, gfx_study_bottom_drawer_opened_idx);
-    img_closet_open = C2D_SpriteSheetGetImage(room_scene, gfx_study_closet_open_idx);
-    img_dark_background = C2D_SpriteSheetGetImage(room_scene, gfx_study_dark_background_idx);
-    img_middle_drawer_opened = C2D_SpriteSheetGetImage(room_scene, gfx_study_middle_drawer_opened_idx);
-    img_paper_taken = C2D_SpriteSheetGetImage(room_scene, gfx_study_paper_taken_idx);
-    img_sliding_board = C2D_SpriteSheetGetImage(room_scene, gfx_study_sliding_board_idx);
-    img_top_drawer_opened = C2D_SpriteSheetGetImage(room_scene, gfx_study_top_drawer_opened_idx);
+    if (!gfxmap_load_assets("romfs:/gfx/study", &assets)) {
+        return;
+    }
+    img_background = gfxmap_get_image(assets, "gfx_background_idx");
+    img_book_taken = gfxmap_get_image(assets, "gfx_book_taken_idx");
+    img_bottom_drawer_opened = gfxmap_get_image(assets, "gfx_bottom_drawer_opened_idx");
+    img_closet_open = gfxmap_get_image(assets, "gfx_closet_open_idx");
+    img_dark_background = gfxmap_get_image(assets, "gfx_dark_background_idx");
+    img_middle_drawer_opened = gfxmap_get_image(assets, "gfx_middle_drawer_opened_idx");
+    img_paper_taken = gfxmap_get_image(assets, "gfx_paper_taken_idx");
+    img_sliding_board = gfxmap_get_image(assets, "gfx_sliding_board_idx");
+    img_top_drawer_opened = gfxmap_get_image(assets, "gfx_top_drawer_opened_idx");
 }
 
 static void room_draw(void) {
@@ -338,7 +340,7 @@ static void room_draw(void) {
 
 
 static void room_close(void) {
-    C2D_SpriteSheetFree(room_scene);
+    C2D_SpriteSheetFree(assets);
 }
 
 static void south_action(void) {

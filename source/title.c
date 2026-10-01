@@ -4,8 +4,8 @@
 #include <citro2d.h>
 #include "lang.h"
 #include "audio.h"
-#include "gfx_title.h"
 #include "game.h"
+#include "gfxmap.h"
 
 typedef enum {
     TITLE_INTRO,
@@ -32,7 +32,7 @@ static TitleChoice selected;
 static OptionChoice option = OPTION_NONE;
 static C2D_TextBuf text_buf;
 static C2D_Text text[TITLE_COUNT];
-static C2D_SpriteSheet title_assets;
+static C2D_SpriteSheet assets;
 static C2D_Image img_background;
 static C2D_Image img_lankhor;
 static C2D_Image img_abutton;
@@ -82,14 +82,16 @@ static Credit credits[] = {
 };
 
 void title_init(void) {
-    title_assets = C2D_SpriteSheetLoad("romfs:/gfx/gfx_title.t3x");
-    img_background = C2D_SpriteSheetGetImage(title_assets, gfx_title_background_idx);
-    img_lankhor = C2D_SpriteSheetGetImage(title_assets, gfx_title_lankhor_idx);
-    img_abutton = C2D_SpriteSheetGetImage(title_assets, gfx_title_abutton_idx);
-    img_xbutton = C2D_SpriteSheetGetImage(title_assets, gfx_title_xbutton_idx);
-    img_analogpad = C2D_SpriteSheetGetImage(title_assets, gfx_title_analogpad_idx);
-    img_dpad = C2D_SpriteSheetGetImage(title_assets, gfx_title_dpad_idx);
-    img_touch = C2D_SpriteSheetGetImage(title_assets, gfx_title_touch_idx);
+    if (!gfxmap_load_assets("romfs:/gfx/title", &assets)) {
+        return;
+    }
+    img_background = gfxmap_get_image(assets, "gfx_background_idx");
+    img_lankhor = gfxmap_get_image(assets, "gfx_lankhor_idx");
+    img_abutton = gfxmap_get_image(assets, "gfx_abutton_idx");
+    img_xbutton = gfxmap_get_image(assets, "gfx_xbutton_idx");
+    img_analogpad = gfxmap_get_image(assets, "gfx_analogpad_idx");
+    img_dpad = gfxmap_get_image(assets, "gfx_dpad_idx");
+    img_touch = gfxmap_get_image(assets, "gfx_touch_idx");
     selected = TITLE_INTRO;
     text_buf = C2D_TextBufNew(4096);
     for (int i = 0; i < TITLE_COUNT; i++) {
@@ -228,8 +230,8 @@ void title_close(void) {
         C2D_TextBufDelete(text_buf);
         text_buf = NULL;
     }
-    if (title_assets) {
-        C2D_SpriteSheetFree(title_assets);
-        title_assets = NULL;
+    if (assets) {
+        C2D_SpriteSheetFree(assets);
+        assets = NULL;
     }
 }

@@ -212,20 +212,18 @@ static void piano_draw_bottom(void) {
 
 static bool piano_init(void) {
     assets = C2D_SpriteSheetLoad("romfs:/minigames/piano/gfx.t3x");
+    if (!assets) {
+        printf("Cannot load spritesheet\n");
+        return false;
+    }
     if (!gfxmap_load("romfs:/minigames/piano/gfx.h")) {
         printf("Cannot load gfx headers\n");
         C2D_SpriteSheetFree(assets);
         assets = NULL;
         return false;
     }
-    int img_idx = gfxmap_get_index("gfx_background_idx");
-    if (img_idx < 0) {
-        printf("unknown image: gfx_background_idx\n");
-        C2D_SpriteSheetFree(assets);
-        assets = NULL;
-        return false;
-    }
-    img_background = C2D_SpriteSheetGetImage(assets, img_idx);
+    img_background = gfxmap_get_image(assets, "gfx_background_idx");
+
     if (!text_buf) {
         text_buf = C2D_TextBufNew(1024);
     }

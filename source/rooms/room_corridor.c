@@ -1,8 +1,8 @@
 // room_corridor.c
 #include <citro2d.h>
+#include "gfxmap.h"
 #include "game.h"
 #include "room_corridor.h"
-#include "gfx_corridor.h"
 #include "inventory.h"
 #include "room_diningroom.h"
 #include "room_livingroom.h"
@@ -10,7 +10,7 @@
 #include "room_kitchen.h"
 #include "room_cellar.h"
 
-static C2D_SpriteSheet room_scene;
+static C2D_SpriteSheet assets;
 static C2D_Image img_background;
 
 static Hotspot hotspots[] = {
@@ -38,8 +38,10 @@ static Hotspot hotspots[] = {
 };
 
 static void room_init(void) {
-    room_scene = C2D_SpriteSheetLoad("romfs:/gfx/gfx_corridor.t3x");
-    img_background = C2D_SpriteSheetGetImage(room_scene, gfx_corridor_bg_idx);
+    if (!gfxmap_load_assets("romfs:/gfx/corridor", &assets)) {
+        return;
+    }
+    img_background = gfxmap_get_image(assets, "gfx_bg_idx");
 }
 
 static void room_draw(void) {
@@ -47,7 +49,7 @@ static void room_draw(void) {
 }
 
 static void room_close(void) {
-    C2D_SpriteSheetFree(room_scene);
+    C2D_SpriteSheetFree(assets);
 }
 
 static void move_north(void) {

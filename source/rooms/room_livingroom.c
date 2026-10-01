@@ -1,16 +1,16 @@
 // room_livingroom.c
 #include <citro2d.h>
+#include "gfxmap.h"
 #include "game.h"
 #include "room_livingroom.h"
 #include "room_cryoroom.h"
 #include "room_corridor.h"
-#include "gfx_livingroom.h"
 #include "inventory.h"
 #include "gamestate.h"
 #include "audio.h"
 #include "minigame_piano.h"
 
-static C2D_SpriteSheet room_scene;
+static C2D_SpriteSheet assets;
 static C2D_Image img_background;
 static C2D_Image img_lighter;
 static C2D_Image img_hearth_opened;
@@ -182,13 +182,15 @@ static Hotspot hotspots[] = {
 };
 
 static void room_init(void) {
-    room_scene = C2D_SpriteSheetLoad("romfs:/gfx/gfx_livingroom.t3x");
-    img_background = C2D_SpriteSheetGetImage(room_scene, gfx_livingroom_bg_idx);
-    img_lighter = C2D_SpriteSheetGetImage(room_scene, gfx_livingroom_lighter_idx);
-    img_hearth_opened = C2D_SpriteSheetGetImage(room_scene, gfx_livingroom_hearth_opened_idx);
-    img_hearth_prepared = C2D_SpriteSheetGetImage(room_scene, gfx_livingroom_hearth_prepared_idx);
-    img_piano_opened = C2D_SpriteSheetGetImage(room_scene, gfx_livingroom_piano_opened_idx);
-    img_statue = C2D_SpriteSheetGetImage(room_scene, gfx_livingroom_statue_idx);
+    if (!gfxmap_load_assets("romfs:/gfx/livingroom", &assets)) {
+        return;
+    }
+    img_background = gfxmap_get_image(assets, "gfx_bg_idx");
+    img_lighter = gfxmap_get_image(assets, "gfx_lighter_idx");
+    img_hearth_opened = gfxmap_get_image(assets, "gfx_hearth_opened_idx");
+    img_hearth_prepared = gfxmap_get_image(assets, "gfx_hearth_prepared_idx");
+    img_piano_opened = gfxmap_get_image(assets, "gfx_piano_opened_idx");
+    img_statue = gfxmap_get_image(assets, "gfx_statue_idx");
 }
 
 static void room_draw(void) {
@@ -211,7 +213,7 @@ static void room_draw(void) {
 }
 
 static void room_close(void) {
-    C2D_SpriteSheetFree(room_scene);
+    C2D_SpriteSheetFree(assets);
 }
 
 static void move_south(void) {

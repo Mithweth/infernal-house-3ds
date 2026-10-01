@@ -1,14 +1,14 @@
 // room_bathroom.c
 
 #include <citro2d.h>
+#include "gfxmap.h"
 #include "game.h"
 #include "room_bathroom.h"
 #include "room_firstfloor.h"
-#include "gfx_bathroom.h"
 #include "inventory.h"
 #include "gamestate.h"
 
-static C2D_SpriteSheet room_scene;
+static C2D_SpriteSheet assets;
 static C2D_Image img_background;
 static C2D_Image img_carpet_moved;
 static C2D_Image img_doors_opened;
@@ -203,14 +203,16 @@ static Hotspot hotspots[] = {
 };
 
 static void room_init(void) {
-    room_scene = C2D_SpriteSheetLoad("romfs:/gfx/gfx_bathroom.t3x");
-    img_background = C2D_SpriteSheetGetImage(room_scene, gfx_bathroom_background_idx);
-    img_carpet_moved = C2D_SpriteSheetGetImage(room_scene, gfx_bathroom_carpet_moved_idx);
-    img_doors_opened = C2D_SpriteSheetGetImage(room_scene, gfx_bathroom_doors_opened_idx);
-    img_drawer_opened = C2D_SpriteSheetGetImage(room_scene, gfx_bathroom_drawer_opened_idx);
-    img_perfume_taken = C2D_SpriteSheetGetImage(room_scene, gfx_bathroom_perfume_taken_idx);
-    img_shower_opened = C2D_SpriteSheetGetImage(room_scene, gfx_bathroom_shower_opened_idx);
-    img_soap_taken = C2D_SpriteSheetGetImage(room_scene, gfx_bathroom_soap_taken_idx);
+    if (!gfxmap_load_assets("romfs:/gfx/bathroom", &assets)) {
+        return;
+    }
+    img_background = gfxmap_get_image(assets, "gfx_background_idx");
+    img_carpet_moved = gfxmap_get_image(assets, "gfx_carpet_moved_idx");
+    img_doors_opened = gfxmap_get_image(assets, "gfx_doors_opened_idx");
+    img_drawer_opened = gfxmap_get_image(assets, "gfx_drawer_opened_idx");
+    img_perfume_taken = gfxmap_get_image(assets, "gfx_perfume_taken_idx");
+    img_shower_opened = gfxmap_get_image(assets, "gfx_shower_opened_idx");
+    img_soap_taken = gfxmap_get_image(assets, "gfx_soap_taken_idx");
 }
 
 static void room_draw(void) {
@@ -236,7 +238,7 @@ static void room_draw(void) {
 }
 
 static void room_close(void) {
-    C2D_SpriteSheetFree(room_scene);
+    C2D_SpriteSheetFree(assets);
 }
 
 static void move_west(void) {

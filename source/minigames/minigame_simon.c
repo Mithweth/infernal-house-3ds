@@ -244,53 +244,24 @@ static void simon_draw_bottom(void) {
 
 static bool simon_init(void) {
     assets = C2D_SpriteSheetLoad("romfs:/minigames/simon/gfx.t3x");
+
+    if (!assets) {
+        printf("Cannot load spritesheet\n");
+        return false;
+    }
+
     if (!gfxmap_load("romfs:/minigames/simon/gfx.h")) {
         printf("Cannot load gfx headers\n");
         C2D_SpriteSheetFree(assets);
         assets = NULL;
         return false;
     }
-    int gfx_background_idx = gfxmap_get_index("gfx_background_idx");
-    if (gfx_background_idx < 0) {
-        printf("unknown image: gfx_background_idx\n");
-        C2D_SpriteSheetFree(assets);
-        assets = NULL;
-        return false;
-    }
-    int gfx_yellow_idx = gfxmap_get_index("gfx_yellow_idx");
-    if (gfx_yellow_idx < 0) {
-        printf("unknown image: gfx_yellow_idx\n");
-        C2D_SpriteSheetFree(assets);
-        assets = NULL;
-        return false;
-    }
-    int gfx_red_idx = gfxmap_get_index("gfx_red_idx");
-    if (gfx_red_idx < 0) {
-        printf("unknown image: gfx_red_idx\n");
-        C2D_SpriteSheetFree(assets);
-        assets = NULL;
-        return false;
-    }
-    int gfx_green_idx = gfxmap_get_index("gfx_green_idx");
-    if (gfx_green_idx < 0) {
-        printf("unknown image: gfx_green_idx\n");
-        C2D_SpriteSheetFree(assets);
-        assets = NULL;
-        return false;
-    }
-    int gfx_blue_idx = gfxmap_get_index("gfx_blue_idx");
-    if (gfx_blue_idx < 0) {
-        printf("unknown image: gfx_blue_idx\n");
-        C2D_SpriteSheetFree(assets);
-        assets = NULL;
-        return false;
-    }
-    img_background = C2D_SpriteSheetGetImage(assets, gfx_background_idx);
-    img_yellow = C2D_SpriteSheetGetImage(assets, gfx_yellow_idx);
-    img_red = C2D_SpriteSheetGetImage(assets, gfx_red_idx);
-    img_green = C2D_SpriteSheetGetImage(assets, gfx_green_idx);
-    img_blue = C2D_SpriteSheetGetImage(assets, gfx_blue_idx);
-    mode = SIMON_OFF;
+
+    img_background = gfxmap_get_image(assets, "gfx_background_idx");
+    img_yellow = gfxmap_get_image(assets, "gfx_yellow_idx");
+    img_red = gfxmap_get_image(assets, "gfx_red_idx");
+    img_green = gfxmap_get_image(assets, "gfx_green_idx");
+    img_blue = gfxmap_get_image(assets, "gfx_blue_idx");
     return true;
 }
 

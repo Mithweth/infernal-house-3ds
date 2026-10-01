@@ -20,15 +20,15 @@ int gfxmap_get_index(const char *name) {
     return -1;
 }
 
-C2D_Image gfxmap_get(C2D_SpriteSheet assets, const char *name) {
+C2D_Image gfxmap_get_image(C2D_SpriteSheet assets, const char *name) {
     int index = gfxmap_get_index(name);
 
     if (index < 0) {
+    	printf("Image not found: %s\n", name);
         return (C2D_Image){0};
     }
     return C2D_SpriteSheetGetImage(assets, index);
 }
-
 
 bool gfxmap_load(const char *filename) {
     FILE *f = fopen(filename, "r");
@@ -74,5 +74,28 @@ bool gfxmap_load(const char *filename) {
     }
 
     fclose(f);
+    return true;
+}
+
+bool gfxmap_load_assets(const char *path, C2D_SpriteSheet *assets) {
+    char filename[256];
+
+    snprintf(filename, sizeof(filename), "%s/gfx.t3x", path);
+
+    *assets = C2D_SpriteSheetLoad(filename);
+    if (!*assets) {
+        printf("Cannot load spritesheet: %s\n", filename);
+        return false;
+    }
+
+    snprintf(filename, sizeof(filename), "%s/gfx.h", path);
+
+    if (!gfxmap_load(filename)) {
+        printf("Cannot load gfx headers: %s\n", filename);
+        C2D_SpriteSheetFree(*assets);
+        *assets = NULL;
+        return false;
+    }
+
     return true;
 }

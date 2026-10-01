@@ -1,15 +1,15 @@
 // room_hall.c
 #include <citro2d.h>
 
+#include "gfxmap.h"
 #include "game.h"
 #include "audio.h"
 #include "room_hall.h"
 #include "room_diningroom.h"
-#include "gfx_hall.h"
 #include "inventory.h"
 #include "gamestate.h"
 
-static C2D_SpriteSheet room_scene;
+static C2D_SpriteSheet assets;
 static C2D_Image img_background;
 static C2D_Image img_left_closet_opened;
 static C2D_Image img_left_closet_empty;
@@ -167,14 +167,16 @@ static Hotspot hotspots[] = {
 };
 
 static void room_init(void) {
-    room_scene = C2D_SpriteSheetLoad("romfs:/gfx/gfx_hall.t3x");
-    img_background = C2D_SpriteSheetGetImage(room_scene, gfx_hall_bg_idx);
-    img_right_closet_opened = C2D_SpriteSheetGetImage(room_scene, gfx_hall_right_closet_opened_idx);
-    img_right_closet_empty = C2D_SpriteSheetGetImage(room_scene, gfx_hall_right_closet_empty_idx);
-    img_left_closet_opened = C2D_SpriteSheetGetImage(room_scene, gfx_hall_left_closet_opened_idx);
-    img_left_closet_empty = C2D_SpriteSheetGetImage(room_scene, gfx_hall_left_closet_empty_idx);
-    img_carpet_moved = C2D_SpriteSheetGetImage(room_scene, gfx_hall_carpet_moved_idx);
-    img_message = C2D_SpriteSheetGetImage(room_scene, gfx_hall_message_idx);
+    if (!gfxmap_load_assets("romfs:/gfx/hall", &assets)) {
+        return;
+    }
+    img_background = gfxmap_get_image(assets, "gfx_bg_idx");
+    img_right_closet_opened = gfxmap_get_image(assets, "gfx_right_closet_opened_idx");
+    img_right_closet_empty = gfxmap_get_image(assets, "gfx_right_closet_empty_idx");
+    img_left_closet_opened = gfxmap_get_image(assets, "gfx_left_closet_opened_idx");
+    img_left_closet_empty = gfxmap_get_image(assets, "gfx_left_closet_empty_idx");
+    img_carpet_moved = gfxmap_get_image(assets, "gfx_carpet_moved_idx");
+    img_message = gfxmap_get_image(assets, "gfx_message_idx");
 }
 
 static void room_draw(void) {
@@ -203,7 +205,7 @@ static void room_draw(void) {
 }
 
 static void room_close(void) {
-    C2D_SpriteSheetFree(room_scene);
+    C2D_SpriteSheetFree(assets);
 }
 
 static void move_north(void) {

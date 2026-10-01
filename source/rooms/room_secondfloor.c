@@ -1,15 +1,15 @@
 // room_secondfloor.c
 
 #include <citro2d.h>
+#include "gfxmap.h"
 #include "game.h"
 #include "room_secondfloor.h"
 #include "room_firstfloor.h"
-#include "gfx_secondfloor.h"
 #include "room_laboratory.h"
 #include "inventory.h"
 #include "gamestate.h"
 
-static C2D_SpriteSheet room_scene;
+static C2D_SpriteSheet assets;
 static C2D_Image img_background;
 
 
@@ -49,8 +49,10 @@ static Hotspot hotspots[] = {
 };
 
 static void room_init(void) {
-    room_scene = C2D_SpriteSheetLoad("romfs:/gfx/gfx_secondfloor.t3x");
-    img_background = C2D_SpriteSheetGetImage(room_scene, gfx_secondfloor_background_idx);
+    if (!gfxmap_load_assets("romfs:/gfx/secondfloor", &assets)) {
+        return;
+    }
+    img_background = gfxmap_get_image(assets, "gfx_background_idx");
 }
 
 static void room_draw(void) {
@@ -58,7 +60,7 @@ static void room_draw(void) {
 }
 
 static void room_close(void) {
-    C2D_SpriteSheetFree(room_scene);
+    C2D_SpriteSheetFree(assets);
 }
 
 static void move_west(void) {

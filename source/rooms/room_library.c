@@ -1,16 +1,16 @@
 // room_library.c
 
 #include <citro2d.h>
+#include "gfxmap.h"
 #include "game.h"
 #include "room_library.h"
 #include "room_corridor.h"
 #include "room_study.h"
-#include "gfx_library.h"
 #include "inventory.h"
 #include "gamestate.h"
 #include "audio.h"
 
-static C2D_SpriteSheet room_scene;
+static C2D_SpriteSheet assets;
 static C2D_Image img_background;
 static C2D_Image img_statue_taken;
 static C2D_Image img_cup_taken;
@@ -217,13 +217,15 @@ static void southeast_action(void) {
 }
 
 static void room_init(void) {
-    room_scene = C2D_SpriteSheetLoad("romfs:/gfx/gfx_library.t3x");
-    img_background = C2D_SpriteSheetGetImage(room_scene, gfx_library_bg_idx);
-    img_statue_taken = C2D_SpriteSheetGetImage(room_scene, gfx_library_statue_taken_idx);
-    img_cup_taken = C2D_SpriteSheetGetImage(room_scene, gfx_library_cup_taken_idx);
-    img_book_pushed = C2D_SpriteSheetGetImage(room_scene, gfx_library_pushed_book_idx);
-    img_clock_taken = C2D_SpriteSheetGetImage(room_scene, gfx_library_clock_taken_idx);
-    img_passage_opened = C2D_SpriteSheetGetImage(room_scene, gfx_library_passage_opened_idx);
+    if (!gfxmap_load_assets("romfs:/gfx/library", &assets)) {
+        return;
+    }
+    img_background = gfxmap_get_image(assets, "gfx_bg_idx");
+    img_statue_taken = gfxmap_get_image(assets, "gfx_statue_taken_idx");
+    img_cup_taken = gfxmap_get_image(assets, "gfx_cup_taken_idx");
+    img_book_pushed = gfxmap_get_image(assets, "gfx_pushed_book_idx");
+    img_clock_taken = gfxmap_get_image(assets, "gfx_clock_taken_idx");
+    img_passage_opened = gfxmap_get_image(assets, "gfx_passage_opened_idx");
 }
 
 static void room_draw(void) {
@@ -244,7 +246,7 @@ static void room_draw(void) {
 }
 
 static void room_close(void) {
-    C2D_SpriteSheetFree(room_scene);
+    C2D_SpriteSheetFree(assets);
 }
 
 Room library = {

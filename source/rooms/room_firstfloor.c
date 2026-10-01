@@ -2,6 +2,7 @@
 // <room_name.c
 
 #include <citro2d.h>
+#include "gfxmap.h"
 #include "game.h"
 #include "room_firstfloor.h"
 #include "room_diningroom.h"
@@ -9,11 +10,10 @@
 #include "room_secondfloor.h"
 #include "room_secondbedroom.h"
 #include "room_bathroom.h"
-#include "gfx_firstfloor.h"
 #include "inventory.h"
 #include "gamestate.h"
 
-static C2D_SpriteSheet room_scene;
+static C2D_SpriteSheet assets;
 static C2D_Image img_background;
 static C2D_Image img_carpet_moved;
 
@@ -47,9 +47,11 @@ static Hotspot hotspots[] = {
 };
 
 static void room_init(void) {
-    room_scene = C2D_SpriteSheetLoad("romfs:/gfx/gfx_firstfloor.t3x");
-    img_background = C2D_SpriteSheetGetImage(room_scene, gfx_firstfloor_bg_idx);
-    img_carpet_moved = C2D_SpriteSheetGetImage(room_scene, gfx_firstfloor_carpet_moved_idx);
+    if (!gfxmap_load_assets("romfs:/gfx/firstfloor", &assets)) {
+        return;
+    }
+    img_background = gfxmap_get_image(assets, "gfx_bg_idx");
+    img_carpet_moved = gfxmap_get_image(assets, "gfx_carpet_moved_idx");
 }
 
 static void room_draw(void) {
@@ -60,7 +62,7 @@ static void room_draw(void) {
 }
 
 static void room_close(void) {
-    C2D_SpriteSheetFree(room_scene);
+    C2D_SpriteSheetFree(assets);
 }
 
 static void move_east(void) {

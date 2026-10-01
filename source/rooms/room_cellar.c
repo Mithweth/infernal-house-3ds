@@ -3,16 +3,16 @@
 
 // Replace cellar
 
+#include "gfxmap.h"
 #include "game.h"
 #include "room_cellar.h"
 #include "room_corridor.h"
 #include "room_firstunderground.h"
-#include "gfx_cellar.h"
 #include "inventory.h"
 #include "gamestate.h"
 #include "minigame_simon.h"
 
-static C2D_SpriteSheet room_scene;
+static C2D_SpriteSheet assets;
 static C2D_Image img_background;
 static C2D_Image img_alarm_box_opened;
 static C2D_Image img_alarm_box_enabled;
@@ -111,10 +111,12 @@ static Hotspot hotspots[] = {
 };
 
 static void room_init(void) {
-    room_scene = C2D_SpriteSheetLoad("romfs:/gfx/gfx_cellar.t3x");
-    img_background = C2D_SpriteSheetGetImage(room_scene, gfx_cellar_bg_idx);
-    img_alarm_box_opened = C2D_SpriteSheetGetImage(room_scene, gfx_cellar_alarm_box_opened_idx);
-    img_alarm_box_enabled = C2D_SpriteSheetGetImage(room_scene, gfx_cellar_alarm_box_enabled_idx);
+    if (!gfxmap_load_assets("romfs:/gfx/cellar", &assets)) {
+        return;
+    }
+    img_background = gfxmap_get_image(assets, "gfx_bg_idx");
+    img_alarm_box_opened = gfxmap_get_image(assets, "gfx_alarm_box_opened_idx");
+    img_alarm_box_enabled = gfxmap_get_image(assets, "gfx_alarm_box_enabled_idx");
 }
 
 static void room_draw(void) {
@@ -127,7 +129,7 @@ static void room_draw(void) {
 }
 
 static void room_close(void) {
-    C2D_SpriteSheetFree(room_scene);
+    C2D_SpriteSheetFree(assets);
 }
 
 static void move_east(void) {

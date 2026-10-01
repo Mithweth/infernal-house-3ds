@@ -110,7 +110,7 @@ static bool load_inventory(const char *filename) {
                     item_count = 0;
                     return false;
                 }
-                item->image = gfxmap_get(inventory_assets, image_id);
+                item->image = gfxmap_get_image(inventory_assets, image_id);
                 if (!item->image.tex) {
                     printf("%s:%zu: unknown image: %s\n", filename, line_number, image_id);
                     fclose(f);
@@ -174,7 +174,7 @@ static bool load_inventory(const char *filename) {
                 if ((fmt) && (strcmp(fmt, "FULLSCREEN") == 0)) {
                     item->detail_fullscreen = true;
                 }
-                item->detail_image = gfxmap_get(inventory_assets, image_id);
+                item->detail_image = gfxmap_get_image(inventory_assets, image_id);
 
                 if (!item->detail_image.tex) {
                     printf("%s:%zu: unknown image: %s\n", filename, line_number, image_id);

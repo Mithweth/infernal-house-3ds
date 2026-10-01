@@ -1,16 +1,16 @@
 // room_firstunderground.c
 
 #include <citro2d.h>
+#include "gfxmap.h"
 #include "game.h"
 #include "room_firstunderground.h"
 #include "room_secondunderground.h"
 #include "room_cellar.h"
-#include "gfx_firstunderground.h"
 #include "minigame_measure.h"
 #include "inventory.h"
 #include "gamestate.h"
 
-static C2D_SpriteSheet room_scene;
+static C2D_SpriteSheet assets;
 static C2D_Image img_bg;
 static C2D_Image img_shovel_taken;
 static C2D_Image img_sledgehammer_taken;
@@ -135,12 +135,14 @@ static Hotspot hotspots[] = {
 };
 
 static void room_init(void) {
-    room_scene = C2D_SpriteSheetLoad("romfs:/gfx/gfx_firstunderground.t3x");
-    img_bg = C2D_SpriteSheetGetImage(room_scene, gfx_firstunderground_bg_idx);
-    img_shovel_taken = C2D_SpriteSheetGetImage(room_scene, gfx_firstunderground_shovel_taken_idx);
-    img_sledgehammer_taken = C2D_SpriteSheetGetImage(room_scene, gfx_firstunderground_sledgehammer_taken_idx);
-    img_hole_dug = C2D_SpriteSheetGetImage(room_scene, gfx_firstunderground_hole_dug_idx);
-    img_hole_empty = C2D_SpriteSheetGetImage(room_scene, gfx_firstunderground_hole_empty_idx);
+    if (!gfxmap_load_assets("romfs:/gfx/firstunderground", &assets)) {
+        return;
+    }
+    img_bg = gfxmap_get_image(assets, "gfx_bg_idx");
+    img_shovel_taken = gfxmap_get_image(assets, "gfx_shovel_taken_idx");
+    img_sledgehammer_taken = gfxmap_get_image(assets, "gfx_sledgehammer_taken_idx");
+    img_hole_dug = gfxmap_get_image(assets, "gfx_hole_dug_idx");
+    img_hole_empty = gfxmap_get_image(assets, "gfx_hole_empty_idx");
 }
 
 static void room_draw(void) {
@@ -162,7 +164,7 @@ static void room_draw(void) {
 }
 
 static void room_close(void) {
-    C2D_SpriteSheetFree(room_scene);
+    C2D_SpriteSheetFree(assets);
 }
 
 static void move_north(void) {

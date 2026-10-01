@@ -2,14 +2,14 @@
 // <room_name.c
 
 #include <citro2d.h>
+#include "gfxmap.h"
 #include "game.h"
 #include "room_firstbedroom.h"
 #include "room_firstfloor.h"
-#include "gfx_firstbedroom.h"
 #include "inventory.h"
 #include "gamestate.h"
 
-static C2D_SpriteSheet room_scene;
+static C2D_SpriteSheet assets;
 static C2D_Image img_dark_background;
 static C2D_Image img_dark_closet_opened;
 static C2D_Image img_dark_invoice_taken;
@@ -201,21 +201,23 @@ static Hotspot hotspots[] = {
 };
 
 static void room_init(void) {
-    room_scene = C2D_SpriteSheetLoad("romfs:/gfx/gfx_firstbedroom.t3x");
-    img_dark_background = C2D_SpriteSheetGetImage(room_scene, gfx_firstbedroom_dark_bg_idx);
-    img_dark_closet_opened = C2D_SpriteSheetGetImage(room_scene, gfx_firstbedroom_dark_closet_opened_idx);
-    img_dark_invoice_taken = C2D_SpriteSheetGetImage(room_scene, gfx_firstbedroom_dark_invoice_taken_idx);
-    img_dark_left_nightstand_empty = C2D_SpriteSheetGetImage(room_scene, gfx_firstbedroom_dark_left_nightstand_empty_idx);
-    img_dark_left_nightstand_opened = C2D_SpriteSheetGetImage(room_scene, gfx_firstbedroom_dark_left_nightstand_opened_idx);
-    img_dark_right_nightstand_opened = C2D_SpriteSheetGetImage(room_scene, gfx_firstbedroom_dark_right_nightstand_opened_idx);
-    img_dark_stain_remover_taken = C2D_SpriteSheetGetImage(room_scene, gfx_firstbedroom_dark_stain_remover_taken_idx);
-    img_light_background = C2D_SpriteSheetGetImage(room_scene, gfx_firstbedroom_light_bg_idx);
-    img_light_closet_opened = C2D_SpriteSheetGetImage(room_scene, gfx_firstbedroom_light_closet_opened_idx);
-    img_light_invoice_taken = C2D_SpriteSheetGetImage(room_scene, gfx_firstbedroom_light_invoice_taken_idx);
-    img_light_left_nightstand_empty = C2D_SpriteSheetGetImage(room_scene, gfx_firstbedroom_light_left_nightstand_empty_idx);
-    img_light_left_nightstand_opened = C2D_SpriteSheetGetImage(room_scene, gfx_firstbedroom_light_left_nightstand_opened_idx);
-    img_light_right_nightstand_opened = C2D_SpriteSheetGetImage(room_scene, gfx_firstbedroom_light_right_nightstand_opened_idx);
-    img_light_stain_remover_taken = C2D_SpriteSheetGetImage(room_scene, gfx_firstbedroom_light_stain_remover_taken_idx);
+    if (!gfxmap_load_assets("romfs:/gfx/firstbedroom", &assets)) {
+        return;
+    }
+    img_dark_background = gfxmap_get_image(assets, "gfx_dark_bg_idx");
+    img_dark_closet_opened = gfxmap_get_image(assets, "gfx_dark_closet_opened_idx");
+    img_dark_invoice_taken = gfxmap_get_image(assets, "gfx_dark_invoice_taken_idx");
+    img_dark_left_nightstand_empty = gfxmap_get_image(assets, "gfx_dark_left_nightstand_empty_idx");
+    img_dark_left_nightstand_opened = gfxmap_get_image(assets, "gfx_dark_left_nightstand_opened_idx");
+    img_dark_right_nightstand_opened = gfxmap_get_image(assets, "gfx_dark_right_nightstand_opened_idx");
+    img_dark_stain_remover_taken = gfxmap_get_image(assets, "gfx_dark_stain_remover_taken_idx");
+    img_light_background = gfxmap_get_image(assets, "gfx_light_bg_idx");
+    img_light_closet_opened = gfxmap_get_image(assets, "gfx_light_closet_opened_idx");
+    img_light_invoice_taken = gfxmap_get_image(assets, "gfx_light_invoice_taken_idx");
+    img_light_left_nightstand_empty = gfxmap_get_image(assets, "gfx_light_left_nightstand_empty_idx");
+    img_light_left_nightstand_opened = gfxmap_get_image(assets, "gfx_light_left_nightstand_opened_idx");
+    img_light_right_nightstand_opened = gfxmap_get_image(assets, "gfx_light_right_nightstand_opened_idx");
+    img_light_stain_remover_taken = gfxmap_get_image(assets, "gfx_light_stain_remover_taken_idx");
 }
 
 static void room_draw(void) {
@@ -263,7 +265,7 @@ static void room_draw(void) {
 }
 
 static void room_close(void) {
-    C2D_SpriteSheetFree(room_scene);
+    C2D_SpriteSheetFree(assets);
 }
 
 static void move_south(void) {

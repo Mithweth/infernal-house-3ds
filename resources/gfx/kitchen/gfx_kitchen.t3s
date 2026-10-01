@@ -1,9 +1,0 @@
---atlas -f rgba8888 -z auto
-bg.png
-bottom_closet_opened.png
-closet_below_opened.png
-dishwasher_opened.png
-drawer_opened.png
-fridge_opened.png
-oven_opened.png
-top_closet_opened.png

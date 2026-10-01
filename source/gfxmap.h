@@ -12,5 +12,6 @@ typedef struct {
 } GfxImageIndex;
 
 int gfxmap_get_index(const char *name);
-C2D_Image gfxmap_get(C2D_SpriteSheet assets, const char *name);
+C2D_Image gfxmap_get_image(C2D_SpriteSheet assets, const char *name);
 bool gfxmap_load(const char *filename);
+bool gfxmap_load_assets(const char *path, C2D_SpriteSheet *assets);

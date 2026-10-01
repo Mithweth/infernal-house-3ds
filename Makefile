@@ -29,9 +29,11 @@ ROMFS       := romfs
 # These directories are copied as-is from resources/ to romfs/.
 RAW_ASSET_DIRS	:=	audio lang states
 
-# Graphics that must be linked directly into the executable.
-# Everything else under GRAPHICS will be placed in RomFS.
-MEMGFX		:=	$(GRAPHICS)/hud/gfx_hud.t3s
+# The HUD is the only spritesheet linked directly into the executable.
+# Its gfx.t3s is generated like all the others.
+MEMGFX		:=	$(GRAPHICS)/hud/gfx.t3s
+MEM_T3XFILES	:=	gfx_hud.t3x
+MEM_HFILES	:=	gfx_hud.h
 
 #---------------------------------------------------------------------------------
 # options for code generation
@@ -84,51 +86,34 @@ BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
 # Graphics
 #---------------------------------------------------------------------------------
 
-# Find every .t3s recursively under resources/gfx.
-GFXFILES	:=	$(shell if [ -d "$(GRAPHICS)" ]; then find "$(GRAPHICS)" -type f -name '*.t3s'; fi)
+# generate-gfx creates one gfx.t3s in every directory containing PNG files.
+# This list is evaluated by the second make invocation, after generation.
+GFXFILES	:=	$(shell if [ -d "$(ASSETS)" ]; then find "$(ASSETS)" -type f -name 'gfx.t3s'; fi)
 
-# Everything except MEMGFX goes to RomFS.
+# Everything except MEMGFX goes to RomFS, preserving the directory hierarchy.
+# resources/gfx/hall/gfx.t3s -> romfs/gfx/hall/gfx.t3x + gfx.h
 ROMGFX		:=	$(filter-out $(MEMGFX),$(GFXFILES))
 
-# Directories containing .t3s files, used by VPATH.
-GFXDIRS		:=	$(sort $(dir $(GFXFILES)))
-
-# Graphics linked into the executable.
-MEM_T3XFILES	:=	$(notdir $(MEMGFX:.t3s=.t3x))
-MEM_HFILES	:=	$(notdir $(MEMGFX:.t3s=.h))
-
-# Graphics generated into RomFS.
-ROM_T3XFILES	:=	$(foreach file,$(ROMGFX),$(ROMFS)/gfx/$(notdir $(file:.t3s=.t3x)))
-
-ROM_HFILES	:=	$(foreach file,$(ROMGFX),$(BUILD)/$(notdir $(file:.t3s=.h)))
-
-T3XHFILES	:=	$(MEM_HFILES:%=$(BUILD)/%) $(ROM_HFILES)
+ROM_T3XFILES	:=	$(patsubst $(ASSETS)/%/gfx.t3s,$(ROMFS)/%/gfx.t3x,$(ROMGFX))
+ROM_HFILES	:=	$(patsubst $(ASSETS)/%/gfx.t3s,$(ROMFS)/%/gfx.h,$(ROMGFX))
 
 #---------------------------------------------------------------------------------
 # Timelines
 #---------------------------------------------------------------------------------
 
-TIMELINE_GFX	:=	$(wildcard $(TIMELINES)/*/gfx.t3s)
-TIMELINE_DIRS	:=	$(sort $(dir $(TIMELINE_GFX)))
-
-TIMELINE_FILES := $(foreach dir,$(TIMELINE_DIRS),\
-	$(ROMFS)/timelines/$(notdir $(patsubst %/,%,$(dir)))/gfx.t3x \
-	$(ROMFS)/timelines/$(notdir $(patsubst %/,%,$(dir)))/gfx.h \
-	$(ROMFS)/timelines/$(notdir $(patsubst %/,%,$(dir)))/timeline)
+TIMELINE_SOURCE_FILES := $(wildcard $(TIMELINES)/*/timeline)
+TIMELINE_FILES := $(patsubst $(TIMELINES)/%/timeline,$(ROMFS)/timelines/%/timeline,$(TIMELINE_SOURCE_FILES))
 
 #---------------------------------------------------------------------------------
 # Inventory
 #---------------------------------------------------------------------------------
 
-INVENTORY_FILES := $(ROMFS)/inventory/inventory $(ROMFS)/inventory/gfx.t3x $(ROMFS)/inventory/gfx.h
+INVENTORY_FILES := $(ROMFS)/inventory/inventory
 
 #---------------------------------------------------------------------------------
 # Minigames
 #---------------------------------------------------------------------------------
 
-MINIGAME_GFX := $(wildcard $(MINIGAMES)/*/gfx.t3s)
-MINIGAME_DIRS := $(sort $(dir $(MINIGAME_GFX)))
-MINIGAME_FILES := $(foreach dir,$(MINIGAME_DIRS),$(ROMFS)/minigames/$(notdir $(patsubst %/,%,$(dir)))/gfx.t3x $(ROMFS)/minigames/$(notdir $(patsubst %/,%,$(dir)))/gfx.h)
 MINIGAME_RAW_FILES := $(shell if [ -d "$(MINIGAMES)" ]; then find "$(MINIGAMES)" -type f -name '*.raw'; fi)
 ROMFS_MINIGAME_RAW_FILES := $(patsubst $(ASSETS)/%,$(ROMFS)/%,$(MINIGAME_RAW_FILES))
 
@@ -145,7 +130,6 @@ ROMFS_RAW_FILES := $(patsubst $(ASSETS)/%,$(ROMFS)/%,$(RAW_ASSET_FILES))
 # Search paths
 #---------------------------------------------------------------------------------
 export VPATH := $(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
-				$(foreach dir,$(GFXDIRS),$(CURDIR)/$(dir)) \
 				$(foreach dir,$(DATA),$(CURDIR)/$(dir))
 
 #---------------------------------------------------------------------------------
@@ -178,7 +162,7 @@ export OFILES := $(OFILES_BIN) $(OFILES_SOURCES)
 export HFILES := $(PICAFILES:.v.pica=_shbin.h) \
 			 $(SHLISTFILES:.shlist=_shbin.h) \
 			 $(addsuffix .h,$(subst .,_,$(BINFILES))) \
-			 $(notdir $(T3XHFILES))
+			 $(MEM_HFILES)
 
 #---------------------------------------------------------------------------------
 # Include / library paths
@@ -221,18 +205,45 @@ ifneq ($(ROMFS),)
 	export _3DSXFLAGS += --romfs=$(CURDIR)/$(ROMFS)
 endif
 
-.PHONY: all clean lint
+.PHONY: all generate-gfx build-project clean lint
 
 #---------------------------------------------------------------------------------
 # Main outer target
 #---------------------------------------------------------------------------------
-all: $(BUILD) \
+# gfx.t3s files must exist before the graphics lists are evaluated, hence the
+# second make invocation.
+all: generate-gfx
+	@$(MAKE) --no-print-directory build-project
+
+#---------------------------------------------------------------------------------
+# Generate one gfx.t3s per directory containing PNG files
+#---------------------------------------------------------------------------------
+generate-gfx:
+	@find "$(ASSETS)" -type f -name '*.png' -exec dirname {} \; | sort -u | \
+	while IFS= read -r d; do \
+		tmp="$$d/gfx.t3s.tmp"; \
+		{ \
+			echo "--atlas -f rgba8888 -z auto"; \
+			for f in "$$d"/*.png; do basename "$$f"; done | sort; \
+		} > "$$tmp"; \
+		if [ ! -f "$$d/gfx.t3s" ] || ! cmp -s "$$tmp" "$$d/gfx.t3s"; then \
+			mv "$$tmp" "$$d/gfx.t3s"; \
+			echo "generated $$d/gfx.t3s"; \
+		else \
+			rm -f "$$tmp"; \
+		fi; \
+	done
+
+#---------------------------------------------------------------------------------
+# Build assets, then run the usual inner Makefile from build/
+#---------------------------------------------------------------------------------
+build-project: $(BUILD) \
 	 $(MEM_T3XFILES:%=$(BUILD)/%) \
+	 $(MEM_HFILES:%=$(BUILD)/%) \
 	 $(ROM_T3XFILES) \
-	 $(T3XHFILES) \
+	 $(ROM_HFILES) \
 	 $(TIMELINE_FILES) \
 	 $(INVENTORY_FILES) \
-	 $(MINIGAME_FILES) \
 	 $(ROMFS_MINIGAME_RAW_FILES) \
 	 $(ROMFS_RAW_FILES)
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
@@ -250,6 +261,7 @@ clean:
 	@echo clean ...
 	@rm -rf $(BUILD) $(ROMFS)
 	@rm -f $(TARGET).3dsx $(OUTPUT).smdh $(TARGET).elf PRN
+	@find "$(ASSETS)" -type f \( -name 'gfx.t3s' -o -name 'gfx.t3s.tmp' \) -delete 2>/dev/null || true
 
 #---------------------------------------------------------------------------------
 # Lint
@@ -257,6 +269,7 @@ clean:
 
 lint:
 	@$(MAKE) CFLAGS="$(CFLAGS) -fanalyzer"
+
 
 #---------------------------------------------------------------------------------
 # Assets copied directly to RomFS
@@ -266,28 +279,31 @@ $(ROMFS)/%: $(ASSETS)/%
 	@cp $< $@
 
 #---------------------------------------------------------------------------------
-# Graphics linked directly into the executable.
-# MEMGFX currently contains gfx_hud.t3s.
+# HUD graphics linked directly into the executable.
 #---------------------------------------------------------------------------------
-$(MEM_T3XFILES:%=$(BUILD)/%) $(MEM_HFILES:%=$(BUILD)/%) &: $(MEMGFX)
-	@echo $(notdir $<)
+$(BUILD)/gfx_hud.t3x $(BUILD)/gfx_hud.h &: $(MEMGFX)
+	@echo hud/gfx.t3s
 	@mkdir -p $(BUILD)
 	@tex3ds -i $< \
-		-H $(BUILD)/$(patsubst %.t3s,%.h,$(notdir $<)) \
-		-d $(DEPSDIR)/$(patsubst %.t3s,%.d,$(notdir $<)) \
-		-o $(BUILD)/$(patsubst %.t3s,%.t3x,$(notdir $<))
+		-H $(BUILD)/gfx_hud.h \
+		-d $(DEPSDIR)/gfx_hud.d \
+		-o $(BUILD)/gfx_hud.t3x
+
+#---------------------------------------------------------------------------------
+# Runtime graphics
+# resources/<path>/gfx.t3s -> romfs/<path>/gfx.t3x + gfx.h
+#---------------------------------------------------------------------------------
+$(ROMFS)/%/gfx.t3x $(ROMFS)/%/gfx.h &: $(ASSETS)/%/gfx.t3s
+	@echo $*/gfx.t3s
+	@mkdir -p $(ROMFS)/$*
+	@tex3ds -i $< \
+		-H $(ROMFS)/$*/gfx.h \
+		-d $(DEPSDIR)/gfx_$(subst /,_,$*).d \
+		-o $(ROMFS)/$*/gfx.t3x
 
 #---------------------------------------------------------------------------------
 # Timelines
 #---------------------------------------------------------------------------------
-$(ROMFS)/timelines/%/gfx.t3x $(ROMFS)/timelines/%/gfx.h &: $(TIMELINES)/%/gfx.t3s
-	@echo $(notdir $<)
-	@mkdir -p $(ROMFS)/timelines/$*
-	@tex3ds -i $< \
-		-H $(ROMFS)/timelines/$*/gfx.h \
-		-d $(DEPSDIR)/gfx_timeline_$*.d \
-		-o $(ROMFS)/timelines/$*/gfx.t3x
-
 $(ROMFS)/timelines/%/timeline: $(TIMELINES)/%/timeline
 	@mkdir -p $(ROMFS)/timelines/$*
 	@cp $< $@
@@ -295,41 +311,9 @@ $(ROMFS)/timelines/%/timeline: $(TIMELINES)/%/timeline
 #---------------------------------------------------------------------------------
 # Inventory
 #---------------------------------------------------------------------------------
-$(ROMFS)/inventory/gfx.t3x $(ROMFS)/inventory/gfx.h &: $(INVENTORY)/gfx.t3s
-	@echo $(notdir $<)
-	@mkdir -p $(ROMFS)/inventory
-	@tex3ds -i $< \
-		-H $(ROMFS)/inventory/gfx.h \
-		-d $(DEPSDIR)/gfx_inventory.d \
-		-o $(ROMFS)/inventory/gfx.t3x
-
 $(ROMFS)/inventory/inventory: $(INVENTORY)/inventory
 	@mkdir -p $(ROMFS)/inventory
 	@cp $< $@
-
-#---------------------------------------------------------------------------------
-# Minigames
-#---------------------------------------------------------------------------------
-$(ROMFS)/minigames/%/gfx.t3x $(ROMFS)/minigames/%/gfx.h &: $(MINIGAMES)/%/gfx.t3s
-	@echo minigame $*
-	@mkdir -p $(ROMFS)/minigames/$*
-	@tex3ds -i $< \
-		-H $(ROMFS)/minigames/$*/gfx.h \
-		-d $(DEPSDIR)/gfx_minigame_$*.d \
-		-o $(ROMFS)/minigames/$*/gfx.t3x
-
-#---------------------------------------------------------------------------------
-# All other graphics:
-# Build the .t3x into RomFS.
-# The generated header remains in BUILD.
-#---------------------------------------------------------------------------------
-$(ROMFS)/gfx/%.t3x $(BUILD)/%.h &: %.t3s
-	@echo $(notdir $<)
-	@mkdir -p $(ROMFS)/gfx $(BUILD)
-	@tex3ds -i $< \
-		-H $(BUILD)/$*.h \
-		-d $(DEPSDIR)/$*.d \
-		-o $(ROMFS)/gfx/$*.t3x
 
 #---------------------------------------------------------------------------------
 else

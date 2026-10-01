@@ -1,14 +1,14 @@
 // room_kitchen.c
 #include <citro2d.h>
+#include "gfxmap.h"
 #include "game.h"
 #include "gamestate.h"
 #include "room_kitchen.h"
 #include "room_corridor.h"
-#include "gfx_kitchen.h"
 #include "inventory.h"
 #include "audio.h"
 
-static C2D_SpriteSheet room_scene;
+static C2D_SpriteSheet assets;
 static C2D_Image img_background;
 static C2D_Image img_drawer_opened;
 static C2D_Image img_top_closet_opened;
@@ -249,15 +249,17 @@ static Hotspot hotspots[] = {
 };
 
 static void room_init(void) {
-    room_scene = C2D_SpriteSheetLoad("romfs:/gfx/gfx_kitchen.t3x");
-    img_background = C2D_SpriteSheetGetImage(room_scene, gfx_kitchen_bg_idx);
-    img_drawer_opened = C2D_SpriteSheetGetImage(room_scene, gfx_kitchen_drawer_opened_idx);
-    img_top_closet_opened = C2D_SpriteSheetGetImage(room_scene, gfx_kitchen_top_closet_opened_idx);
-    img_bottom_closet_opened = C2D_SpriteSheetGetImage(room_scene, gfx_kitchen_bottom_closet_opened_idx);
-    img_closet_below_opened = C2D_SpriteSheetGetImage(room_scene, gfx_kitchen_closet_below_opened_idx);
-    img_fridge_opened = C2D_SpriteSheetGetImage(room_scene, gfx_kitchen_fridge_opened_idx);
-    img_dishwasher_opened = C2D_SpriteSheetGetImage(room_scene, gfx_kitchen_dishwasher_opened_idx);
-    img_oven_opened = C2D_SpriteSheetGetImage(room_scene, gfx_kitchen_oven_opened_idx);
+    if (!gfxmap_load_assets("romfs:/gfx/kitchen", &assets)) {
+        return;
+    }
+    img_background = gfxmap_get_image(assets, "gfx_bg_idx");
+    img_drawer_opened = gfxmap_get_image(assets, "gfx_drawer_opened_idx");
+    img_top_closet_opened = gfxmap_get_image(assets, "gfx_top_closet_opened_idx");
+    img_bottom_closet_opened = gfxmap_get_image(assets, "gfx_bottom_closet_opened_idx");
+    img_closet_below_opened = gfxmap_get_image(assets, "gfx_closet_below_opened_idx");
+    img_fridge_opened = gfxmap_get_image(assets, "gfx_fridge_opened_idx");
+    img_dishwasher_opened = gfxmap_get_image(assets, "gfx_dishwasher_opened_idx");
+    img_oven_opened = gfxmap_get_image(assets, "gfx_oven_opened_idx");
 
 }
 
@@ -287,7 +289,7 @@ static void room_draw(void) {
 }
 
 static void room_close(void) {
-    C2D_SpriteSheetFree(room_scene);
+    C2D_SpriteSheetFree(assets);
 }
 
 static void move_southwest(void) {
