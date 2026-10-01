@@ -13,7 +13,7 @@ static C2D_Text text;
 static touchPosition start;
 static touchPosition current;
 
-void measure_init(void) {
+static bool measure_init(void) {
     if (!text_buf) {
         text_buf = C2D_TextBufNew(1024);
     }
@@ -21,9 +21,10 @@ void measure_init(void) {
     start.py = 197.0f;
     current.px = 151.0f;
     current.py = 197.0f;
+    return true;
 }
 
-void measure_update(u32 keys, touchPosition touch) {
+static void measure_update(u32 keys, touchPosition touch) {
 	if ((keys & KEY_A) || (keys & KEY_B)) {
 	    game_minigame_stop();
 	    return;
@@ -51,7 +52,7 @@ static float measure_distance(float x, float y) {
     return len * DISTANCE / target_pixels;
 }
 
-void measure_draw(void) {
+static void measure_draw(void) {
     float meters = measure_distance(current.px, current.py);
     char buf[64];
     snprintf(buf, sizeof(buf), "%s %.2f %s", lang_get("MEASURE_PREFIX"), meters, lang_get("MEASURE_SUFFIX"));

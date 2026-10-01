@@ -90,7 +90,10 @@ void game_minigame_start(MiniGame *minigame) {
     active_minigame = minigame;
     music_stop();
     if (active_minigame->init) {
-        active_minigame->init();
+        if (!active_minigame->init()) {
+            printf("Fail loading mini-game\n");
+            return;
+        }
     }
     game_mode = GAME_MINIGAME;
 }

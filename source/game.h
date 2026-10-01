@@ -47,7 +47,7 @@ typedef struct Room {
 } Room;
 
 typedef struct {
-    void (*init)(void);
+    bool (*init)(void);
     void (*update)(u32 keys, touchPosition touch);
     void (*draw)(void);
     void (*close)(void);

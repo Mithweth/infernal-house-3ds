@@ -178,7 +178,7 @@ static bool load_timeline(const char *filename) {
 
                 TimelineSprite *sprite = &full_screen->sprites[full_screen->sprite_count];
 
-                sprite->image = gfxmap_get_image(timeline_assets, image_name);
+                sprite->image = gfxmap_get(timeline_assets, image_name);
                 if (!sprite->image.tex) {
                     printf("%s:%zu: unknown image %s\n", filename, line_number, image_name);
                     fclose(f);
@@ -329,7 +329,7 @@ static bool load_timeline(const char *filename) {
             if (strcmp(image_name, "NONE") == 0) {
                 event->image = (C2D_Image){0};
             } else {
-                event->image = gfxmap_get_image(timeline_assets, image_name);
+                event->image = gfxmap_get(timeline_assets, image_name);
                 if (!event->image.tex) {
                     printf("%s:%zu: unknown image %s\n", filename, line_number, image_name);
                     fclose(f);
@@ -578,7 +578,7 @@ bool timeline_init(const char *directory) {
         return false;
     }
 
-    if (!gfxmap_load_gfx_header(header_path)) {
+    if (!gfxmap_load(header_path)) {
         printf("Cannot load gfx headers: %s\n", header_path);
         C2D_SpriteSheetFree(timeline_assets);
         timeline_assets = NULL;

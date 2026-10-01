@@ -110,7 +110,7 @@ static bool load_inventory(const char *filename) {
                     item_count = 0;
                     return false;
                 }
-                item->image = gfxmap_get_image(inventory_assets, image_id);
+                item->image = gfxmap_get(inventory_assets, image_id);
                 if (!item->image.tex) {
                     printf("%s:%zu: unknown image: %s\n", filename, line_number, image_id);
                     fclose(f);
@@ -174,7 +174,7 @@ static bool load_inventory(const char *filename) {
                 if ((fmt) && (strcmp(fmt, "FULLSCREEN") == 0)) {
                     item->detail_fullscreen = true;
                 }
-                item->detail_image = gfxmap_get_image(inventory_assets, image_id);
+                item->detail_image = gfxmap_get(inventory_assets, image_id);
 
                 if (!item->detail_image.tex) {
                     printf("%s:%zu: unknown image: %s\n", filename, line_number, image_id);
@@ -440,7 +440,7 @@ bool inventory_init(void) {
         return false;
     }
 
-    if (!gfxmap_load_gfx_header("romfs:/inventory/gfx.h")) {
+    if (!gfxmap_load("romfs:/inventory/gfx.h")) {
         printf("Cannot load gfx headers\n");
         C2D_SpriteSheetFree(inventory_assets);
         inventory_assets = NULL;
@@ -454,7 +454,7 @@ bool inventory_init(void) {
         return false;
     }
 
-    int img_idx = gfxmap_get_image_index("gfx_selected_idx");
+    int img_idx = gfxmap_get_index("gfx_selected_idx");
     if (img_idx < 0) {
         printf("unknown image: gfx_selected_idx\n");
         C2D_SpriteSheetFree(inventory_assets);
@@ -463,7 +463,7 @@ bool inventory_init(void) {
     }
     img_selected = C2D_SpriteSheetGetImage(inventory_assets, img_idx);
 
-    img_idx = gfxmap_get_image_index("gfx_background_idx");
+    img_idx = gfxmap_get_index("gfx_background_idx");
     if (img_idx < 0) {
         printf("unknown image: gfx_background_idx\n");
         C2D_SpriteSheetFree(inventory_assets);

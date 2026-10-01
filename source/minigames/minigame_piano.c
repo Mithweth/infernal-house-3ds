@@ -2,7 +2,7 @@
 
 #include <3ds.h>
 #include <citro2d.h>
-#include "gfx_piano.h"
+#include "gfxmap.h"
 #include "lang.h"
 #include "game.h"
 #include "gamestate.h"
@@ -46,7 +46,7 @@ typedef struct {
 static ndspWaveBuf wavebuf[PIANO_CHANNEL_LAST - PIANO_CHANNEL_FIRST + 1];
 static s16 *sample = NULL;
 static size_t sample_size;
-static C2D_SpriteSheet piano_assets;
+static C2D_SpriteSheet assets;
 static C2D_Image img_background;
 static C2D_TextBuf text_buf;
 static C2D_Text text;
@@ -210,13 +210,32 @@ static void piano_draw_bottom(void) {
     C2D_DrawText(&text, C2D_WithColor | C2D_AlignCenter, 160.0f, 220.0f, 0.92f, 0.65f, 0.65f, C2D_Color32(164, 164, 164, 255));
 }
 
-static void piano_init(void) {
-    piano_assets = C2D_SpriteSheetLoad("romfs:/gfx/gfx_piano.t3x");
-    img_background = C2D_SpriteSheetGetImage(piano_assets, gfx_piano_background_idx);
+static bool piano_init(void) {
+    assets = C2D_SpriteSheetLoad("romfs:/minigames/piano/gfx.t3x");
+    if (!gfxmap_load("romfs:/minigames/piano/gfx.h")) {
+        printf("Cannot load gfx headers\n");
+        C2D_SpriteSheetFree(assets);
+        assets = NULL;
+        return false;
+    }
+    int img_idx = gfxmap_get_index("gfx_background_idx");
+    if (img_idx < 0) {
+        printf("unknown image: gfx_background_idx\n");
+        C2D_SpriteSheetFree(assets);
+        assets = NULL;
+        return false;
+    }
+    img_background = C2D_SpriteSheetGetImage(assets, img_idx);
     if (!text_buf) {
         text_buf = C2D_TextBufNew(1024);
     }
     FILE *f = fopen("romfs:/audio/piano_a4.raw", "rb");
+    if (!f) {
+        printf("cannot load sample romfs:/audio/piano_a4.raw\n");
+        C2D_SpriteSheetFree(assets);
+        assets = NULL;
+        return false;
+    }
 
     fseek(f, 0, SEEK_END);
     sample_size = ftell(f);
@@ -242,12 +261,13 @@ static void piano_init(void) {
 
         ndspChnSetMix(channel, mix);
     }
+    return true;
 }
 
 static void piano_close(void) {
-    if (piano_assets) {
-        C2D_SpriteSheetFree(piano_assets);
-        piano_assets = NULL;
+    if (assets) {
+        C2D_SpriteSheetFree(assets);
+        assets = NULL;
     }
     for (int i = 0; i < PIANO_CHANNEL_LAST - PIANO_CHANNEL_FIRST + 1; i++) {
         ndspChnWaveBufClear(PIANO_CHANNEL_FIRST + i);

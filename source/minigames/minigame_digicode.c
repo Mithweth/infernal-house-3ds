@@ -7,7 +7,7 @@
 #include "minigame_digicode.h"
 #include "game.h"
 #include "audio.h"
-#include "gfx_digicode.h"
+#include "gfxmap.h"
 
 #define KEY_SPACING_X 8.0f
 #define KEY_SPACING_Y 8.0f
@@ -17,7 +17,7 @@
 #define PANEL_TOP 90.0f
 
 
-static C2D_SpriteSheet digicode_assets;
+static C2D_SpriteSheet assets;
 static C2D_Image img_background;
 static uint8_t entered_code[4];
 static size_t position;
@@ -46,7 +46,7 @@ static void digicode_stop(bool success) {
     }
 }
 
-void digicode_update(u32 keys, touchPosition touch) {
+static void digicode_update(u32 keys, touchPosition touch) {
     if (!(keys & KEY_TOUCH)) {
         return;
     }
@@ -83,7 +83,7 @@ void digicode_update(u32 keys, touchPosition touch) {
     entered_code[position++] = pressed;
 }
 
-void digicode_draw(void) {
+static void digicode_draw(void) {
     C2D_DrawImageAt(img_background, 35.0f, 0.0f, 0.9f, NULL, 1.0f, 1.0f);
     C2D_TextBufClear(text_buf);
     char buf[2];
@@ -96,18 +96,32 @@ void digicode_draw(void) {
     }
 }
 
-void digicode_init(void) {
-    digicode_assets = C2D_SpriteSheetLoad("romfs:/gfx/gfx_digicode.t3x");
-    img_background = C2D_SpriteSheetGetImage(digicode_assets, gfx_digicode_background_idx);
+static bool digicode_init(void) {
+    assets = C2D_SpriteSheetLoad("romfs:/minigames/digicode/gfx.t3x");
+    if (!gfxmap_load("romfs:/minigames/digicode/gfx.h")) {
+        printf("Cannot load gfx headers\n");
+        C2D_SpriteSheetFree(assets);
+        assets = NULL;
+        return false;
+    }
+    int img_idx = gfxmap_get_index("gfx_background_idx");
+    if (img_idx < 0) {
+        printf("unknown image: gfx_background_idx\n");
+        C2D_SpriteSheetFree(assets);
+        assets = NULL;
+        return false;
+    }
+    img_background = C2D_SpriteSheetGetImage(assets, img_idx);
     if (!text_buf) {
         text_buf = C2D_TextBufNew(256);
     }
+    return true;
 }
 
-void digicode_close(void) {
-    if (digicode_assets) {
-        C2D_SpriteSheetFree(digicode_assets);
-        digicode_assets = NULL;
+static void digicode_close(void) {
+    if (assets) {
+        C2D_SpriteSheetFree(assets);
+        assets = NULL;
     }
     if (text_buf) {
         C2D_TextBufDelete(text_buf);

@@ -6,7 +6,7 @@
 #include "minigame_simon.h"
 #include "game.h"
 #include "audio.h"
-#include "gfx_simon.h"
+#include "gfxmap.h"
 
 typedef enum {
     SIMON_OFF,
@@ -33,7 +33,7 @@ typedef enum {
 #define SIMON_PAUSE_TIME  250
 #define SIMON_PRESS_TIME 200
 
-static C2D_SpriteSheet simon_assets;
+static C2D_SpriteSheet assets;
 static C2D_Image img_background;
 static C2D_Image img_yellow;
 static C2D_Image img_red;
@@ -158,7 +158,7 @@ static void simon_update_player_flash(void) {
     next_event_time = osGetTime() + SIMON_ROUND_DELAY;
 }
 
-void simon_update(u32 keys, touchPosition touch) {
+static void simon_update(u32 keys, touchPosition touch) {
     if (keys & KEY_TOUCH) {
         if (touch_inside(touch, 161, 111, SWITCH_WIDTH, SWITCH_HEIGHT)) {
             simon_stop(false);
@@ -220,7 +220,7 @@ void simon_update(u32 keys, touchPosition touch) {
     }
 }
 
-void simon_draw_bottom(void) {
+static void simon_draw_bottom(void) {
     C2D_DrawImageAt(img_background, 0.0f, 0.0f, 0.9f, NULL, 1.0f, 1.0f);
     if (light_on) {
         switch (lit_color) {
@@ -242,20 +242,62 @@ void simon_draw_bottom(void) {
     }
 }
 
-void simon_init(void) {
-    simon_assets = C2D_SpriteSheetLoad("romfs:/gfx/gfx_simon.t3x");
-    img_background = C2D_SpriteSheetGetImage(simon_assets, gfx_simon_background_idx);
-    img_yellow = C2D_SpriteSheetGetImage(simon_assets, gfx_simon_yellow_idx);
-    img_red = C2D_SpriteSheetGetImage(simon_assets, gfx_simon_red_idx);
-    img_green = C2D_SpriteSheetGetImage(simon_assets, gfx_simon_green_idx);
-    img_blue = C2D_SpriteSheetGetImage(simon_assets, gfx_simon_blue_idx);
+static bool simon_init(void) {
+    assets = C2D_SpriteSheetLoad("romfs:/minigames/simon/gfx.t3x");
+    if (!gfxmap_load("romfs:/minigames/simon/gfx.h")) {
+        printf("Cannot load gfx headers\n");
+        C2D_SpriteSheetFree(assets);
+        assets = NULL;
+        return false;
+    }
+    int gfx_background_idx = gfxmap_get_index("gfx_background_idx");
+    if (gfx_background_idx < 0) {
+        printf("unknown image: gfx_background_idx\n");
+        C2D_SpriteSheetFree(assets);
+        assets = NULL;
+        return false;
+    }
+    int gfx_yellow_idx = gfxmap_get_index("gfx_yellow_idx");
+    if (gfx_yellow_idx < 0) {
+        printf("unknown image: gfx_yellow_idx\n");
+        C2D_SpriteSheetFree(assets);
+        assets = NULL;
+        return false;
+    }
+    int gfx_red_idx = gfxmap_get_index("gfx_red_idx");
+    if (gfx_red_idx < 0) {
+        printf("unknown image: gfx_red_idx\n");
+        C2D_SpriteSheetFree(assets);
+        assets = NULL;
+        return false;
+    }
+    int gfx_green_idx = gfxmap_get_index("gfx_green_idx");
+    if (gfx_green_idx < 0) {
+        printf("unknown image: gfx_green_idx\n");
+        C2D_SpriteSheetFree(assets);
+        assets = NULL;
+        return false;
+    }
+    int gfx_blue_idx = gfxmap_get_index("gfx_blue_idx");
+    if (gfx_blue_idx < 0) {
+        printf("unknown image: gfx_blue_idx\n");
+        C2D_SpriteSheetFree(assets);
+        assets = NULL;
+        return false;
+    }
+    img_background = C2D_SpriteSheetGetImage(assets, gfx_background_idx);
+    img_yellow = C2D_SpriteSheetGetImage(assets, gfx_yellow_idx);
+    img_red = C2D_SpriteSheetGetImage(assets, gfx_red_idx);
+    img_green = C2D_SpriteSheetGetImage(assets, gfx_green_idx);
+    img_blue = C2D_SpriteSheetGetImage(assets, gfx_blue_idx);
     mode = SIMON_OFF;
+    return true;
 }
 
-void simon_close(void) {
-    if (simon_assets) {
-        C2D_SpriteSheetFree(simon_assets);
-        simon_assets = NULL;
+static void simon_close(void) {
+    if (assets) {
+        C2D_SpriteSheetFree(assets);
+        assets = NULL;
     }
 }
 

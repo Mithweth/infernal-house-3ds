@@ -11,7 +11,7 @@
 static GfxImageIndex image_indexes[GFX_MAX_IMAGES];
 static size_t image_index_count = 0;
 
-int gfxmap_get_image_index(const char *name) {
+int gfxmap_get_index(const char *name) {
     for (size_t i = 0; i < image_index_count; i++) {
         if (strcmp(image_indexes[i].name, name) == 0) {
             return image_indexes[i].index;
@@ -20,8 +20,8 @@ int gfxmap_get_image_index(const char *name) {
     return -1;
 }
 
-C2D_Image gfxmap_get_image(C2D_SpriteSheet assets, const char *name) {
-    int index = gfxmap_get_image_index(name);
+C2D_Image gfxmap_get(C2D_SpriteSheet assets, const char *name) {
+    int index = gfxmap_get_index(name);
 
     if (index < 0) {
         return (C2D_Image){0};
@@ -30,7 +30,7 @@ C2D_Image gfxmap_get_image(C2D_SpriteSheet assets, const char *name) {
 }
 
 
-bool gfxmap_load_gfx_header(const char *filename) {
+bool gfxmap_load(const char *filename) {
     FILE *f = fopen(filename, "r");
     if (!f) {
         printf("Cannot open %s\n", filename);

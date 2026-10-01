@@ -15,15 +15,16 @@ include $(DEVKITARM)/3ds_rules
 #---------------------------------------------------------------------------------
 TARGET		:=	$(notdir $(CURDIR))
 BUILD		:=	build
-SOURCES		:=	source source/rooms
+SOURCES		:=	source source/rooms source/minigames
 DATA		:=	data
-INCLUDES	:=	include source source/rooms
+INCLUDES	:=	include source source/rooms source/minigames
 
-ASSETS		:=	resources
-GRAPHICS	:=	$(ASSETS)/gfx
-TIMELINES	:=	$(ASSETS)/timelines
-INVENTORY	:=	$(ASSETS)/inventory
-ROMFS		:=	romfs
+ASSETS      := resources
+GRAPHICS    := $(ASSETS)/gfx
+TIMELINES   := $(ASSETS)/timelines
+INVENTORY   := $(ASSETS)/inventory
+MINIGAMES   := $(ASSETS)/minigames
+ROMFS       := romfs
 
 # These directories are copied as-is from resources/ to romfs/.
 RAW_ASSET_DIRS	:=	audio lang states
@@ -119,10 +120,17 @@ TIMELINE_FILES := $(foreach dir,$(TIMELINE_DIRS),\
 # Inventory
 #---------------------------------------------------------------------------------
 
-INVENTORY_FILES := \
-	$(ROMFS)/inventory/inventory \
-	$(ROMFS)/inventory/gfx.t3x \
-	$(ROMFS)/inventory/gfx.h
+INVENTORY_FILES := $(ROMFS)/inventory/inventory $(ROMFS)/inventory/gfx.t3x $(ROMFS)/inventory/gfx.h
+
+#---------------------------------------------------------------------------------
+# Minigames
+#---------------------------------------------------------------------------------
+
+MINIGAME_GFX := $(wildcard $(MINIGAMES)/*/gfx.t3s)
+MINIGAME_DIRS := $(sort $(dir $(MINIGAME_GFX)))
+MINIGAME_FILES := $(foreach dir,$(MINIGAME_DIRS),$(ROMFS)/minigames/$(notdir $(patsubst %/,%,$(dir)))/gfx.t3x $(ROMFS)/minigames/$(notdir $(patsubst %/,%,$(dir)))/gfx.h)
+MINIGAME_RAW_FILES := $(shell if [ -d "$(MINIGAMES)" ]; then find "$(MINIGAMES)" -type f -name '*.raw'; fi)
+ROMFS_MINIGAME_RAW_FILES := $(patsubst $(ASSETS)/%,$(ROMFS)/%,$(MINIGAME_RAW_FILES))
 
 #---------------------------------------------------------------------------------
 # Assets copied directly to RomFS
@@ -175,9 +183,9 @@ export HFILES := $(PICAFILES:.v.pica=_shbin.h) \
 #---------------------------------------------------------------------------------
 # Include / library paths
 #---------------------------------------------------------------------------------
-export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
-				$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
-				-I$(CURDIR)/$(BUILD)
+export INCLUDE := $(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
+                  $(foreach dir,$(LIBDIRS),-I$(dir)/include) \
+                  -I$(CURDIR)/$(BUILD)
 
 export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 
@@ -224,6 +232,8 @@ all: $(BUILD) \
 	 $(T3XHFILES) \
 	 $(TIMELINE_FILES) \
 	 $(INVENTORY_FILES) \
+	 $(MINIGAME_FILES) \
+	 $(ROMFS_MINIGAME_RAW_FILES) \
 	 $(ROMFS_RAW_FILES)
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
 
@@ -296,6 +306,17 @@ $(ROMFS)/inventory/gfx.t3x $(ROMFS)/inventory/gfx.h &: $(INVENTORY)/gfx.t3s
 $(ROMFS)/inventory/inventory: $(INVENTORY)/inventory
 	@mkdir -p $(ROMFS)/inventory
 	@cp $< $@
+
+#---------------------------------------------------------------------------------
+# Minigames
+#---------------------------------------------------------------------------------
+$(ROMFS)/minigames/%/gfx.t3x $(ROMFS)/minigames/%/gfx.h &: $(MINIGAMES)/%/gfx.t3s
+	@echo minigame $*
+	@mkdir -p $(ROMFS)/minigames/$*
+	@tex3ds -i $< \
+		-H $(ROMFS)/minigames/$*/gfx.h \
+		-d $(DEPSDIR)/gfx_minigame_$*.d \
+		-o $(ROMFS)/minigames/$*/gfx.t3x
 
 #---------------------------------------------------------------------------------
 # All other graphics:
