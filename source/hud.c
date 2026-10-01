@@ -156,10 +156,14 @@ void hud_reset(void) {
     timer_start();
 }
 
+static void gameover_timeup(void) {
+    game_over("timeup");
+}
+
 void hud_update(void) {
     timer_update();
     if (elapsed_time / 1000 > TIME_MAX_SECONDS) {
-        game_over("timeup");
+        game_wait_for_sfx("romfs:/audio/footsteps_inside.raw", gameover_timeup);
     }
 }
 

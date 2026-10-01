@@ -83,7 +83,15 @@ void (*game_callback_find(const char *name))(void) {
 }
 
 void game_ending(void) {
-    // END
+    if (gamestate_get("item_syringe_injected")) {
+        if (timeline_init("romfs:/timelines/ending")) {
+            game_mode = GAME_TIMELINE;
+            return;
+        }
+        game_init();
+    } else {
+        game_over("bacteria");
+    }
 }
 
 void game_minigame_start(MiniGame *minigame) {
@@ -181,7 +189,7 @@ void game_init(void) {
     music_stop();
     callback_count = 0;
     game_callback_register("secret_code", game_secret_code);
-    game_callback_register("use_syringe", game_use_syringe);
+    game_callback_register("inject_syringe", game_use_syringe);
     hud_init();
     game_mode = GAME_TITLE;
     examine_image = (C2D_Image){0};
@@ -198,6 +206,11 @@ void game_start(void) {
     message_text = NULL;
     active_hotspot = NULL;
     music_play("romfs:/audio/background.ogg");
+    inventory_add("STATUE");
+    inventory_add("ROPE");
+    inventory_add("MAGNETIC_CARD");
+    inventory_add("SYRINGE");
+    inventory_add("PAPER");
     game_set_room(&hall);
 }
 
@@ -452,6 +465,14 @@ void game_update(u32 keys, circlePosition analog, touchPosition touch) {
             }
             return;
 
+        case GAME_MESSAGE:
+            hud_update();
+            if (keys & (KEY_A | KEY_TOUCH)) {
+                game_mode = GAME_NORMAL;
+                examine_image = (C2D_Image){0};
+            }
+            return;
+
         case GAME_BUSY:
             hud_update();
             if (game_busy_sfx_channel > -1) {
@@ -470,12 +491,6 @@ void game_update(u32 keys, circlePosition analog, touchPosition touch) {
         default:
             hud_update();
             break;
-    }
-
-    if ((keys & KEY_A) && (game_mode == GAME_MESSAGE)) {
-        game_mode = GAME_NORMAL;
-        examine_image = (C2D_Image){0};
-        return;
     }
 
     if ((inventory_is_active()) | (inventory_update(keys))) {

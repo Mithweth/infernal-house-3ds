@@ -43,6 +43,30 @@ EOF
     chmod 644 /etc/profile.d/devkit-env.sh
   fi
 
+  echo "* Install bannertool"
+  if [ ! -x /opt/devkitpro/tools/bin/bannertool ]; then
+    tmpdir=$(mktemp -d)
+    curl -SsL -o "$tmpdir/bannertool.zip" https://github.com/Epicpkmn11/bannertool/releases/download/v1.2.2/bannertool.zip
+    pushd "$tmpdir"
+    unzip -qq bannertool.zip
+    mv linux-x86_64/bannertool /opt/devkitpro/tools/bin/
+    popd
+    chmod 755 /opt/devkitpro/tools/bin/bannertool
+    rm -rf "$tmpdir"
+  fi
+
+  echo "* Install makerom"
+  if [ ! -x /opt/devkitpro/tools/bin/makerom ]; then
+    tmpdir=$(mktemp -d)
+    curl -SsL -o "$tmpdir/makerom.zip" https://github.com/3DSGuy/Project_CTR/releases/download/makerom-v0.18.4/makerom-v0.18.4-ubuntu_x86_64.zip
+    pushd "$tmpdir"
+    unzip -qq makerom.zip
+    mv makerom /opt/devkitpro/tools/bin/
+    popd
+    chmod 755 /opt/devkitpro/tools/bin/makerom
+    rm -rf "$tmpdir"
+  fi
+
   echo "* Completed"
   echo
   echo "Please run: source /etc/profile.d/devkit-env.sh"

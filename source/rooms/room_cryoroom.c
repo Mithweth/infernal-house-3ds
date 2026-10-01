@@ -5,6 +5,7 @@
 #include "game.h"
 #include "room_cryoroom.h"
 #include "room_livingroom.h"
+#include "room_heliport.h"
 #include "minigame_digicode.h"
 #include "inventory.h"
 #include "gamestate.h"
@@ -15,6 +16,7 @@ static C2D_Image img_background;
 static C2D_Image img_hangar;
 static C2D_Image img_lever;
 static C2D_Image img_rust_cleaned;
+static C2D_Image img_chamber_opened;
 
 static void lever_action(void) {
     return gamestate_set("cryoroom_lever_use");
@@ -58,6 +60,10 @@ static bool digicode_use_item(const char *id) {
         return true;
     }
     return false;
+}
+
+static void open_cryo_chamber(void) {
+    gamestate_set("cryoroom_chamber_opened");
 }
 
 static Hotspot hotspots[] = {
@@ -138,7 +144,8 @@ static Hotspot hotspots[] = {
         .y = 161,
         .width = 26,
         .height = 24,
-        .id = "CRYOROOM_CRYOCHAMBER_CONSOLE"
+        .id = "CRYOROOM_CRYOCHAMBER_CONSOLE",
+        .action = open_cryo_chamber
     },
     {
         .x = 0,
@@ -164,6 +171,7 @@ static void room_init(void) {
     img_background = gfxmap_get_image(assets, "gfx_background_idx");
     img_hangar = gfxmap_get_image(assets, "gfx_hangar_idx");
     img_lever = gfxmap_get_image(assets, "gfx_lever_idx");
+    img_chamber_opened = gfxmap_get_image(assets, "gfx_cryo_opened_idx");
     img_rust_cleaned = gfxmap_get_image(assets, "gfx_rust_cleaned_idx");
 }
 
@@ -175,6 +183,9 @@ static void room_draw(void) {
     }
     if (gamestate_get("cryoroom_rust_cleaned")) {
         C2D_DrawImageAt(img_rust_cleaned, 97.0f, 58.0f, 0.1f, NULL, 1.0f, 1.0f);
+    }
+    if (gamestate_get("cryoroom_chamber_opened")) {
+        C2D_DrawImageAt(img_chamber_opened, 0.0f, 99.0f, 0.1f, NULL, 1.0f, 1.0f);
     }
 }
 
@@ -191,6 +202,7 @@ static void north_action(void) {
 }
 
 static void east_action(void) {
+    game_set_room(&heliport);
 }
 
 Room cryoroom = {

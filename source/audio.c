@@ -72,6 +72,7 @@ bool music_play(const char *filename) {
     ogg_file = fopen(filename, "rb");
 
     if (!ogg_file) {
+        printf("File not found: %s\n", filename);
         ndspExit();
         return false;
     }
@@ -154,6 +155,7 @@ int sfx_play(const char *filename) {
     FILE *f = fopen(filename, "rb");
 
     if (!f) {
+        printf("File not found: %s\n", filename);
         return -1;
     }
 

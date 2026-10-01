@@ -13,7 +13,7 @@ include $(DEVKITARM)/3ds_rules
 #---------------------------------------------------------------------------------
 # Project configuration
 #---------------------------------------------------------------------------------
-TARGET		:=	$(notdir $(CURDIR))
+TARGET		:=	infernal-house
 BUILD		:=	build
 SOURCES		:=	source source/rooms source/minigames
 DATA		:=	data
@@ -25,6 +25,24 @@ TIMELINES   := $(ASSETS)/timelines
 INVENTORY   := $(ASSETS)/inventory
 MINIGAMES   := $(ASSETS)/minigames
 ROMFS       := romfs
+CIA         := $(ASSETS)/cia
+
+# HOME Menu / CIA metadata
+APP_TITLE       := Infernal House
+APP_DESCRIPTION := Point-and-click by Lankhor
+APP_AUTHOR      := Jean-Baptiste Langlois
+ICON            := $(CIA)/icon.png
+
+APP_PRODUCT_CODE := CTR-H-INFH
+APP_UNIQUE_ID    := 0xF1F3A
+APP_VERSION_MAJOR := 1
+APP_VERSION_MINOR := 0
+APP_VERSION_MICRO := 0
+
+CIA_RSF         := $(CIA)/app.rsf
+CIA_BANNER      := $(CIA)/banner.bnr
+CIA_BANNER_PNG  := $(CIA)/banner.png
+CIA_BANNER_WAV  := $(CIA)/banner.wav
 
 # These directories are copied as-is from resources/ to romfs/.
 RAW_ASSET_DIRS	:=	audio lang states
@@ -88,7 +106,7 @@ BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
 
 # generate-gfx creates one gfx.t3s in every directory containing PNG files.
 # This list is evaluated by the second make invocation, after generation.
-GFXFILES	:=	$(shell if [ -d "$(ASSETS)" ]; then find "$(ASSETS)" -type f -name 'gfx.t3s'; fi)
+GFXFILES	:=	$(shell if [ -d "$(ASSETS)" ]; then find "$(ASSETS)" -type f -name 'gfx.t3s' ! -path "$(CIA)/*"; fi)
 
 # Everything except MEMGFX goes to RomFS, preserving the directory hierarchy.
 # resources/gfx/hall/gfx.t3s -> romfs/gfx/hall/gfx.t3x + gfx.h
@@ -205,7 +223,7 @@ ifneq ($(ROMFS),)
 	export _3DSXFLAGS += --romfs=$(CURDIR)/$(ROMFS)
 endif
 
-.PHONY: all generate-gfx build-project clean lint
+.PHONY: all generate-gfx build-project banner cia clean lint
 
 #---------------------------------------------------------------------------------
 # Main outer target
@@ -219,7 +237,7 @@ all: generate-gfx
 # Generate one gfx.t3s per directory containing PNG files
 #---------------------------------------------------------------------------------
 generate-gfx:
-	@find "$(ASSETS)" -type f -name '*.png' -exec dirname {} \; | sort -u | \
+	@find "$(ASSETS)" -type f -name '*.png' ! -path "$(CIA)/*" -exec dirname {} \; | sort -u | \
 	while IFS= read -r d; do \
 		tmp="$$d/gfx.t3s.tmp"; \
 		{ \
@@ -249,6 +267,52 @@ build-project: $(BUILD) \
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
 
 #---------------------------------------------------------------------------------
+# CIA
+#---------------------------------------------------------------------------------
+# Generate the banner locally once, then commit resources/cia/banner.bnr.
+# The CIA target deliberately does NOT depend on this target, so CI only needs
+# makerom, not bannertool.
+banner:
+	@bannertool makebanner -i $(CIA_BANNER_PNG) -a $(CIA_BANNER_WAV) -o $(CIA_BANNER)
+	@echo built ... $(CIA_BANNER)
+
+# Build the normal project first (ELF + SMDH + RomFS), then package it as CIA.
+cia:
+	@test -f "$(CIA_BANNER)" || { \
+		echo "Missing $(CIA_BANNER). Run 'make banner' locally and commit it."; \
+		exit 1; \
+	}
+	@command -v makerom >/dev/null 2>&1 || { \
+		echo "makerom not found in PATH"; \
+		exit 1; \
+	}
+	@makerom -f cia \
+		-o $(TARGET).cia \
+		-target t \
+		-exefslogo \
+		-elf $(TARGET).elf \
+		-icon $(TARGET).smdh \
+		-banner $(CIA_BANNER) \
+		-rsf $(CIA_RSF) \
+		-major $(APP_VERSION_MAJOR) \
+		-minor $(APP_VERSION_MINOR) \
+		-micro $(APP_VERSION_MICRO) \
+		-DAPP_TITLE="$(APP_TITLE)" \
+		-DAPP_PRODUCT_CODE="$(APP_PRODUCT_CODE)" \
+		-DAPP_UNIQUE_ID="$(APP_UNIQUE_ID)" \
+		-DAPP_ROMFS="$(CURDIR)/$(ROMFS)" \
+		-DAPP_CATEGORY="Application" \
+		-DAPP_USE_ON_SD="true" \
+		-DAPP_ENCRYPTED="false" \
+		-DAPP_MEMORY_TYPE="Application" \
+		-DAPP_SYSTEM_MODE="64MB" \
+		-DAPP_SYSTEM_MODE_EXT="Legacy" \
+		-DAPP_CPU_SPEED="268MHz" \
+		-DAPP_ENABLE_L2_CACHE="false" \
+		-DAPP_VERSION_MAJOR="$(APP_VERSION_MAJOR)"
+	@echo built ... $(TARGET).cia
+
+#---------------------------------------------------------------------------------
 # Directories
 #---------------------------------------------------------------------------------
 $(BUILD):
@@ -260,7 +324,7 @@ $(BUILD):
 clean:
 	@echo clean ...
 	@rm -rf $(BUILD) $(ROMFS)
-	@rm -f $(TARGET).3dsx $(OUTPUT).smdh $(TARGET).elf PRN
+	@rm -f $(TARGET).3dsx $(OUTPUT).smdh $(TARGET).elf $(TARGET).cia PRN
 	@find "$(ASSETS)" -type f \( -name 'gfx.t3s' -o -name 'gfx.t3s.tmp' \) -delete 2>/dev/null || true
 
 #---------------------------------------------------------------------------------

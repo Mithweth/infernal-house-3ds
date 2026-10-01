@@ -53,5 +53,6 @@ study_lights_on KEEP
 study_lightbulb_screwed KEEP
 cryoroom_rust_cleaned KEEP
 cryoroom_lever_use TOGGLE
+cryoroom_chamber_opened TOGGLE
 cryoroom_digicode_enabled KEEP
 item_syringe_injected KEEP

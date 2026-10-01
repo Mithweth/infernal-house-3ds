@@ -299,12 +299,11 @@ bool inventory_update(u32 keys) {
         return true;
     }
 
-    if (item && item->use_callback) {
-        item->use_callback();
-        return true;
-    }
-
     if (keys & KEY_A) {
+        if (item && item->use_callback) {
+            item->use_callback();
+            return true;
+        }
         game_use_item(item->id);
         return true;
     }

@@ -13,18 +13,6 @@ docker_make() {
         make "$@"
 }
 
-clean() {
-    docker_make clean
-}
-
-build() {
-    docker_make DEBUG="$DEBUG"
-}
-
-lint() {
-    docker_make lint
-}
-
 install() {
     if [ -z "${NITRO_IP:-}" ]; then
         echo "NITRO_IP is not set, skipping install"
@@ -42,30 +30,20 @@ install() {
         args+=(-s)
     fi
 
-    until 3dslink "${args[@]}" work.3dsx; do
+    until 3dslink "${args[@]}" infernal-house.3dsx; do
         echo "3DS not reachable, retrying in 5 seconds..."
         sleep 5
     done
 }
 
-all() {
-    clean
-    build
-    install
-}
-
 run_command() {
     case "$1" in
-        clean)   clean ;;
-        build)   build ;;
-        lint)    lint ;;
-        install) install ;;
-        all)     all ;;
-        *)
-            echo "Unknown command: $1" >&2
-            echo "Usage: $0 [-d] [clean|build|lint|install|all]..." >&2
-            exit 1
-            ;;
+        build)   docker_make DEBUG="$DEBUG";;
+        install) install;;
+        all)     docker_make clean
+                 docker_make DEBUG="$DEBUG"
+                 install;;
+        *)       docker_make "$1";;
     esac
 }
 

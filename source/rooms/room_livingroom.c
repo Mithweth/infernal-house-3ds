@@ -202,7 +202,7 @@ static void room_draw(void) {
         C2D_DrawImageAt(img_piano_opened, 2.0f, 102.0f, 0.1f, NULL, 1.0f, 1.0f); 
     }
     if (gamestate_get("livingroom_secret_passage_opened")) {
-        C2D_DrawImageAt(img_hearth_opened, 150.0f, 108.0f, 0.1f, NULL, 1.0f, 1.0f);
+        C2D_DrawImageAt(img_hearth_opened, 151.0f, 109.0f, 0.1f, NULL, 1.0f, 1.0f);
     }
     if (gamestate_get("livingroom_rope_in_hearth_bound")) {
         C2D_DrawImageAt(img_hearth_prepared, 152.0f, 110.0f, 0.1f, NULL, 1.0f, 1.0f); 

@@ -59,17 +59,17 @@ static void digicode_update(u32 keys, touchPosition touch) {
         digicode_stop(false);
         return;
     }
-    sfx_play("romfs:/audio/beep.raw");
+    sfx_play("romfs:/minigames/digicode/beep.raw");
     if (pressed == 12) {
         if (position < 4) {
             return;
         }
 
         if (memcmp(entered_code, game_get_secret_code(), sizeof(entered_code)) == 0) {
-            sfx_play("romfs:/audio/confirm_beep.raw");
+            sfx_play("romfs:/minigames/digicode/confirm_beep.raw");
             digicode_stop(true);
         } else {
-            sfx_play("romfs:/audio/error_beep.raw");
+            sfx_play("romfs:/minigames/digicode/error_beep.raw");
             position = 0;
         }
         return;
@@ -97,15 +97,7 @@ static void digicode_draw(void) {
 }
 
 static bool digicode_init(void) {
-    assets = C2D_SpriteSheetLoad("romfs:/minigames/digicode/gfx.t3x");
-    if (!assets) {
-        printf("Cannot load spritesheet\n");
-        return false;
-    }
-    if (!gfxmap_load("romfs:/minigames/digicode/gfx.h")) {
-        printf("Cannot load gfx headers\n");
-        C2D_SpriteSheetFree(assets);
-        assets = NULL;
+    if (!gfxmap_load_assets("romfs:/minigames/digicode", &assets)) {
         return false;
     }
     img_background = gfxmap_get_image(assets, "gfx_background_idx");

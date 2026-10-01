@@ -69,7 +69,7 @@ static void simon_update_sequence(void) {
         lit_color = sequence[show_position];
         light_on = true;
 
-        sfx_play("romfs:/audio/simon_blop.raw");
+        sfx_play("romfs:/minigames/simon/blop.raw");
 
         next_event_time = now + SIMON_LIGHT_TIME;
     } else {
@@ -115,7 +115,7 @@ static void simon_press(SimonColor color) {
 
     lit_color = color;
     light_on = true;
-    sfx_play("romfs:/audio/simon_blop.raw");
+    sfx_play("romfs:/minigames/simon/blop.raw");
     press_correct = color == sequence[position];
 
     if (press_correct) {
@@ -137,7 +137,7 @@ static void simon_update_player_flash(void) {
     light_on = false;
 
     if (!press_correct) {
-        fail_sfx_channel = sfx_play("romfs:/audio/simon_fail.raw");
+        fail_sfx_channel = sfx_play("romfs:/minigames/simon/fail.raw");
         mode = SIMON_FAILURE;
         return;
     }
@@ -243,17 +243,7 @@ static void simon_draw_bottom(void) {
 }
 
 static bool simon_init(void) {
-    assets = C2D_SpriteSheetLoad("romfs:/minigames/simon/gfx.t3x");
-
-    if (!assets) {
-        printf("Cannot load spritesheet\n");
-        return false;
-    }
-
-    if (!gfxmap_load("romfs:/minigames/simon/gfx.h")) {
-        printf("Cannot load gfx headers\n");
-        C2D_SpriteSheetFree(assets);
-        assets = NULL;
+    if (!gfxmap_load_assets("romfs:/minigames/simon", &assets)) {
         return false;
     }
 

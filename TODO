@@ -1,5 +1,6 @@
-gameover without syringe
-good ending
+ci/cd
+add version field
+localisation
 game_show_message background
 callback for minigames
 room generator (isolate room assets)
