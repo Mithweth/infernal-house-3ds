@@ -8,10 +8,9 @@
 #include "inventory.h"
 #include "game.h"
 #include "lang.h"
+#include "gfxmap.h"
 
 #define ITEM_MAX       64
-#define ITEM_NAME_MAX  96
-#define INVENTORY_MAX_IMAGES 128
 #define INVENTORY_COLUMNS  6
 #define INVENTORY_ROWS     2
 #define ITEM_SIZE       32.0f
@@ -28,13 +27,6 @@ static size_t selected = 0;
 static Item *inventory[ITEM_MAX];
 static size_t inventory_count = 0;
 
-typedef struct {
-    char name[ITEM_NAME_MAX];
-    int index;
-} InventoryImageIndex;
-
-static InventoryImageIndex image_indexes[INVENTORY_MAX_IMAGES];
-static size_t image_index_count = 0;
 static C2D_SpriteSheet inventory_assets;
 static C2D_TextBuf text_buf;
 static C2D_Text text;
@@ -58,72 +50,6 @@ static char *trim(char *str) {
     }
 
     return str;
-}
-
-static int get_image_index(const char *name) {
-    for (size_t i = 0; i < image_index_count; i++) {
-        if (strcmp(image_indexes[i].name, name) == 0) {
-            return image_indexes[i].index;
-        }
-    }
-    return -1;
-}
-
-static bool load_gfx_header(const char *filename) {
-    FILE *f = fopen(filename, "r");
-    if (!f) {
-        printf("Cannot open %s\n", filename);
-        return false;
-    }
-
-    image_index_count = 0;
-
-    char line[256];
-
-    while (fgets(line, sizeof(line), f)) {
-        char directive[32];
-        char name[ITEM_NAME_MAX];
-        char value[32];
-
-        if (sscanf(line, "%31s %95s %31s", directive, name, value) != 3) {
-            continue;
-        }
-
-        if (strcmp(directive, "#define") != 0) {
-            continue;
-        }
-
-        size_t len = strlen(name);
-
-        if (len < 4 || strcmp(name + len - 4, "_idx") != 0) {
-            continue;
-        }
-        int index = atoi(value);
-
-        if (image_index_count >= INVENTORY_MAX_IMAGES) {
-            printf("Too many images in %s\n", filename);
-            fclose(f);
-            return false;
-        }
-
-        InventoryImageIndex *entry = &image_indexes[image_index_count++];
-
-        strcpy(entry->name, name);
-        entry->index = index;
-    }
-
-    fclose(f);
-    return true;
-}
-
-static C2D_Image get_image(const char *name) {
-    int index = get_image_index(name);
-
-    if (index < 0) {
-        return (C2D_Image){0};
-    }
-
-    return C2D_SpriteSheetGetImage(inventory_assets, index);
 }
 
 static Item *inventory_find(const char *id) {
@@ -184,7 +110,7 @@ static bool load_inventory(const char *filename) {
                     item_count = 0;
                     return false;
                 }
-                item->image = get_image(image_id);
+                item->image = gfxmap_get_image(inventory_assets, image_id);
                 if (!item->image.tex) {
                     printf("%s:%zu: unknown image: %s\n", filename, line_number, image_id);
                     fclose(f);
@@ -248,7 +174,7 @@ static bool load_inventory(const char *filename) {
                 if ((fmt) && (strcmp(fmt, "FULLSCREEN") == 0)) {
                     item->detail_fullscreen = true;
                 }
-                item->detail_image = get_image(image_id);
+                item->detail_image = gfxmap_get_image(inventory_assets, image_id);
 
                 if (!item->detail_image.tex) {
                     printf("%s:%zu: unknown image: %s\n", filename, line_number, image_id);
@@ -514,7 +440,7 @@ bool inventory_init(void) {
         return false;
     }
 
-    if (!load_gfx_header("romfs:/inventory/gfx.h")) {
+    if (!gfxmap_load_gfx_header("romfs:/inventory/gfx.h")) {
         printf("Cannot load gfx headers\n");
         C2D_SpriteSheetFree(inventory_assets);
         inventory_assets = NULL;
@@ -528,7 +454,7 @@ bool inventory_init(void) {
         return false;
     }
 
-    int img_idx = get_image_index("gfx_selected_idx");
+    int img_idx = gfxmap_get_image_index("gfx_selected_idx");
     if (img_idx < 0) {
         printf("unknown image: gfx_selected_idx\n");
         C2D_SpriteSheetFree(inventory_assets);
@@ -537,7 +463,7 @@ bool inventory_init(void) {
     }
     img_selected = C2D_SpriteSheetGetImage(inventory_assets, img_idx);
 
-    img_idx = get_image_index("gfx_background_idx");
+    img_idx = gfxmap_get_image_index("gfx_background_idx");
     if (img_idx < 0) {
         printf("unknown image: gfx_background_idx\n");
         C2D_SpriteSheetFree(inventory_assets);

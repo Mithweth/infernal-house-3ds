@@ -9,11 +9,10 @@
 #include "audio.h"
 #include "lang.h"
 #include "game.h"
+#include "gfxmap.h"
 
 #define TIMELINE_MAX_EVENTS       256
 #define TIMELINE_MAX_SPRITES       16
-#define TIMELINE_MAX_IMAGES       256
-#define TIMELINE_NAME_MAX          96
 
 #define TIMELINE_CHAR_DELAY      100
 #define TIMELINE_CHAR_DELAY_FAST  33
@@ -57,11 +56,6 @@ typedef struct {
     char *sound;
 } TimelineEvent;
 
-typedef struct {
-    char name[TIMELINE_NAME_MAX];
-    int index;
-} TimelineImageIndex;
-
 static size_t event_pos = 0;
 static size_t text_position = 0;
 static char current_str[2048];
@@ -79,8 +73,6 @@ static C2D_Image image_left;
 static C2D_Image image_center;
 static C2D_Image image_right;
 static C2D_SpriteSheet timeline_assets;
-static TimelineImageIndex image_indexes[TIMELINE_MAX_IMAGES];
-static size_t image_index_count = 0;
 static TimelineEvent events[TIMELINE_MAX_EVENTS];
 static size_t event_count = 0;
 
@@ -122,62 +114,6 @@ static TimelineTextColor parse_color(const char *str) {
     return TIMELINE_COLOR_WHITE;
 }
 
-static int get_image_index(const char *name) {
-    for (size_t i = 0; i < image_index_count; i++) {
-        if (strcmp(image_indexes[i].name, name) == 0) {
-            return image_indexes[i].index;
-        }
-    }
-    return -1;
-}
-
-static bool load_gfx_header(const char *filename) {
-    FILE *f = fopen(filename, "r");
-    if (!f) {
-        printf("Cannot open %s\n", filename);
-        return false;
-    }
-
-    image_index_count = 0;
-
-    char line[256];
-
-    while (fgets(line, sizeof(line), f)) {
-        char directive[32];
-        char name[TIMELINE_NAME_MAX];
-        char value[32];
-
-        if (sscanf(line, "%31s %95s %31s", directive, name, value) != 3) {
-            continue;
-        }
-
-        if (strcmp(directive, "#define") != 0) {
-            continue;
-        }
-
-        size_t len = strlen(name);
-
-        if (len < 4 || strcmp(name + len - 4, "_idx") != 0) {
-            continue;
-        }
-        int index = atoi(value);
-
-        if (image_index_count >= TIMELINE_MAX_IMAGES) {
-            printf("Too many images in %s\n", filename);
-            fclose(f);
-            return false;
-        }
-
-        TimelineImageIndex *entry = &image_indexes[image_index_count++];
-
-        strcpy(entry->name, name);
-        entry->index = index;
-    }
-
-    fclose(f);
-    return true;
-}
-
 static TimelineEvent *add_event(TimelineEventType type) {
     if (event_count >= TIMELINE_MAX_EVENTS) {
         return NULL;
@@ -188,16 +124,6 @@ static TimelineEvent *add_event(TimelineEventType type) {
     event->type = type;
 
     return event;
-}
-
-static C2D_Image get_image(const char *name) {
-    int index = get_image_index(name);
-
-    if (index < 0) {
-        return (C2D_Image){0};
-    }
-
-    return C2D_SpriteSheetGetImage(timeline_assets, index);
 }
 
 static bool load_timeline(const char *filename) {
@@ -252,7 +178,7 @@ static bool load_timeline(const char *filename) {
 
                 TimelineSprite *sprite = &full_screen->sprites[full_screen->sprite_count];
 
-                sprite->image = get_image(image_name);
+                sprite->image = gfxmap_get_image(timeline_assets, image_name);
                 if (!sprite->image.tex) {
                     printf("%s:%zu: unknown image %s\n", filename, line_number, image_name);
                     fclose(f);
@@ -403,7 +329,7 @@ static bool load_timeline(const char *filename) {
             if (strcmp(image_name, "NONE") == 0) {
                 event->image = (C2D_Image){0};
             } else {
-                event->image = get_image(image_name);
+                event->image = gfxmap_get_image(timeline_assets, image_name);
                 if (!event->image.tex) {
                     printf("%s:%zu: unknown image %s\n", filename, line_number, image_name);
                     fclose(f);
@@ -652,7 +578,7 @@ bool timeline_init(const char *directory) {
         return false;
     }
 
-    if (!load_gfx_header(header_path)) {
+    if (!gfxmap_load_gfx_header(header_path)) {
         printf("Cannot load gfx headers: %s\n", header_path);
         C2D_SpriteSheetFree(timeline_assets);
         timeline_assets = NULL;
