@@ -55,7 +55,7 @@ static void selected_item_draw(void) {
         C2D_TextBufClear(text_buf);
         C2D_TextParse(&text, text_buf, lang_get(item->name_id));
         C2D_TextOptimize(&text);
-        C2D_DrawText(&text, C2D_WithColor, 100.0f, 172.0f, 0.5f, 0.5f, 0.5f, C2D_Color32(192, 192, 192, 255));
+        C2D_DrawText(&text, C2D_WithColor, 115.0f, 172.0f, 0.5f, 0.5f, 0.5f, C2D_Color32(192, 192, 192, 255));
     }
 }
 
@@ -64,7 +64,7 @@ static void target_draw(void) {
     if (target_name) {
         C2D_TextParse(&text, text_buf, lang_get(target_name));
         C2D_TextOptimize(&text);
-        C2D_DrawText(&text, C2D_WithColor, 100.0f, 208.0f, 0.7f, 0.5f, 0.5f, C2D_Color32(192, 192, 192, 255));
+        C2D_DrawText(&text, C2D_WithColor, 115.0f, 208.0f, 0.7f, 0.5f, 0.5f, C2D_Color32(192, 192, 192, 255));
     }
 }
 

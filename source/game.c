@@ -419,8 +419,12 @@ static void room_draw(void) {
             C2D_TextGetDimensions(&text, 0.5f, 0.5f, &width, &height);
             float box_height = height + 20.0f;
             float box_y = 240.0f - box_height - 10.0f;
-            C2D_DrawRectSolid(10.0f, box_y, 0.8f, 300.0f, box_height, C2D_Color32(0, 0, 0, 180));
-            C2D_DrawText(&text, C2D_WithColor, 20.0f, box_y + 10.0f, 0.9f, 0.5f, 0.5f, C2D_Color32(255, 255, 255, 255));
+            C2D_DrawRectSolid(13.0f, box_y + 3.0f, 0.79f, 300.0f, box_height, C2D_Color32(0, 0, 0, 150));
+            C2D_DrawRectSolid(10.0f, box_y, 0.80f, 300.0f, box_height, C2D_Color32(150, 120, 55, 255));
+            C2D_DrawRectSolid(12.0f, box_y + 2.0f, 0.81f, 296.0f, box_height - 4.0f, C2D_Color32(18, 24, 34, 235));
+            C2D_DrawRectSolid(15.0f, box_y + 5.0f, 0.82f, 290.0f, box_height - 10.0f, C2D_Color32(105, 82, 40, 255));
+            C2D_DrawRectSolid(16.0f, box_y + 6.0f, 0.83f, 288.0f, box_height - 12.0f, C2D_Color32(22, 28, 40, 245));
+            C2D_DrawText(&text, C2D_WithColor, 22.0f, box_y + 10.0f, 0.9f, 0.5f, 0.5f, C2D_Color32(255, 255, 255, 255));
         }
     }
 }

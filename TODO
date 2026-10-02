@@ -1,9 +1,6 @@
 ci/cd
-add version field
-localisation
-game_show_message background
 callback for minigames
 room generator (isolate room assets)
 add some comments
+add dev doc
 add some events
-

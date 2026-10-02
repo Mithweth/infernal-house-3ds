@@ -8,6 +8,7 @@
 #include "gfxmap.h"
 
 typedef enum {
+    TITLE_LANG,
     TITLE_INTRO,
     TITLE_GAME,
     TITLE_CONTROLS,
@@ -24,8 +25,6 @@ typedef enum {
 typedef struct {
     const char *role_id;
     const char *name;
-    C2D_Text role;
-    C2D_Text person;
 } Credit;
 
 static TitleChoice selected;
@@ -40,15 +39,18 @@ static C2D_Image img_xbutton;
 static C2D_Image img_analogpad;
 static C2D_Image img_dpad;
 static C2D_Image img_touch;
+static char *VERSION = "dev";
+static C2D_Text version_text;
 
 static const char *choices[] = {
+    "LANG_NAME",
     "TITLE_INTRO",
     "TITLE_GAME",
     "TITLE_CONTROLS",
     "TITLE_CREDITS"
 };
 
-static C2D_Text controls_text[5];
+static C2D_Text controls_text;
 
 static Credit credits[] = {
     {
@@ -92,29 +94,8 @@ void title_init(void) {
     img_analogpad = gfxmap_get_image(assets, "gfx_analogpad_idx");
     img_dpad = gfxmap_get_image(assets, "gfx_dpad_idx");
     img_touch = gfxmap_get_image(assets, "gfx_touch_idx");
-    selected = TITLE_INTRO;
+    selected = TITLE_GAME;
     text_buf = C2D_TextBufNew(4096);
-    for (int i = 0; i < TITLE_COUNT; i++) {
-        C2D_TextParse(&text[i], text_buf, lang_get(choices[i]));
-        C2D_TextOptimize(&text[i]);
-    }
-    for (int i = 0; i < (sizeof(credits) / sizeof(credits[0])); i++) {
-        C2D_TextParse(&credits[i].role, text_buf, lang_get(credits[i].role_id));
-        C2D_TextParse(&credits[i].person, text_buf, credits[i].name);
-        C2D_TextOptimize(&credits[i].role);
-        C2D_TextOptimize(&credits[i].person);
-    }
-
-    C2D_TextParse(&controls_text[0], text_buf, lang_get("TITLE_CONTROLS_MOVE"));
-    C2D_TextParse(&controls_text[1], text_buf, lang_get("TITLE_CONTROLS_INVENTORY"));
-    C2D_TextParse(&controls_text[2], text_buf, lang_get("TITLE_CONTROLS_EXAMINE"));
-    C2D_TextParse(&controls_text[3], text_buf, lang_get("TITLE_CONTROLS_USE"));
-    C2D_TextParse(&controls_text[4], text_buf, lang_get("TITLE_CONTROLS_ACTION"));
-    C2D_TextOptimize(&controls_text[0]);
-    C2D_TextOptimize(&controls_text[1]);
-    C2D_TextOptimize(&controls_text[2]);
-    C2D_TextOptimize(&controls_text[3]);
-    C2D_TextOptimize(&controls_text[4]);
 }
 
 void title_update(u32 keys) {
@@ -149,7 +130,11 @@ void title_update(u32 keys) {
 
     sfx_play("romfs:/audio/title_choice.raw");
 
+    printf("Title selected choice: %d\n", selected);
     switch (selected) {
+        case TITLE_LANG:
+            lang_next();
+            break;
         case TITLE_INTRO:
             game_intro();
             break;
@@ -176,10 +161,17 @@ void title_draw_top(void) {
 }
 
 static void title_draw_credits(void) {
+    C2D_TextBufClear(text_buf);
+    C2D_Text role;
+    C2D_Text person;
     for (int i = 0; i < (sizeof(credits) / sizeof(credits[0])); i++) {
         float y = 20.0f + i * 20.0f;
-        C2D_DrawText(&credits[i].role, C2D_WithColor, 20.0f, y, 0.5f, 0.4f, 0.4f, C2D_Color32(128, 128, 128, 255));
-        C2D_DrawText(&credits[i].person, C2D_WithColor | C2D_AlignRight, 300.0f, y, 0.5f, 0.4f, 0.4f, C2D_Color32(164, 164, 164, 255));
+        C2D_TextParse(&role, text_buf, lang_get(credits[i].role_id));
+        C2D_TextParse(&person, text_buf, credits[i].name);
+        C2D_TextOptimize(&role);
+        C2D_TextOptimize(&person);
+        C2D_DrawText(&role, C2D_WithColor, 20.0f, y, 0.5f, 0.4f, 0.4f, C2D_Color32(128, 128, 128, 255));
+        C2D_DrawText(&person, C2D_WithColor | C2D_AlignRight, 300.0f, y, 0.5f, 0.4f, 0.4f, C2D_Color32(164, 164, 164, 255));
     }
     C2D_DrawImageAt(img_lankhor, 85.0f, 160.0f, 0.5f, NULL, 1.0f, 1.0f);
 }
@@ -190,11 +182,22 @@ static void title_draw_controls(void) {
     C2D_DrawImageAt(img_xbutton, 18.0f, 110.0f, 0.3f, NULL, 1.0f, 1.0f);
     C2D_DrawImageAt(img_abutton, 18.0f, 150.0f, 0.3f, NULL, 1.0f, 1.0f);
     C2D_DrawImageAt(img_touch, 10.0f, 185.0f, 0.3f, NULL, 0.9f, 0.9f);
-    C2D_DrawText(&controls_text[0], C2D_WithColor, 90.0f, 15.0f, 0.5f, 0.55f, 0.55f, C2D_Color32(224, 224, 224, 255));
-    C2D_DrawText(&controls_text[1], C2D_WithColor, 90.0f, 70.0f, 0.5f, 0.55f, 0.55f, C2D_Color32(224, 224, 224, 255));
-    C2D_DrawText(&controls_text[2], C2D_WithColor, 90.0f, 115.0f, 0.5f, 0.55f, 0.55f, C2D_Color32(224, 224, 224, 255));
-    C2D_DrawText(&controls_text[3], C2D_WithColor, 90.0f, 155.0f, 0.5f, 0.55f, 0.55f, C2D_Color32(224, 224, 224, 255));
-    C2D_DrawText(&controls_text[4], C2D_WithColor, 90.0f, 200.0f, 0.5f, 0.55f, 0.55f, C2D_Color32(224, 224, 224, 255));
+    C2D_TextBufClear(text_buf);
+    C2D_TextParse(&controls_text, text_buf, lang_get("TITLE_CONTROLS_MOVE"));
+    C2D_TextOptimize(&controls_text);
+    C2D_DrawText(&controls_text, C2D_WithColor, 90.0f, 15.0f, 0.5f, 0.55f, 0.55f, C2D_Color32(224, 224, 224, 255));
+    C2D_TextParse(&controls_text, text_buf, lang_get("TITLE_CONTROLS_INVENTORY"));
+    C2D_TextOptimize(&controls_text);
+    C2D_DrawText(&controls_text, C2D_WithColor, 90.0f, 70.0f, 0.5f, 0.55f, 0.55f, C2D_Color32(224, 224, 224, 255));
+    C2D_TextParse(&controls_text, text_buf, lang_get("TITLE_CONTROLS_EXAMINE"));
+    C2D_TextOptimize(&controls_text);
+    C2D_DrawText(&controls_text, C2D_WithColor, 90.0f, 115.0f, 0.5f, 0.55f, 0.55f, C2D_Color32(224, 224, 224, 255));
+    C2D_TextParse(&controls_text, text_buf, lang_get("TITLE_CONTROLS_USE"));
+    C2D_TextOptimize(&controls_text);
+    C2D_DrawText(&controls_text, C2D_WithColor, 90.0f, 155.0f, 0.5f, 0.55f, 0.55f, C2D_Color32(224, 224, 224, 255));
+    C2D_TextParse(&controls_text, text_buf, lang_get("TITLE_CONTROLS_ACTION"));
+    C2D_TextOptimize(&controls_text);
+    C2D_DrawText(&controls_text, C2D_WithColor, 90.0f, 200.0f, 0.5f, 0.55f, 0.55f, C2D_Color32(224, 224, 224, 255));
 }
 
 static void title_draw_menu(void) {
@@ -205,8 +208,15 @@ static void title_draw_menu(void) {
         } else {
             color = C2D_Color32(64, 64, 64, 255);
         }
+        C2D_TextBufClear(text_buf);
+        for (int i = 0; i < TITLE_COUNT; i++) {
+            C2D_TextParse(&text[i], text_buf, lang_get(choices[i]));
+            C2D_TextOptimize(&text[i]);
+        }
         C2D_DrawText(&text[i], C2D_WithColor | C2D_AlignCenter, 160.0f, (i * 30) + 70.0f, 0.5f, 0.65f, 0.65f, color);
     }
+    C2D_TextParse(&version_text, text_buf, VERSION);
+    C2D_DrawText(&version_text, C2D_WithColor | C2D_AlignRight, 320.0f, 230.0f, 0.5f, 0.35f, 0.35f, C2D_Color32(64, 64, 64, 255));
 }
 
 void title_draw_bottom(void) {

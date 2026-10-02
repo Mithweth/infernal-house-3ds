@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
     gfxInitDefault();
     romfsInit();
     debug_init();
-    if (!lang_init("fr")) {
+    if (!lang_init()) {
         return 1;
     }
     if (!gamestate_init("romfs:/states/game.state")) {
