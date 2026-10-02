@@ -49,6 +49,7 @@ void (*callbacks_inventory_find(const char *name))(void) {
             return cb->callback;
         }
     }
+    printf("Callback not found: %s\n", name);
     return NULL;
 }
 
@@ -60,7 +61,7 @@ MiniGame *callbacks_minigame_find(const char *name) {
             return cb->minigame;
         }
     }
-
+    printf("Callback not found: %s\n", name);
     return NULL;
 }
 
