@@ -358,6 +358,9 @@ void inventory_draw(void) {
 }
 
 const Item *inventory_get_selected(void) {
+    if (inventory_count == 0) {
+        return NULL;
+    }
     return inventory[selected];
 }
 

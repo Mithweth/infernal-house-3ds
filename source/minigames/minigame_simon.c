@@ -252,6 +252,7 @@ static bool simon_init(void) {
     img_red = gfxmap_get_image(assets, "gfx_red_idx");
     img_green = gfxmap_get_image(assets, "gfx_green_idx");
     img_blue = gfxmap_get_image(assets, "gfx_blue_idx");
+    mode = SIMON_OFF;
     return true;
 }
 

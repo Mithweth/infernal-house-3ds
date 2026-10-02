@@ -73,7 +73,6 @@ bool music_play(const char *filename) {
 
     if (!ogg_file) {
         printf("File not found: %s\n", filename);
-        ndspExit();
         return false;
     }
 

@@ -27,10 +27,12 @@ static C2D_TextBuf text_buf;
 static C2D_Text text;
 static u64 elapsed_time;
 static u64 last_time;
+static bool time_up_triggered;
 
 void timer_start(void) {
     elapsed_time = 0;
     last_time = osGetTime();
+    time_up_triggered = false;
 }
 
 void timer_update(void) {
@@ -162,7 +164,8 @@ static void gameover_timeup(void) {
 
 void hud_update(void) {
     timer_update();
-    if (elapsed_time / 1000 > TIME_MAX_SECONDS) {
+    if (!time_up_triggered && elapsed_time / 1000 > TIME_MAX_SECONDS) {
+        time_up_triggered = true;
         game_wait_for_sfx("romfs:/audio/footsteps_inside.raw", gameover_timeup);
     }
 }

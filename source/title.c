@@ -209,10 +209,8 @@ static void title_draw_menu(void) {
             color = C2D_Color32(64, 64, 64, 255);
         }
         C2D_TextBufClear(text_buf);
-        for (int i = 0; i < TITLE_COUNT; i++) {
-            C2D_TextParse(&text[i], text_buf, lang_get(choices[i]));
-            C2D_TextOptimize(&text[i]);
-        }
+        C2D_TextParse(&text[i], text_buf, lang_get(choices[i]));
+        C2D_TextOptimize(&text[i]);
         C2D_DrawText(&text[i], C2D_WithColor | C2D_AlignCenter, 160.0f, (i * 30) + 70.0f, 0.5f, 0.65f, 0.65f, color);
     }
     C2D_TextParse(&version_text, text_buf, VERSION);

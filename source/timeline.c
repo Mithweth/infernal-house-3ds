@@ -409,6 +409,9 @@ void timeline_update(u32 keys) {
         if (current_event < event_count && events[current_event].type == TIMELINE_PAUSE) {
             current_event++;
         }
+        if (current_event >= event_count) {
+            current_event = event_count - 1;
+        }
         return;
     }
     const TimelineEvent *event = &events[current_event];

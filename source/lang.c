@@ -135,7 +135,9 @@ bool lang_init(void) {
     }
     while ((entry = readdir(dir))) {
         if (language_count >= MAX_LANGUAGES) {
-            return true;
+            current_language = 0;
+            closedir(dir);
+            return lang_load();
         }
         char line[MAX_LINE_LENGTH];
         char fullname[512];

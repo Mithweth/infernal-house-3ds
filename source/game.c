@@ -100,6 +100,7 @@ void game_minigame_start(MiniGame *minigame) {
     if (active_minigame->init) {
         if (!active_minigame->init()) {
             printf("Fail loading mini-game\n");
+            active_minigame = NULL;
             return;
         }
     }
@@ -132,6 +133,9 @@ static void path_execute(const Path *path) {
 }
 
 void game_set_room(Room *room) {
+    if (!room) {
+        return;
+    }
     if (!text_buf) {
         text_buf = C2D_TextBufNew(4096);
     }
@@ -150,7 +154,7 @@ void game_set_room(Room *room) {
     if (current_room && current_room->init) {
         current_room->init();
     }
-    printf("entering Room: %d hotspots found\n", current_room->hotspot_count);
+    printf("entering Room: %zu hotspots found\n", current_room->hotspot_count);
 }
 
 void game_close(void) {

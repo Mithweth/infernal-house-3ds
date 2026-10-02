@@ -220,6 +220,7 @@ static bool piano_init(void) {
     if (!text_buf) {
         text_buf = C2D_TextBufNew(1024);
     }
+    note_count = 0;
     FILE *f = fopen("romfs:/audio/piano_a4.raw", "rb");
     if (!f) {
         printf("cannot load sample romfs:/audio/piano_a4.raw\n");

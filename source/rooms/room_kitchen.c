@@ -65,7 +65,7 @@ static bool kitchen_top_closet_opened(void) {
     return gamestate_get("kitchen_top_closet_opened");
 }
 static bool kitchen_bottom_closet_opened(void) {
-    return gamestate_get("kitchen_top_closet_opened");
+    return gamestate_get("kitchen_bottom_closet_opened");
 }
 
 static Hotspot hotspots[] = {

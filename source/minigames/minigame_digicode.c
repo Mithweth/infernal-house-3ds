@@ -104,6 +104,8 @@ static bool digicode_init(void) {
     if (!text_buf) {
         text_buf = C2D_TextBufNew(256);
     }
+    position = 0;
+    memset(entered_code, 0, sizeof(entered_code));
     return true;
 }
 

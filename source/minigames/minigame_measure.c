@@ -1,4 +1,4 @@
-// measure.c
+// minigame_measure.c
 #include <3ds.h>
 #include <math.h>
 #include "game.h"
