@@ -462,17 +462,21 @@ static void execute_actions(RoomAction *action, size_t count) {
         if (action->type == ROOM_ACTION_SET) {
             gamestate_set(action->argument);
         } else if (action->type == ROOM_ACTION_INVENTORY_ADD) {
-            inventory_add(argument);
+            inventory_add(action->argument);
         } else if (action->type == ROOM_ACTION_INVENTORY_REMOVE) {
-            inventory_remove(argument);
+            inventory_remove(action->argument);
         } else if (action->type == ROOM_ACTION_MESSAGE) {
-            game_show_message(argument);
+            game_show_message(action->argument);
+        } else if (action->type == ROOM_ACTION_SFX) {
+            char path[256];
+            snprintf(path, sizeof(path), "%s/%s.raw", room->path, action->argument);
+            sfx_play(path);
         } else if (action->type == ROOM_ACTION_ROOM) {
-            game_set_room(argument);
+            game_set_room(action->argument);
         } else if (action->type == ROOM_ACTION_TIMELINE) {
-            game_timeline_start(argument);
+            game_timeline_start(action->argument);
         } else if (action->type == ROOM_ACTION_MINIGAME) {
-            game_minigame_start(argument);
+            game_minigame_start(action->argument);
         }
     }
 }
@@ -481,7 +485,6 @@ static bool match_conditions(RoomCondition *conditions, size_t count) {
     for (size_t c = 0; c < count; c++) {
         RoomCondition *condition = &conditions[c];
         bool value;
-
         if (condition->type == ROOM_CONDITION_STATE_IS) {
             value = gamestate_get(condition->name);
         } else {
@@ -492,7 +495,6 @@ static bool match_conditions(RoomCondition *conditions, size_t count) {
             return false;
         }
     }
-
     return true;
 }
 
@@ -560,7 +562,7 @@ bool room_init(const char *name) {
         return false;
     }
     snprintf(path, sizeof(path), "romfs:/rooms/%s/room", name);
-    if (!parse_room(path)) {
+    if (!load_room(path)) {
         C2D_SpriteSheetFree(room->assets);
         free(room);
         return false;
