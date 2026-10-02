@@ -1,4 +1,4 @@
-// minigame_piano.c
+// piano.c
 
 #include <3ds.h>
 #include <citro2d.h>
@@ -277,7 +277,7 @@ static void piano_close(void) {
 }
 
 
-MiniGame minigame_piano = {
+MiniGame piano = {
     .init = piano_init,
     .draw = piano_draw_bottom,
     .update = piano_update,

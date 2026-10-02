@@ -1,4 +1,4 @@
-// minigame_measure.c
+// measure.c
 #include <3ds.h>
 #include <math.h>
 #include "game.h"
@@ -97,8 +97,7 @@ void measure_close(void) {
     }
 }
 
-
-MiniGame minigame_measure = {
+MiniGame measure = {
     .init = measure_init,
     .draw = measure_draw,
     .update = measure_update,

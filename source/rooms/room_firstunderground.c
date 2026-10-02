@@ -6,7 +6,6 @@
 #include "room_firstunderground.h"
 #include "room_secondunderground.h"
 #include "room_cellar.h"
-#include "minigame_measure.h"
 #include "inventory.h"
 #include "gamestate.h"
 
@@ -39,7 +38,7 @@ static bool target_is_active(void) {
 
 static bool x_form_use_item(const char *id) {
     if (strcmp(id, "MEASURING_TAPE") == 0) {
-        game_minigame_start(&minigame_measure);
+        game_minigame_start("measure");
         return true;
     }
     return false;

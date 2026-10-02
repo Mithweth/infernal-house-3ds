@@ -1,9 +1,8 @@
-// minigame_simon.c
+// simon.c
 
 #include <3ds.h>
 #include <citro2d.h>
 #include <stdlib.h>
-#include "minigame_simon.h"
 #include "game.h"
 #include "audio.h"
 #include "gfxmap.h"
@@ -268,7 +267,7 @@ static void simon_close(void) {
     }
 }
 
-MiniGame minigame_simon = {
+MiniGame simon = {
     .init = simon_init,
     .draw = simon_draw_bottom,
     .update = simon_update,
