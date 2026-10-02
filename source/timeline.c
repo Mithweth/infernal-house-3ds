@@ -15,7 +15,6 @@
 #define TIMELINE_MAX_SPRITES       16
 
 #define TIMELINE_CHAR_DELAY      100
-#define TIMELINE_CHAR_DELAY_FAST  33
 
 typedef enum {
     TIMELINE_TEXT,
@@ -405,19 +404,33 @@ static void update_text(void) {
 
 void timeline_update(u32 keys) {
     if (keys & KEY_B) {
-        current_event++;
-        if (current_event < event_count && events[current_event].type == TIMELINE_PAUSE) {
-            current_event++;
+        game_init();
+        return;
+    }
+    if (keys & KEY_A) {
+        const TimelineEvent *event = &events[current_event];
+
+        if (event->type == TIMELINE_TEXT) {
+            const char *str = lang_get(event->text);
+            const char *remaining = &str[event_pos];
+            size_t len = strlen(remaining);
+            memcpy(&current_str[text_position], remaining, len + 1);
+            text_position += len;
+            memcpy(previous_str, current_str, text_position + 1);
+            event_pos = 0;
+            update_text();
+            pause_start = 0;
         }
+        current_event++;
+
         if (current_event >= event_count) {
             current_event = event_count - 1;
         }
         return;
     }
+
     const TimelineEvent *event = &events[current_event];
     u64 now = osGetTime();
-    u32 held = hidKeysHeld();
-    int pause_duration = (held & KEY_A) ? TIMELINE_CHAR_DELAY_FAST : TIMELINE_CHAR_DELAY;
 
     switch (event->type) {
     case TIMELINE_MUSIC_START:
@@ -464,9 +477,10 @@ void timeline_update(u32 keys) {
                 text_position += len;
                 current_str[text_position] = '\0';
                 event_pos += len;
-                next_char_time = now + pause_duration;
+                next_char_time = now + TIMELINE_CHAR_DELAY;
                 update_text();
             } else {
+                memcpy(previous_str, current_str, text_position + 1);
                 event_pos = 0;
                 current_event++;
             }
@@ -480,7 +494,7 @@ void timeline_update(u32 keys) {
         if (pause_start == 0) {
             pause_start = now;
         }
-        if (now - pause_start >= event->duration * pause_duration / TIMELINE_CHAR_DELAY) {
+        if (now - pause_start >= event->duration * TIMELINE_CHAR_DELAY / TIMELINE_CHAR_DELAY) {
             pause_start = 0;
             current_event++;
         }

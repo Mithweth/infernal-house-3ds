@@ -475,7 +475,7 @@ void game_update(u32 keys, circlePosition analog, touchPosition touch) {
 
         case GAME_MESSAGE:
             hud_update();
-            if (keys & (KEY_A | KEY_TOUCH)) {
+            if (keys & (KEY_A | KEY_B | KEY_TOUCH)) {
                 game_mode = GAME_NORMAL;
                 examine_image = (C2D_Image){0};
             }
