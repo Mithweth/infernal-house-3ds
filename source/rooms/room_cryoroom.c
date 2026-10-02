@@ -6,7 +6,6 @@
 #include "room_cryoroom.h"
 #include "room_livingroom.h"
 #include "room_heliport.h"
-#include "minigame_digicode.h"
 #include "inventory.h"
 #include "gamestate.h"
 #include "audio.h"
@@ -45,7 +44,7 @@ static bool sign_use_item(const char *id) {
 
 static void digicode_action(void) {
     if (gamestate_get("cryoroom_digicode_enabled")) {
-        game_minigame_start(&minigame_digicode);
+        game_minigame_start("digicode");
     } else {
         game_show_message("CRYOROOM_PANEL_NEED_CARD");
     }

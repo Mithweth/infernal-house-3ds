@@ -10,7 +10,6 @@
 #include "room_firstunderground.h"
 #include "inventory.h"
 #include "gamestate.h"
-#include "minigame_simon.h"
 
 static C2D_SpriteSheet assets;
 static C2D_Image img_background;
@@ -46,7 +45,7 @@ static void opened_alarm_box_action(void) {
 }
 
 static void simon_action(void) {
-    game_minigame_start(&minigame_simon);
+    game_minigame_start("simon");
 }
 
 static bool cellar_alarm_box_opened(void) {

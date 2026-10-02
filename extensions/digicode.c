@@ -1,13 +1,14 @@
-// minigame_digicode.c
+// digicode.c
 
 #include <3ds.h>
 #include <citro2d.h>
 #include <stdlib.h>
 #include <string.h>
-#include "minigame_digicode.h"
+#include "digicode.h"
 #include "game.h"
 #include "audio.h"
 #include "gfxmap.h"
+#include "secret_code.h"
 
 #define KEY_SPACING_X 8.0f
 #define KEY_SPACING_Y 8.0f
@@ -69,7 +70,7 @@ static void digicode_update(u32 keys, touchPosition touch) {
             return;
         }
 
-        if (memcmp(entered_code, game_get_secret_code(), sizeof(entered_code)) == 0) {
+        if (memcmp(entered_code, secret_code_get(), sizeof(entered_code)) == 0) {
             sfx_play("romfs:/minigames/digicode/confirm_beep.raw");
             digicode_stop(true);
         } else {
@@ -124,7 +125,7 @@ static void digicode_close(void) {
     }
 }
 
-MiniGame minigame_digicode = {
+MiniGame digicode = {
     .init = digicode_init,
     .draw = digicode_draw,
     .update = digicode_update,

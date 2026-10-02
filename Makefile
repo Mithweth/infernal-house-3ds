@@ -15,9 +15,9 @@ include $(DEVKITARM)/3ds_rules
 #---------------------------------------------------------------------------------
 TARGET		:=	infernal-house
 BUILD		:=	build
-SOURCES		:=	source source/rooms source/minigames
+SOURCES		:=	source source/rooms source/minigames extensions
 DATA		:=	data
-INCLUDES	:=	include source source/rooms source/minigames
+INCLUDES	:=	include source source/rooms source/minigames extensions
 
 ASSETS      := resources
 GRAPHICS    := $(ASSETS)/gfx

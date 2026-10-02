@@ -9,6 +9,7 @@
 #include "game.h"
 #include "lang.h"
 #include "gfxmap.h"
+#include "callbacks.h"
 
 #define ITEM_MAX       64
 #define INVENTORY_COLUMNS  6
@@ -138,7 +139,7 @@ static bool load_inventory(const char *filename) {
                     item_count = 0;
                     return false;
                 }
-                item->examine_callback = game_callback_find(cb);
+                item->examine_callback = callbacks_inventory_find(cb);
                 continue;
             }
             if (strcmp(command, "USE_CALLBACK") == 0) {
@@ -149,7 +150,7 @@ static bool load_inventory(const char *filename) {
                     item_count = 0;
                     return false;
                 }
-                item->use_callback = game_callback_find(cb);
+                item->use_callback = callbacks_inventory_find(cb);
                 continue;
             }
             if (strcmp(command, "DETAIL") == 0) {
