@@ -1,0 +1,49 @@
+name: Build
+
+on:
+  pull_request:
+  release:
+    types: 
+      - published
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install build tools
+        shell: bash
+        run: |
+          sudo scripts/install-env.sh
+          echo "DEVKITPRO=/opt/devkitpro" >> "$GITHUB_ENV"
+          echo "DEVKITARM=/opt/devkitpro/devkitARM" >> "$GITHUB_ENV"
+          echo "/opt/devkitpro/tools/bin" >> "$GITHUB_PATH"
+
+      - name: update version number
+        if: github.event_name == 'release'
+        shell: bash
+        run : sed -i 's/VERSION = "dev"/VERSION = "${{ github.event.release.tag_name }}"/1' source/title.c
+
+      - name: build
+        shell: bash
+        run: make
+
+      - name: create CIA file
+        shell: bash
+        run: make cia
+
+      - name: upload release files
+        if: github.event_name == 'release'
+        shell: bash
+        run: |
+          for file in *.3dsx *.cia; do
+            gh release upload ${{ github.event.release.tag_name }} $file
+          done
+        env:
+          GITHUB_TOKEN: ${{ github.TOKEN }}

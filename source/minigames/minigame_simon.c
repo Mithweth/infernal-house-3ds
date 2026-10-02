@@ -159,6 +159,11 @@ static void simon_update_player_flash(void) {
 }
 
 static void simon_update(u32 keys, touchPosition touch) {
+    if (keys & KEY_B) {
+        simon_stop(false);
+        return;
+    }
+
     if (keys & KEY_TOUCH) {
         if (touch_inside(touch, 161, 111, SWITCH_WIDTH, SWITCH_HEIGHT)) {
             simon_stop(false);

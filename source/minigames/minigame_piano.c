@@ -186,6 +186,10 @@ static void piano_play_note(int note) {
 }
 
 static void piano_update(u32 keys, touchPosition touch) {
+    if (keys & KEY_B) {
+        piano_stop(false);
+        return;
+    }
     if (!(keys & KEY_TOUCH)) {
         return;
     }

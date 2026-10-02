@@ -47,6 +47,10 @@ static void digicode_stop(bool success) {
 }
 
 static void digicode_update(u32 keys, touchPosition touch) {
+    if (keys & KEY_B) {
+        digicode_stop(false);
+        return;
+    }
     if (!(keys & KEY_TOUCH)) {
         return;
     }
