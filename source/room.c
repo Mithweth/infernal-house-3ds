@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 
 #include "room.h"
 #include "gamestate.h"
@@ -9,28 +8,9 @@
 #include "gfxmap.h"
 #include "game.h"
 #include "audio.h"
+#include "str_utils.h"
 
 static Room *room = NULL;
-
-static char *trim(char *str) {
-    while (*str && isspace((unsigned char)*str)) {
-        str++;
-    }
-    if (*str == '\0') {
-        return str;
-    }
-    char *end = str + strlen(str) - 1;
-    while (end > str && isspace((unsigned char)*end)) {
-        *end-- = '\0';
-    }
-    return str;
-}
-
-
-static bool parse_bool(const char *str) {
-    return strcmp(str, "true") == 0;
-}
-
 
 static RoomCondition condition_add(const char *type, const char *name, const char *value) {
     RoomCondition condition = {0};
@@ -45,7 +25,7 @@ static RoomCondition condition_add(const char *type, const char *name, const cha
     }
 
     condition.name = strdup(name);
-    condition.expected = parse_bool(value);
+    condition.expected = str_to_bool(value);
     return condition;
 }
 
@@ -154,7 +134,7 @@ static bool load_room(const char *filename) {
     while (fgets(line, sizeof(line), f)) {
         line_number++;
 
-        char *p = trim(line);
+        char *p = str_trim(line);
 
         if (!*p || *p == '#') {
             continue;
@@ -460,7 +440,7 @@ static bool load_room(const char *filename) {
     return true;
 }
 
-static void execute_actions(RoomAction *actions, size_t count) {
+static bool execute_actions(RoomAction *actions, size_t count) {
     for (size_t c = 0; c < count; c++) {
         RoomAction *action = &actions[c];
         if (action->type == ROOM_ACTION_SET) {
@@ -477,13 +457,16 @@ static void execute_actions(RoomAction *actions, size_t count) {
             sfx_play(path);
         } else if (action->type == ROOM_ACTION_ROOM) {
             game_set_room(action->argument);
-            return;
+            return true;
         } else if (action->type == ROOM_ACTION_TIMELINE) {
             game_timeline_start(action->argument);
+            return true;
         } else if (action->type == ROOM_ACTION_MINIGAME) {
             game_minigame_start(action->argument);
+            return true;
         }
     }
+    return false;
 }
 
 static bool match_conditions(RoomCondition *conditions, size_t count) {
@@ -517,34 +500,58 @@ static void path_execute(Path *path) {
 }
 
 void room_move_north(void) {
+    if (!room) {
+        return;
+    }
     path_execute(&room->north);
 }
 
 void room_move_northeast(void) {
+    if (!room) {
+        return;
+    }
     path_execute(&room->northeast);
 }
 
 void room_move_east(void) {
+    if (!room) {
+        return;
+    }
     path_execute(&room->east);
 }
 
 void room_move_southeast(void) {
+    if (!room) {
+        return;
+    }
     path_execute(&room->southeast);
 }
 
 void room_move_south(void) {
+    if (!room) {
+        return;
+    }
     path_execute(&room->south);
 }
 
 void room_move_southwest(void) {
+    if (!room) {
+        return;
+    }
     path_execute(&room->southwest);
 }
 
 void room_move_west(void) {
+    if (!room) {
+        return;
+    }
     path_execute(&room->west);
 }
 
 void room_move_northwest(void) {
+    if (!room) {
+        return;
+    }
     path_execute(&room->northwest);
 }
 
@@ -570,7 +577,9 @@ void room_execute_hotspot_action(Hotspot *hotspot) {
         if (!match_conditions(room_action_block->conditions, room_action_block->condition_count)) {
             continue;
         }
-        execute_actions(room_action_block->actions, room_action_block->action_count);
+        if (execute_actions(room_action_block->actions, room_action_block->action_count)) {
+            break;
+        }
     }
 }
 
@@ -660,15 +669,12 @@ bool room_init(const char *name) {
     snprintf(path, sizeof(path), "romfs:/rooms/%s", name);
     room->path = strdup(path);
     if (!gfxmap_load_assets(path, &room->assets)) {
-        free(room);
-        room = NULL;
+        room_close();
         return false;
     }
     snprintf(path, sizeof(path), "romfs:/rooms/%s/room", name);
     if (!load_room(path)) {
-        C2D_SpriteSheetFree(room->assets);
-        free(room);
-        room = NULL;
+        room_close();
         return false;
     }
     printf("entering Room: %s\n", name);
@@ -754,7 +760,9 @@ void room_close(void) {
         }
     }
     free(room->path);
-    C2D_SpriteSheetFree(room->assets);
+    if (room->assets) {
+        C2D_SpriteSheetFree(room->assets);
+    }
     free(room);
     room = NULL;
 }

@@ -4,12 +4,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include "inventory.h"
 #include "game.h"
 #include "lang.h"
 #include "gfxmap.h"
 #include "callbacks.h"
+#include "str_utils.h"
 
 #define ITEM_MAX       64
 #define INVENTORY_COLUMNS  6
@@ -34,24 +34,6 @@ static C2D_Text text;
 static C2D_Image img_selected;
 static C2D_Image img_background;
 static InventoryMode inventory_mode = INVENTORY_NORMAL;
-
-static char *trim(char *str) {
-    while (*str && isspace((unsigned char)*str)) {
-        str++;
-    }
-
-    if (*str == '\0') {
-        return str;
-    }
-
-    char *end = str + strlen(str) - 1;
-
-    while (end > str && isspace((unsigned char)*end)) {
-        *end-- = '\0';
-    }
-
-    return str;
-}
 
 static Item *inventory_find(const char *id) {
     for (size_t i = 0; i < item_count; i++) {
@@ -90,7 +72,7 @@ static bool load_inventory(const char *filename) {
 
     while (fgets(line, sizeof(line), f)) {
         line_number++;
-        char *p = trim(line);
+        char *p = str_trim(line);
 
         if (*p == '\0' || *p == '#') {
             continue;

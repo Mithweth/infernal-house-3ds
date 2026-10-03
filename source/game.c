@@ -1,5 +1,6 @@
 // game.c
 #include <3ds.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include "game.h"
 #include "lang.h"
@@ -25,15 +26,6 @@ static C2D_Text text;
 static void (*game_busy_callback)(void) = NULL;
 static MiniGame *active_minigame = NULL;
 static int game_busy_sfx_channel = -1;
-
-
-// void game_ending(void) {
-//     if (gamestate_get("item_syringe_injected")) {
-//         game_timeline_start("ending");
-//     } else {
-//         game_timeline_start("bacteria");
-//     }
-// }
 
 void game_minigame_start(const char *name) {
     active_minigame = callbacks_minigame_find(name);
@@ -62,12 +54,16 @@ void game_minigame_stop(void) {
 }
 
 void game_set_room(const char *name) {
+    char room_name[64];
+    snprintf(room_name, sizeof(room_name), "%s", name);
     room_close();
     active_hotspot = NULL;
     target = NULL;
     game_mode = GAME_NORMAL;
     message_text = NULL;
-    room_init(name);
+    if (!room_init(room_name)) {
+        printf("Cannot enter room: %s\n", room_name);
+    }
 }
 
 void game_close(void) {
