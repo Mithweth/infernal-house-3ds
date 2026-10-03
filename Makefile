@@ -140,6 +140,9 @@ ROMFS_MINIGAME_RAW_FILES 	:= $(patsubst $(ASSETS)/%,$(ROMFS)/%,$(MINIGAME_RAW_FI
 # Rooms
 #---------------------------------------------------------------------------------
 
+ROOM_SRC_FILES				:= $(wildcard $(ROOMS)/*/room)
+ROMFS_ROOM_FILES			:= $(patsubst $(ASSETS)/%,$(ROMFS)/%,$(ROOM_SRC_FILES))
+
 ROOM_RAW_FILES 				:= $(shell if [ -d "$(ROOMS)" ]; then find "$(ROOMS)" -type f -name '*.raw'; fi)
 ROMFS_ROOM_RAW_FILES 		:= $(patsubst $(ASSETS)/%,$(ROMFS)/%,$(ROOM_RAW_FILES))
 
@@ -268,6 +271,7 @@ build-project: $(BUILD) \
 	 $(TIMELINE_FILES) \
 	 $(INVENTORY_FILES) \
 	 $(ROMFS_MINIGAME_RAW_FILES) \
+	 $(ROMFS_ROOM_FILES) \
 	 $(ROMFS_ROOM_RAW_FILES) \
 	 $(ROMFS_RAW_FILES)
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile

@@ -27,17 +27,13 @@ static MiniGame *active_minigame = NULL;
 static int game_busy_sfx_channel = -1;
 
 
-void game_ending(void) {
-    if (gamestate_get("item_syringe_injected")) {
-        if (timeline_init("romfs:/timelines/ending")) {
-            game_mode = GAME_TIMELINE;
-            return;
-        }
-        game_init();
-    } else {
-        game_over("bacteria");
-    }
-}
+// void game_ending(void) {
+//     if (gamestate_get("item_syringe_injected")) {
+//         game_timeline_start("ending");
+//     } else {
+//         game_timeline_start("bacteria");
+//     }
+// }
 
 void game_minigame_start(const char *name) {
     active_minigame = callbacks_minigame_find(name);
@@ -90,9 +86,9 @@ const char *game_target_name(void) {
     return target->id;
 }
 
-void game_over(const char *timeline) {
+void game_timeline_start(const char *name) {
     char path[256];
-    snprintf(path, sizeof(path), "romfs:/timelines/gameover_%s", timeline);
+    snprintf(path, sizeof(path), "romfs:/timelines/%s", name);
     if (timeline_init(path)) {
         game_mode = GAME_TIMELINE;
         return;

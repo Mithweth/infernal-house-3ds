@@ -4,7 +4,11 @@
 #include <ctype.h>
 
 #include "room.h"
+#include "gamestate.h"
+#include "inventory.h"
 #include "gfxmap.h"
+#include "game.h"
+#include "audio.h"
 
 static Room *room = NULL;
 

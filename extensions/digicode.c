@@ -9,6 +9,7 @@
 #include "audio.h"
 #include "gfxmap.h"
 #include "secret_code.h"
+#include "gamestate.h"
 
 #define KEY_SPACING_X 8.0f
 #define KEY_SPACING_Y 8.0f
@@ -43,8 +44,13 @@ static int key_pressed(touchPosition touch) {
 static void digicode_stop(bool success) {
     game_minigame_stop();
     if (success) {
-        game_ending();
+        if (gamestate_get("item_syringe_injected")) {
+            game_timeline_start("ending");
+        } else {
+            game_timeline_start("bacteria");
+        }
     }
+
 }
 
 static void digicode_update(u32 keys, touchPosition touch) {

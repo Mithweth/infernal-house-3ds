@@ -9,6 +9,7 @@
 #include "gfx_hud.h"
 #include "gfx_hud_t3x.h"
 #include "lang.h"
+#include "room.h"
 
 #define TIME_MAX_SECONDS 3600
 static C2D_SpriteSheet hud_assets;
@@ -99,35 +100,35 @@ static void timer_draw() {
 
 static void movement_draw(void) {
     C2D_DrawImageAt(img_directions, 303.0f, 51.0f, 0.0f, NULL, 1.0f, 1.0f);
-    if (game_can_move_north()) {
+    if (room_can_move_north()) {
         C2D_DrawImageAt(img_arrow_n, 339.0f, 62.0f, 0.2f, NULL, 1.0f, 1.0f);
     }
 
-    if (game_can_move_northeast()) {
+    if (room_can_move_northeast()) {
         C2D_DrawImageAt(img_arrow_ne, 363.0f, 74.0f, 0.2f, NULL, 1.0f, 1.0f);
     }
 
-    if (game_can_move_east()) {
+    if (room_can_move_east()) {
         C2D_DrawImageAt(img_arrow_e, 369.0f, 98.0f, 0.2f, NULL, 1.0f, 1.0f);
     }
 
-    if (game_can_move_southeast()) {
+    if (room_can_move_southeast()) {
         C2D_DrawImageAt(img_arrow_se, 362.0f, 121.0f, 0.2f, NULL, 1.0f, 1.0f);
     }
 
-    if (game_can_move_south()) {
+    if (room_can_move_south()) {
         C2D_DrawImageAt(img_arrow_s, 338.0f, 129.0f, 0.2f, NULL, 1.0f, 1.0f);
     }
 
-    if (game_can_move_southwest()) {
+    if (room_can_move_southwest()) {
         C2D_DrawImageAt(img_arrow_sw, 314.0f, 120.0f, 0.2f, NULL, 1.0f, 1.0f);
     }
 
-    if (game_can_move_west()) {
+    if (room_can_move_west()) {
         C2D_DrawImageAt(img_arrow_w, 306.0f, 97.0f, 0.2f, NULL, 1.0f, 1.0f);
         
     }
-    if (game_can_move_northwest()) {
+    if (room_can_move_northwest()) {
         C2D_DrawImageAt(img_arrow_nw, 314.0f, 73.0f, 0.2f, NULL, 1.0f, 1.0f);
     }
 }
@@ -159,7 +160,7 @@ void hud_reset(void) {
 }
 
 static void gameover_timeup(void) {
-    game_over("timeup");
+    game_timeline_start("timeup");
 }
 
 void hud_update(void) {
