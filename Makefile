@@ -13,71 +13,72 @@ include $(DEVKITARM)/3ds_rules
 #---------------------------------------------------------------------------------
 # Project configuration
 #---------------------------------------------------------------------------------
-TARGET		:=	infernal-house
-BUILD		:=	build
-SOURCES		:=	source source/rooms source/minigames extensions
-DATA		:=	data
-INCLUDES	:=	include source source/rooms source/minigames extensions
+TARGET				:=	infernal-house
+BUILD				:=	build
+SOURCES 			:=  source extensions
+DATA				:=	data
+INCLUDES			:=	include source extensions
+APP_VERSION 		?= 1.0.0
 
-ASSETS      := resources
-GRAPHICS    := $(ASSETS)/gfx
-TIMELINES   := $(ASSETS)/timelines
-INVENTORY   := $(ASSETS)/inventory
-MINIGAMES   := $(ASSETS)/minigames
-ROMFS       := romfs
-CIA         := $(ASSETS)/cia
+ASSETS				:= resources
+GRAPHICS			:= $(ASSETS)/gfx
+TIMELINES			:= $(ASSETS)/timelines
+INVENTORY			:= $(ASSETS)/inventory
+MINIGAMES			:= $(ASSETS)/minigames
+ROOMS				:= $(ASSETS)/rooms
+ROMFS				:= romfs
+CIA					:= $(ASSETS)/cia
 
 # HOME Menu / CIA metadata
-APP_TITLE       := Infernal House
-APP_DESCRIPTION := Point-and-click by Lankhor
-APP_AUTHOR      := Jean-Baptiste Langlois
-ICON            := $(CIA)/icon.png
+APP_TITLE			:= Infernal House
+APP_DESCRIPTION		:= Point-and-click by Lankhor
+APP_AUTHOR			:= Jean-Baptiste Langlois
+ICON				:= $(CIA)/icon.png
 
-APP_PRODUCT_CODE := CTR-H-INFH
-APP_UNIQUE_ID    := 0xF1F3A
-APP_VERSION_MAJOR := 1
-APP_VERSION_MINOR := 0
-APP_VERSION_MICRO := 0
+APP_PRODUCT_CODE	:= CTR-H-INFH
+APP_UNIQUE_ID		:= 0xF1F3A
+VERSION_PARTS 		:= $(subst ., ,$(APP_VERSION))
+APP_VERSION_MAJOR 	:= $(word 1,$(VERSION_PARTS))
+APP_VERSION_MINOR 	:= $(word 2,$(VERSION_PARTS))
+APP_VERSION_MICRO 	:= $(word 3,$(VERSION_PARTS))
 
-CIA_RSF         := $(CIA)/app.rsf
-CIA_BANNER      := $(CIA)/banner.bnr
-CIA_BANNER_PNG  := $(CIA)/banner.png
-CIA_BANNER_WAV  := $(CIA)/banner.wav
+CIA_RSF				:= $(CIA)/app.rsf
+CIA_BANNER 			:= $(CIA)/banner.bnr
+CIA_BANNER_PNG 		:= $(CIA)/banner.png
+CIA_BANNER_WAV 		:= $(CIA)/banner.wav
 
 # These directories are copied as-is from resources/ to romfs/.
-RAW_ASSET_DIRS	:=	audio lang states
+RAW_ASSET_DIRS		:=	audio lang states
 
 # The HUD is the only spritesheet linked directly into the executable.
 # Its gfx.t3s is generated like all the others.
-MEMGFX		:=	$(GRAPHICS)/hud/gfx.t3s
-MEM_T3XFILES	:=	gfx_hud.t3x
-MEM_HFILES	:=	gfx_hud.h
+MEMGFX				:=	$(GRAPHICS)/hud/gfx.t3s
+MEM_T3XFILES		:=	gfx_hud.t3x
+MEM_HFILES			:=	gfx_hud.h
 
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
-ARCH	:=	-march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft
+ARCH				:=	-march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft
 
-CFLAGS	:=	-g -Wall -O2 -mword-relocations \
-			-ffunction-sections \
-			$(ARCH)
+CFLAGS 				:=	-g -Wall -O2 -mword-relocations -ffunction-sections $(ARCH)
 
 ifeq ($(DEBUG),1)
-	CFLAGS += -DDEBUG
+	CFLAGS 			+= -DDEBUG
 endif
-CFLAGS	+=	$(INCLUDE) -D__3DS__
+CFLAGS 				+=	$(INCLUDE) -D__3DS__ -DVERSION=\"$(APP_VERSION)\"
 
-CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu++11
+CXXFLAGS			:= $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu++11
 
-ASFLAGS	:=	-g $(ARCH)
-LDFLAGS	=	-specs=3dsx.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
+ASFLAGS				:=	-g $(ARCH)
+LDFLAGS				=	-specs=3dsx.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS	:= -lcitro2d -lcitro3d -lctru -lm -lvorbisidec -logg
+LIBS				:= -lcitro2d -lcitro3d -lctru -lm -lvorbisidec -logg
 
 #---------------------------------------------------------------------------------
 # Libraries
 #---------------------------------------------------------------------------------
-LIBDIRS := $(CTRULIB) $(DEVKITPRO)/portlibs/3ds
+LIBDIRS 			:= $(CTRULIB) $(DEVKITPRO)/portlibs/3ds
 
 #---------------------------------------------------------------------------------
 # no real need to edit anything past this point unless you need to add
@@ -86,19 +87,19 @@ LIBDIRS := $(CTRULIB) $(DEVKITPRO)/portlibs/3ds
 ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
 
-export OUTPUT	:=	$(CURDIR)/$(TARGET)
-export TOPDIR	:=	$(CURDIR)
-export DEPSDIR	:=	$(CURDIR)/$(BUILD)
+export OUTPUT		:=	$(CURDIR)/$(TARGET)
+export TOPDIR		:=	$(CURDIR)
+export DEPSDIR		:=	$(CURDIR)/$(BUILD)
 
 #---------------------------------------------------------------------------------
 # Source files
 #---------------------------------------------------------------------------------
-CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
-CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
-SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
-PICAFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.v.pica)))
-SHLISTFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.shlist)))
-BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
+CFILES				:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
+CPPFILES			:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
+SFILES				:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
+PICAFILES			:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.v.pica)))
+SHLISTFILES			:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.shlist)))
+BINFILES			:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
 
 #---------------------------------------------------------------------------------
 # Graphics
@@ -106,49 +107,53 @@ BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
 
 # generate-gfx creates one gfx.t3s in every directory containing PNG files.
 # This list is evaluated by the second make invocation, after generation.
-GFXFILES	:=	$(shell if [ -d "$(ASSETS)" ]; then find "$(ASSETS)" -type f -name 'gfx.t3s' ! -path "$(CIA)/*"; fi)
+GFXFILES			:=	$(shell if [ -d "$(ASSETS)" ]; then find "$(ASSETS)" -type f -name 'gfx.t3s' ! -path "$(CIA)/*"; fi)
 
 # Everything except MEMGFX goes to RomFS, preserving the directory hierarchy.
 # resources/gfx/hall/gfx.t3s -> romfs/gfx/hall/gfx.t3x + gfx.h
-ROMGFX		:=	$(filter-out $(MEMGFX),$(GFXFILES))
+ROMGFX				:=	$(filter-out $(MEMGFX),$(GFXFILES))
 
-ROM_T3XFILES	:=	$(patsubst $(ASSETS)/%/gfx.t3s,$(ROMFS)/%/gfx.t3x,$(ROMGFX))
-ROM_HFILES	:=	$(patsubst $(ASSETS)/%/gfx.t3s,$(ROMFS)/%/gfx.h,$(ROMGFX))
+ROM_T3XFILES		:=	$(patsubst $(ASSETS)/%/gfx.t3s,$(ROMFS)/%/gfx.t3x,$(ROMGFX))
+ROM_HFILES			:=	$(patsubst $(ASSETS)/%/gfx.t3s,$(ROMFS)/%/gfx.h,$(ROMGFX))
 
 #---------------------------------------------------------------------------------
 # Timelines
 #---------------------------------------------------------------------------------
 
-TIMELINE_SOURCE_FILES := $(wildcard $(TIMELINES)/*/timeline)
-TIMELINE_FILES := $(patsubst $(TIMELINES)/%/timeline,$(ROMFS)/timelines/%/timeline,$(TIMELINE_SOURCE_FILES))
+TIMELINE_SRC_FILES 	:= $(wildcard $(TIMELINES)/*/timeline)
+TIMELINE_FILES 		:= $(patsubst $(TIMELINES)/%/timeline,$(ROMFS)/timelines/%/timeline,$(TIMELINE_SRC_FILES))
 
 #---------------------------------------------------------------------------------
 # Inventory
 #---------------------------------------------------------------------------------
 
-INVENTORY_FILES := $(ROMFS)/inventory/inventory
+INVENTORY_FILES 	:= $(ROMFS)/inventory/inventory
 
 #---------------------------------------------------------------------------------
 # Minigames
 #---------------------------------------------------------------------------------
 
-MINIGAME_RAW_FILES := $(shell if [ -d "$(MINIGAMES)" ]; then find "$(MINIGAMES)" -type f -name '*.raw'; fi)
-ROMFS_MINIGAME_RAW_FILES := $(patsubst $(ASSETS)/%,$(ROMFS)/%,$(MINIGAME_RAW_FILES))
+MINIGAME_RAW_FILES 			:= $(shell if [ -d "$(MINIGAMES)" ]; then find "$(MINIGAMES)" -type f -name '*.raw'; fi)
+ROMFS_MINIGAME_RAW_FILES 	:= $(patsubst $(ASSETS)/%,$(ROMFS)/%,$(MINIGAME_RAW_FILES))
+
+#---------------------------------------------------------------------------------
+# Rooms
+#---------------------------------------------------------------------------------
+
+ROOM_RAW_FILES 				:= $(shell if [ -d "$(ROOMS)" ]; then find "$(ROOMS)" -type f -name '*.raw'; fi)
+ROMFS_ROOM_RAW_FILES 		:= $(patsubst $(ASSETS)/%,$(ROMFS)/%,$(ROOM_RAW_FILES))
 
 #---------------------------------------------------------------------------------
 # Assets copied directly to RomFS
 #---------------------------------------------------------------------------------
 
-RAW_ASSET_FILES := $(foreach dir,$(RAW_ASSET_DIRS),\
-	$(shell if [ -d "$(ASSETS)/$(dir)" ]; then find "$(ASSETS)/$(dir)" -type f; fi))
-
-ROMFS_RAW_FILES := $(patsubst $(ASSETS)/%,$(ROMFS)/%,$(RAW_ASSET_FILES))
+RAW_ASSET_FILES 			:= $(foreach dir,$(RAW_ASSET_DIRS),$(shell if [ -d "$(ASSETS)/$(dir)" ]; then find "$(ASSETS)/$(dir)" -type f; fi))
+ROMFS_RAW_FILES 			:= $(patsubst $(ASSETS)/%,$(ROMFS)/%,$(RAW_ASSET_FILES))
 
 #---------------------------------------------------------------------------------
 # Search paths
 #---------------------------------------------------------------------------------
-export VPATH := $(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
-				$(foreach dir,$(DATA),$(CURDIR)/$(dir))
+export VPATH 				:= $(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) $(foreach dir,$(DATA),$(CURDIR)/$(dir))
 
 #---------------------------------------------------------------------------------
 # use CXX for linking C++ projects, CC for standard C
@@ -162,36 +167,36 @@ endif
 #---------------------------------------------------------------------------------
 # Object files
 #---------------------------------------------------------------------------------
-export OFILES_SOURCES :=	$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
+export OFILES_SOURCES 		:=	$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
 
 # IMPORTANT:
 # Only MEM_T3XFILES is converted with bin2o and linked into the executable.
 # RomFS graphics are NOT included here.
-export OFILES_BIN	:=	$(addsuffix .o,$(BINFILES)) \
-				$(PICAFILES:.v.pica=.shbin.o) \
-				$(SHLISTFILES:.shlist=.shbin.o) \
-				$(addsuffix .o,$(MEM_T3XFILES))
+export OFILES_BIN			:=	$(addsuffix .o,$(BINFILES)) \
+								$(PICAFILES:.v.pica=.shbin.o) \
+								$(SHLISTFILES:.shlist=.shbin.o) \
+								$(addsuffix .o,$(MEM_T3XFILES))
 
-export OFILES := $(OFILES_BIN) $(OFILES_SOURCES)
+export OFILES 				:= $(OFILES_BIN) $(OFILES_SOURCES)
 
 #---------------------------------------------------------------------------------
 # Generated headers
 #---------------------------------------------------------------------------------
-export HFILES := $(PICAFILES:.v.pica=_shbin.h) \
-			 $(SHLISTFILES:.shlist=_shbin.h) \
-			 $(addsuffix .h,$(subst .,_,$(BINFILES))) \
-			 $(MEM_HFILES)
+export HFILES 				:= 	$(PICAFILES:.v.pica=_shbin.h) \
+								$(SHLISTFILES:.shlist=_shbin.h) \
+								$(addsuffix .h,$(subst .,_,$(BINFILES))) \
+								$(MEM_HFILES)
 
 #---------------------------------------------------------------------------------
 # Include / library paths
 #---------------------------------------------------------------------------------
-export INCLUDE := $(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
-                  $(foreach dir,$(LIBDIRS),-I$(dir)/include) \
-                  -I$(CURDIR)/$(BUILD)
+export INCLUDE 				:= 	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
+				  				$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
+				  				-I$(CURDIR)/$(BUILD)
 
-export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
+export LIBPATHS				:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 
-export _3DSXDEPS	:=	$(if $(NO_SMDH),,$(OUTPUT).smdh)
+export _3DSXDEPS			:=	$(if $(NO_SMDH),,$(OUTPUT).smdh)
 
 #---------------------------------------------------------------------------------
 # Icon
@@ -199,28 +204,28 @@ export _3DSXDEPS	:=	$(if $(NO_SMDH),,$(OUTPUT).smdh)
 ifeq ($(strip $(ICON)),)
 	icons := $(wildcard *.png)
 	ifneq (,$(findstring $(TARGET).png,$(icons)))
-		export APP_ICON := $(TOPDIR)/$(TARGET).png
+		export APP_ICON 	:= $(TOPDIR)/$(TARGET).png
 	else
 		ifneq (,$(findstring icon.png,$(icons)))
 			export APP_ICON := $(TOPDIR)/icon.png
 		endif
 	endif
 else
-	export APP_ICON := $(TOPDIR)/$(ICON)
+	export APP_ICON 		:= $(TOPDIR)/$(ICON)
 endif
 
 #---------------------------------------------------------------------------------
 # SMDH
 #---------------------------------------------------------------------------------
 ifeq ($(strip $(NO_SMDH)),)
-	export _3DSXFLAGS += --smdh=$(CURDIR)/$(TARGET).smdh
+	export _3DSXFLAGS		+= --smdh=$(CURDIR)/$(TARGET).smdh
 endif
 
 #---------------------------------------------------------------------------------
 # RomFS
 #---------------------------------------------------------------------------------
 ifneq ($(ROMFS),)
-	export _3DSXFLAGS += --romfs=$(CURDIR)/$(ROMFS)
+	export _3DSXFLAGS		+= --romfs=$(CURDIR)/$(ROMFS)
 endif
 
 .PHONY: all generate-gfx build-project banner cia clean lint
@@ -263,6 +268,7 @@ build-project: $(BUILD) \
 	 $(TIMELINE_FILES) \
 	 $(INVENTORY_FILES) \
 	 $(ROMFS_MINIGAME_RAW_FILES) \
+	 $(ROMFS_ROOM_RAW_FILES) \
 	 $(ROMFS_RAW_FILES)
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
 

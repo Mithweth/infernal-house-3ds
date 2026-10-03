@@ -1,0 +1,186 @@
+# ---------------------------------------------------------------------------
+# Images
+# ---------------------------------------------------------------------------
+
+IMAGE gfx_bg_idx 0 0 0
+END_IMAGE
+
+IMAGE gfx_right_closet_opened_idx 39 129 0.1
+WHEN STATE_IS hall_right_closet_opened true
+WHEN INVENTORY_HAS FLASHLIGHT false
+END_IMAGE
+
+IMAGE gfx_right_closet_empty_idx 39 130 0.1
+WHEN STATE_IS hall_right_closet_opened true
+WHEN INVENTORY_HAS FLASHLIGHT true
+END_IMAGE
+
+IMAGE gfx_left_closet_opened_idx 0 144 0.1
+WHEN STATE_IS hall_left_closet_opened true
+WHEN INVENTORY_HAS SCREWDRIVER false
+END_IMAGE
+
+IMAGE gfx_left_closet_empty_idx 0 144 0.1
+WHEN STATE_IS hall_left_closet_opened true
+WHEN INVENTORY_HAS SCREWDRIVER true
+END_IMAGE
+
+IMAGE gfx_carpet_moved_idx 22 169 0.2
+WHEN STATE_IS hall_carpet_moved true
+END_IMAGE
+
+IMAGE gfx_message_idx 124 200 0.3
+WHEN STATE_IS hall_carpet_moved true
+WHEN INVENTORY_HAS MESSAGE false
+END_IMAGE
+
+
+# ---------------------------------------------------------------------------
+# Contents of left closet
+# Must come before the generic closet hotspot.
+# ---------------------------------------------------------------------------
+
+HOTSPOT HALL_CLOSET 0 144 36 70
+WHEN STATE_IS hall_left_closet_opened true
+WHEN INVENTORY_HAS SCREWDRIVER false
+MESSAGE HALL_LEFT_CLOSET_CONTENTS
+
+ACTION
+INVENTORY_ADD SCREWDRIVER
+INVENTORY_ADD MAGNIFYING_GLASS
+END_ACTION
+END_HOTSPOT
+
+
+# ---------------------------------------------------------------------------
+# Contents of right closet
+# ---------------------------------------------------------------------------
+
+HOTSPOT HALL_CLOSET 37 135 36 70
+WHEN STATE_IS hall_right_closet_opened true
+WHEN INVENTORY_HAS FLASHLIGHT false
+MESSAGE HALL_RIGHT_CLOSET_CONTENTS
+
+ACTION
+INVENTORY_ADD FLASHLIGHT
+INVENTORY_ADD BINOCULARS
+END_ACTION
+END_HOTSPOT
+
+
+# ---------------------------------------------------------------------------
+# Static hotspots
+# ---------------------------------------------------------------------------
+
+HOTSPOT HALL_CROSS 78 50 25 40
+END_HOTSPOT
+
+HOTSPOT HALL_WALL 35 40 34 47
+END_HOTSPOT
+
+HOTSPOT HALL_ASHTRAY 0 130 20 12
+END_HOTSPOT
+
+HOTSPOT HALL_CANDLE 25 95 15 40
+END_HOTSPOT
+
+HOTSPOT HALL_HANGER 180 75 50 25
+END_HOTSPOT
+
+HOTSPOT HALL_PAINTING 250 30 70 100
+END_HOTSPOT
+
+
+# ---------------------------------------------------------------------------
+# Left closet - open
+# ---------------------------------------------------------------------------
+
+HOTSPOT HALL_CLOSET 0 154 36 70
+WHEN STATE_IS hall_left_closet_opened false
+
+ACTION
+SFX closet_open
+SET hall_left_closet_opened
+END_ACTION
+END_HOTSPOT
+
+
+# ---------------------------------------------------------------------------
+# Left closet - close
+# ---------------------------------------------------------------------------
+
+HOTSPOT HALL_CLOSET 0 154 36 70
+WHEN STATE_IS hall_left_closet_opened true
+
+ACTION
+SFX closet_close
+SET hall_left_closet_opened
+END_ACTION
+END_HOTSPOT
+
+
+# ---------------------------------------------------------------------------
+# Right closet - open
+# ---------------------------------------------------------------------------
+
+HOTSPOT HALL_CLOSET 37 135 36 60
+WHEN STATE_IS hall_right_closet_opened false
+
+ACTION
+SFX closet_open
+SET hall_right_closet_opened
+END_ACTION
+END_HOTSPOT
+
+
+# ---------------------------------------------------------------------------
+# Right closet - close
+# ---------------------------------------------------------------------------
+
+HOTSPOT HALL_CLOSET 37 135 36 60
+WHEN STATE_IS hall_right_closet_opened true
+
+ACTION
+SFX closet_close
+SET hall_right_closet_opened
+END_ACTION
+END_HOTSPOT
+
+
+# ---------------------------------------------------------------------------
+# Message under carpet
+# ---------------------------------------------------------------------------
+
+HOTSPOT HALL_CARPET 124 200 28 20
+WHEN STATE_IS hall_carpet_moved true
+WHEN INVENTORY_HAS MESSAGE false
+MESSAGE HALL_MESSAGE
+
+ACTION
+INVENTORY_ADD MESSAGE
+END_ACTION
+END_HOTSPOT
+
+
+# ---------------------------------------------------------------------------
+# Carpet
+# ---------------------------------------------------------------------------
+
+HOTSPOT HALL_CARPET 46 175 200 65
+
+ACTION
+SET hall_carpet_moved
+END_ACTION
+END_HOTSPOT
+
+
+# ---------------------------------------------------------------------------
+# Exits
+# ---------------------------------------------------------------------------
+
+PATH NORTH
+ACTION
+SFX door_open
+ROOM diningroom
+END_ACTION
+END_PATH
