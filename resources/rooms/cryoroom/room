@@ -1,0 +1,109 @@
+# ---------------------------------------------------------------------------
+# Images
+# ---------------------------------------------------------------------------
+
+IMAGE background 0 0 0
+END_IMAGE
+
+IMAGE hangar 271 12 0.1
+	WHEN STATE_IS cryoroom_lever_use true
+END_IMAGE
+
+IMAGE lever 255 100 0.1
+	WHEN STATE_IS cryoroom_lever_use true
+END_IMAGE
+
+IMAGE rust_cleaned 97 58 0.1
+	WHEN STATE_IS cryoroom_rust_cleaned true
+END_IMAGE
+
+IMAGE cryo_opened 0 99 0.1
+	WHEN STATE_IS cryoroom_chamber_opened true
+END_IMAGE
+
+# ---------------------------------------------------------------------------
+# Hotspots
+# ---------------------------------------------------------------------------
+
+HOTSPOT CRYOROOM_SIGN 97 58 50 17
+	WHEN STATE_IS cryoroom_rust_cleaned false
+	MESSAGE CRYOROOM_RUST_SIGN_MESSAGE
+	USE STAIN_REMOVER
+		INVENTORY_REMOVE STAIN_REMOVER
+		SET cryoroom_rust_cleaned
+	END_USE
+END_HOTSPOT
+
+HOTSPOT CRYOROOM_SIGN 97 58 50 17
+	MESSAGE CRYOROOM_SIGN_MESSAGE
+END_HOTSPOT
+
+HOTSPOT CRYOROOM_STORAGE 273 37 47 164
+	WHEN STATE_IS cryoroom_lever_use false
+END_HOTSPOT
+
+HOTSPOT CRYOROOM_LEVER 252 115 20 25
+	ACTION
+		SET cryoroom_lever_use
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT CRYOROOM_PANEL_CONTROL 145 102 22 26
+	MESSAGE CRYOROOM_PANEL_CONTROL_MESSAGE
+	ACTION
+		WHEN STATE_IS cryoroom_digicode_enabled true
+		MINIGAME digicode
+	END_ACTION
+	ACTION
+		WHEN STATE_IS cryoroom_digicode_enabled false
+		MESSAGE CRYOROOM_PANEL_NEED_CARD
+	END_ACTION
+	USE MAGNETIC_CARD
+		INVENTORY_REMOVE MAGNETIC_CARD
+		MESSAGE CRYOROOM_PANEL_USE_CARD
+		SET cryoroom_digicode_enabled
+	END_USE
+END_HOTSPOT
+
+HOTSPOT CRYOROOM_DOOR 99 78 45 82
+END_HOTSPOT
+
+HOTSPOT CRYOROOM_TANK_MESSAGE 37 78 22 22
+END_HOTSPOT
+
+HOTSPOT CRYOROOM_BOX 1 41 28 82
+END_HOTSPOT
+
+HOTSPOT CRYOROOM_BOX 65 76 30 69
+END_HOTSPOT
+
+HOTSPOT CRYOROOM_CRYOCHAMBER_CONSOLE 67 161 26 24
+	ACTION
+		SET cryoroom_chamber_opened
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT CRYOROOM_CRYOCHAMBER 0 124 68 51
+END_HOTSPOT
+
+HOTSPOT CRYOROOM_ELEVATOR 170 72 62 79
+	MESSAGE CRYOROOM_ELEVATOR_MESSAGE
+END_HOTSPOT
+
+# ---------------------------------------------------------------------------
+# Exits
+# ---------------------------------------------------------------------------
+
+PATH NORTH
+	ACTION
+		WAIT_SFX rope_climbing
+		ROOM livingroom
+	END_ACTION
+END_PATH
+
+PATH EAST
+	WHEN STATE_IS cryoroom_lever_use true
+	ACTION
+		ROOM heliport
+	END_ACTION
+END_PATH

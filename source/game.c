@@ -114,18 +114,18 @@ void game_start(void) {
     message_text = NULL;
     active_hotspot = NULL;
     music_play("romfs:/audio/background.ogg");
-    inventory_add("STATUE");
-    inventory_add("ROPE");
-    inventory_add("MAGNETIC_CARD");
-    inventory_add("SYRINGE");
-    inventory_add("PAPER");
+    inventory_add("MEASURING_TAPE");
     game_set_room("hall");
 }
 
-void game_wait_for_sfx(const char *sfx, void (*callback)(void)) {
+bool game_wait_for_sfx(const char *sfx, void (*callback)(void)) {
     game_busy_sfx_channel = sfx_play(sfx);
+    if (game_busy_sfx_channel < 0) {
+        return false;
+    }
     game_busy_callback = callback;
     game_mode = GAME_BUSY;
+    return true;
 }
 
 void game_intro(void) {
@@ -311,15 +311,13 @@ void game_update(u32 keys, circlePosition analog, touchPosition touch) {
 
         case GAME_BUSY:
             hud_update();
-            if (game_busy_sfx_channel > -1) {
-                if (!sfx_is_playing(game_busy_sfx_channel)) {
-                    game_mode = GAME_NORMAL;
-                    if (game_busy_callback) {
-                        void (*callback)(void) = game_busy_callback;
-                        game_busy_callback = NULL;
-                        game_busy_sfx_channel = -1;
-                        callback();
-                    }
+            if (!sfx_is_playing(game_busy_sfx_channel)) {
+                game_mode = GAME_NORMAL;
+                if (game_busy_callback) {
+                    void (*callback)(void) = game_busy_callback;
+                    game_busy_callback = NULL;
+                    game_busy_sfx_channel = -1;
+                    callback();
                 }
             }
             return;

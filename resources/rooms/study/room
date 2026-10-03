@@ -1,0 +1,199 @@
+# ---------------------------------------------------------------------------
+# Images
+# ---------------------------------------------------------------------------
+
+IMAGE dark_background 0 0 0
+	WHEN STATE_IS study_lights_on false
+END_IMAGE
+
+IMAGE background 0 0 0
+	WHEN STATE_IS study_lights_on true
+END_IMAGE
+
+IMAGE book_taken 41 116 0.1
+	WHEN STATE_IS study_lights_on true
+	WHEN INVENTORY_HAS BOOK true
+END_IMAGE
+
+IMAGE top_drawer_opened 3 140 0.3
+	WHEN STATE_IS study_lights_on true
+	WHEN STATE_IS study_top_drawer_opened true
+END_IMAGE
+
+IMAGE middle_drawer_opened 11 160 0.2
+	WHEN STATE_IS study_lights_on true
+	WHEN STATE_IS study_middle_drawer_opened true
+END_IMAGE
+
+IMAGE bottom_drawer_opened 4 179 0.1
+	WHEN STATE_IS study_lights_on true
+	WHEN STATE_IS study_bottom_drawer_opened true
+END_IMAGE
+
+IMAGE closet_open 199 1 0.1
+	WHEN STATE_IS study_lights_on true
+	WHEN STATE_IS study_closet_opened true
+END_IMAGE
+
+IMAGE sliding_board 69 137 0.1
+	WHEN STATE_IS study_lights_on true
+	WHEN STATE_IS study_board_pulled true
+END_IMAGE
+
+IMAGE paper_taken 98 142 0.2
+	WHEN STATE_IS study_lights_on true
+	WHEN STATE_IS study_board_pulled true
+	WHEN INVENTORY_HAS PAPER true
+END_IMAGE
+
+# ---------------------------------------------------------------------------
+# Hotspots
+# ---------------------------------------------------------------------------
+
+HOTSPOT STUDY_SWITCH 127 47 16 15
+	WHEN STATE_IS study_lights_on false
+	ACTION
+		WHEN STATE_IS study_lightbulb_screwed false
+		MESSAGE STUDY_NO_LIGHTBULB
+	END_ACTION
+	ACTION
+		WHEN STATE_IS study_lightbulb_screwed true
+		SET study_lights_on
+		MESSAGE STUDY_LIGHT
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT STUDY_LAMP 120 61 29 20
+	WHEN STATE_IS study_lights_on false
+	USE LIGHTBULB
+		INVENTORY_REMOVE LIGHTBULB
+		SET study_lightbulb_screwed
+		MESSAGE STUDY_USE_LIGHTBULB
+	END_USE
+END_HOTSPOT
+
+HOTSPOT STUDY_DARK 0 0 320 240
+	WHEN STATE_IS study_lights_on false
+	MESSAGE STUDY_MESSAGE_NO_LIGHT
+	USE *
+		MESSAGE STUDY_USE_NO_LIGHT
+	END_USE
+END_HOTSPOT
+
+HOTSPOT STUDY_BOOK 41 116 44 16
+	WHEN INVENTORY_HAS BOOK false
+	MESSAGE STUDY_BOOK_MESSAGE
+	ACTION
+		INVENTORY_ADD BOOK
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT STUDY_DRAWER 22 140 50 21
+	WHEN STATE_IS study_top_drawer_opened true
+	MESSAGE STUDY_DRAWER_TOP
+	ACTION
+		SET study_top_drawer_opened
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT STUDY_DRAWER 22 140 50 21
+	ACTION
+		SET study_top_drawer_opened
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT STUDY_DRAWER 21 160 50 21
+	WHEN STATE_IS study_middle_drawer_opened true
+	WHEN INVENTORY_HAS SELLOTAPE false
+	MESSAGE STUDY_DRAWER_MIDDLE
+	ACTION
+		INVENTORY_ADD SELLOTAPE
+		INVENTORY_ADD LETTER
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT STUDY_DRAWER 21 160 50 21
+	ACTION
+		SET study_middle_drawer_opened
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT STUDY_DRAWER 21 181 50 23
+	WHEN STATE_IS study_bottom_drawer_opened true
+	MESSAGE STUDY_DRAWER_BOTTOM
+	ACTION
+		SET study_bottom_drawer_opened
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT STUDY_DRAWER 21 181 50 23
+	ACTION
+		SET study_bottom_drawer_opened
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT STUDY_PAPER 100 141 37 12
+	WHEN STATE_IS study_board_pulled true
+	WHEN INVENTORY_HAS PAPER false
+	MESSAGE STUDY_PAPER_EXAMINE
+	ACTION
+		INVENTORY_ADD PAPER
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT STUDY_BOARD 74 139 85 17
+	WHEN STATE_IS study_board_pulled true
+	ACTION
+		SET study_board_pulled
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT STUDY_BOARD 80 137 79 10
+	ACTION
+		SET study_board_pulled
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT STUDY_CALENDAR 13 23 32 80
+END_HOTSPOT
+
+HOTSPOT STUDY_FOLDER 228 77 22 46
+END_HOTSPOT
+
+HOTSPOT STUDY_BOOK 250 79 64 44
+END_HOTSPOT
+
+HOTSPOT STUDY_BIN 185 166 25 38
+	MESSAGE STUDY_BIN_MESSAGE
+END_HOTSPOT
+
+HOTSPOT STUDY_CLOSET 215 3 102 65
+	WHEN STATE_IS study_closet_opened true
+	MESSAGE STUDY_CLOSET_OPENED
+	ACTION
+		SET study_closet_opened
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT STUDY_CLOSET 215 3 102 65
+	ACTION
+		SET study_closet_opened
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT STUDY_CLOSET 215 128 102 63
+	MESSAGE STUDY_CLOSET_BOTTOM
+	USE KEY_ONE
+		MESSAGE STUDY_CLOSET_WITH_KEY
+	END_USE
+END_HOTSPOT
+
+# ---------------------------------------------------------------------------
+# Exits
+# ---------------------------------------------------------------------------
+
+PATH SOUTH
+	ACTION
+		ROOM library
+	END_ACTION
+END_PATH

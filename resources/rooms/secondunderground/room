@@ -1,0 +1,56 @@
+# ---------------------------------------------------------------------------
+# Images
+# ---------------------------------------------------------------------------
+
+IMAGE background 0 0 0
+END_IMAGE
+
+IMAGE wall_open 103 37 0
+	WHEN STATE_IS underground_wall_broken true
+END_IMAGE
+
+# ---------------------------------------------------------------------------
+# Hotspots
+# ---------------------------------------------------------------------------
+
+HOTSPOT UNDERGROUND_SHELF_1 13 46 78 27
+END_HOTSPOT
+
+HOTSPOT UNDERGROUND_SHELF_2 13 83 78 30
+END_HOTSPOT
+
+HOTSPOT UNDERGROUND_SHELF_3 13 121 78 26
+END_HOTSPOT
+
+HOTSPOT UNDERGROUND_WATER_HEATER 267 38 54 135
+END_HOTSPOT
+
+HOTSPOT UNDERGROUND_WALL 124 39 96 139
+	WHEN STATE_IS underground_wall_broken false
+	MESSAGE UNDERGROUND_WALL_MESSAGE
+	USE SLEDGEHAMMER
+		SET underground_wall_broken
+		MESSAGE UNDERGROUND_BREAK_WALL
+	END_USE
+END_HOTSPOT
+
+HOTSPOT UNDERGROUND_WALL_BROKEN 124 39 96 139
+	WHEN STATE_IS underground_wall_broken true
+END_HOTSPOT
+
+# ---------------------------------------------------------------------------
+# Exits
+# ---------------------------------------------------------------------------
+
+PATH WEST
+	ACTION
+		ROOM firstunderground
+	END_ACTION
+END_PATH
+
+PATH NORTH
+	WHEN STATE_IS underground_wall_broken true
+	ACTION
+		ROOM deadroom
+	END_ACTION
+END_PATH

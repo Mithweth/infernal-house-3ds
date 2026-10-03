@@ -1,0 +1,121 @@
+# ---------------------------------------------------------------------------
+# Images
+# ---------------------------------------------------------------------------
+
+IMAGE bg 0 0 0
+END_IMAGE
+
+IMAGE lighter 146 181 0.1
+	WHEN INVENTORY_HAS LIGHTER false
+END_IMAGE
+
+IMAGE piano_opened 2 102 0.1
+	WHEN STATE_IS livingroom_piano_opened true
+END_IMAGE
+
+IMAGE hearth_opened 151 109 0.1
+	WHEN STATE_IS livingroom_secret_passage_opened true
+END_IMAGE
+
+IMAGE hearth_prepared 152 110 0.1
+	WHEN STATE_IS livingroom_rope_in_hearth_bound true
+END_IMAGE
+
+IMAGE statue 162 54 0.1
+	WHEN STATE_IS livingroom_golden_statue_placed true
+END_IMAGE
+
+# ---------------------------------------------------------------------------
+# Hotspots
+# ---------------------------------------------------------------------------
+
+HOTSPOT LIVINGROOM_FIREPLACE_HEARTH_OPENED 146 107 68 47
+	WHEN STATE_IS livingroom_secret_passage_opened true
+	WHEN STATE_IS livingroom_rope_in_hearth_bound false
+	USE ROPE
+		SET livingroom_rope_in_hearth_bound
+		INVENTORY_REMOVE ROPE
+		MESSAGE LIVINGROOM_USE_ROPE
+	END_USE
+END_HOTSPOT
+
+HOTSPOT LIVINGROOM_PIANO 2 111 91 30
+	WHEN STATE_IS livingroom_piano_opened true
+	ACTION
+		MINIGAME piano
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT LIVINGROOM_PIANO 2 111 91 30
+	ACTION
+		WHEN STATE_IS livingroom_piano_opened true
+		SFX closet_close
+	END_ACTION
+	ACTION
+		WHEN STATE_IS livingroom_piano_opened false
+		SFX closet_open
+	END_ACTION
+	ACTION
+		SET livingroom_piano_opened
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT LIVINGROOM_LIGHTER 140 178 32 20
+	WHEN INVENTORY_HAS LIGHTER false
+	ACTION
+		INVENTORY_ADD LIGHTER
+	END_ACTION
+	USE MAGNIFYING_GLASS
+		MESSAGE LIVINGROOM_USE_MAGNIFYING_GLASS
+	END_USE
+END_HOTSPOT
+
+HOTSPOT LIVINGROOM_WOOD 104 114 31 37
+	USE LIGHTER
+		MESSAGE LIVINGROOM_USE_LIGHTER
+	END_USE
+END_HOTSPOT
+
+HOTSPOT LIVINGROOM_PAINTING 9 29 52 54
+END_HOTSPOT
+
+HOTSPOT LIVINGROOM_FIREPLACE 163 72 26 17
+	MESSAGE LIVINGROOM_FIREPLACE_EXAMINE
+	USE STATUE
+		SET livingroom_golden_statue_placed
+		INVENTORY_REMOVE STATUE
+		MESSAGE LIVINGROOM_PLACE_STATUE
+	END_USE
+END_HOTSPOT
+
+HOTSPOT LIVINGROOM_FIREPLACE 146 107 68 47
+	MESSAGE LIVINGROOM_FIREPLACE_HEARTH
+END_HOTSPOT
+
+HOTSPOT LIVINGROOM_FIREPLACE 138 50 92 104
+END_HOTSPOT
+
+# ---------------------------------------------------------------------------
+# Exits
+# ---------------------------------------------------------------------------
+
+PATH SOUTH
+	ACTION
+		WAIT_SFX door_open
+		ROOM corridor
+	END_ACTION
+END_PATH
+
+PATH NORTH
+	WHEN STATE_IS livingroom_secret_passage_opened true
+	ACTION
+		WHEN STATE_IS livingroom_rope_in_hearth_bound false
+		WAIT_SFX falling_down
+		TIMELINE gameover_falldown
+	END_ACTION
+	ACTION
+		WHEN STATE_IS livingroom_rope_in_hearth_bound true
+		WAIT_SFX rope_climbing
+		ROOM cryoroom
+	END_ACTION
+END_PATH

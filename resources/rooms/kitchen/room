@@ -1,0 +1,180 @@
+# ---------------------------------------------------------------------------
+# Images
+# ---------------------------------------------------------------------------
+
+IMAGE bg 0 0 0
+END_IMAGE
+
+IMAGE fridge_opened 0 40 0.3
+	WHEN STATE_IS kitchen_refrigerator_opened true
+END_IMAGE
+
+IMAGE closet_below_opened 49 128 0.3
+	WHEN STATE_IS kitchen_below_closet_opened true
+END_IMAGE
+
+IMAGE oven_opened 109 137 0.4
+	WHEN STATE_IS kitchen_oven_opened true
+END_IMAGE
+
+IMAGE dishwasher_opened 166 128 0.5
+	WHEN STATE_IS kitchen_dishwasher_opened true
+END_IMAGE
+
+IMAGE top_closet_opened 260 0 0.3
+	WHEN STATE_IS kitchen_top_closet_opened true
+END_IMAGE
+
+IMAGE drawer_opened 252 120 0.4
+	WHEN STATE_IS kitchen_drawer_opened true
+END_IMAGE
+
+IMAGE bottom_closet_opened 262 136 0.3
+	WHEN STATE_IS kitchen_bottom_closet_opened true
+END_IMAGE
+
+# ---------------------------------------------------------------------------
+# Hotspots
+# ---------------------------------------------------------------------------
+
+HOTSPOT KITCHEN_REFRIGERATOR 18 60 25 20
+	WHEN STATE_IS kitchen_refrigerator_opened true
+	MESSAGE KITCHEN_REFRIGERATOR_OPENED_1
+	ACTION
+		SET kitchen_refrigerator_opened
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT KITCHEN_REFRIGERATOR 18 80 25 19
+	WHEN STATE_IS kitchen_refrigerator_opened true
+	MESSAGE KITCHEN_REFRIGERATOR_OPENED_2
+	ACTION
+		SET kitchen_refrigerator_opened
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT KITCHEN_REFRIGERATOR 18 100 25 19
+	WHEN STATE_IS kitchen_refrigerator_opened true
+	MESSAGE KITCHEN_REFRIGERATOR_OPENED_3
+	ACTION
+		SET kitchen_refrigerator_opened
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT KITCHEN_REFRIGERATOR 18 118 25 21
+	WHEN STATE_IS kitchen_refrigerator_opened true
+	MESSAGE KITCHEN_REFRIGERATOR_OPENED_4
+	ACTION
+		SET kitchen_refrigerator_opened
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT KITCHEN_REFRIGERATOR 18 142 25 48
+	WHEN STATE_IS kitchen_refrigerator_opened true
+	MESSAGE KITCHEN_REFRIGERATOR_OPENED_5
+	ACTION
+		SET kitchen_refrigerator_opened
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT KITCHEN_REFRIGERATOR 0 40 48 173
+	ACTION
+		SET kitchen_refrigerator_opened
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT KITCHEN_CLOSET 49 130 55 64
+	WHEN STATE_IS kitchen_below_closet_opened true
+	MESSAGE KITCHEN_CLOSET_BELOW_OPENED
+	ACTION
+		SET kitchen_below_closet_opened
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT KITCHEN_CLOSET 49 130 55 64
+	ACTION
+		SET kitchen_below_closet_opened
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT KITCHEN_OVEN 133 131 47 63
+	ACTION
+		SET kitchen_oven_opened
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT KITCHEN_DISHWASHER 183 131 60 70
+	WHEN STATE_IS kitchen_dishwasher_opened true
+	MESSAGE KITCHEN_DISHWASHER_OPENED
+	ACTION
+		SET kitchen_dishwasher_opened
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT KITCHEN_DISHWASHER 183 131 60 70
+	ACTION
+		SET kitchen_dishwasher_opened
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT KITCHEN_CLOSET 260 2 53 119
+	WHEN STATE_IS kitchen_top_closet_opened true
+	MESSAGE KITCHEN_TOP_CLOSET_OPENED
+	ACTION
+		SET kitchen_top_closet_opened
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT KITCHEN_CLOSET 260 2 53 119
+	ACTION
+		SET kitchen_top_closet_opened
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT KITCHEN_DRAWER 262 120 51 19
+	WHEN STATE_IS kitchen_drawer_opened true
+	MESSAGE KITCHEN_DRAWER_OPENED
+	ACTION
+		SET kitchen_drawer_opened
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT KITCHEN_DRAWER 262 120 51 19
+	ACTION
+		SET kitchen_drawer_opened
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT KITCHEN_CLOSET 264 138 48 64
+	WHEN STATE_IS kitchen_bottom_closet_opened true
+	MESSAGE KITCHEN_BOTTOM_CLOSET_OPENED
+	ACTION
+		SET kitchen_bottom_closet_opened
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT KITCHEN_CLOSET 264 138 48 64
+	ACTION
+		SET kitchen_bottom_closet_opened
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT KITCHEN_TOWELS 105 49 50 42
+END_HOTSPOT
+
+HOTSPOT KITCHEN_TOOLS 176 47 74 46
+END_HOTSPOT
+
+HOTSPOT KITCHEN_TOOLS 180 94 36 30
+END_HOTSPOT
+
+# ---------------------------------------------------------------------------
+# Exits
+# ---------------------------------------------------------------------------
+
+PATH SOUTHWEST
+	ACTION
+		WAIT_SFX door_open
+		ROOM corridor
+	END_ACTION
+END_PATH

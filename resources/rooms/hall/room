@@ -2,36 +2,36 @@
 # Images
 # ---------------------------------------------------------------------------
 
-IMAGE gfx_bg_idx 0 0 0
+IMAGE bg 0 0 0
 END_IMAGE
 
-IMAGE gfx_right_closet_opened_idx 39 129 0.1
-WHEN STATE_IS hall_right_closet_opened true
-WHEN INVENTORY_HAS FLASHLIGHT false
+IMAGE right_closet_opened 39 129 0.1
+	WHEN STATE_IS hall_right_closet_opened true
+	WHEN INVENTORY_HAS FLASHLIGHT false
 END_IMAGE
 
-IMAGE gfx_right_closet_empty_idx 39 130 0.1
-WHEN STATE_IS hall_right_closet_opened true
-WHEN INVENTORY_HAS FLASHLIGHT true
+IMAGE right_closet_empty 39 130 0.1
+	WHEN STATE_IS hall_right_closet_opened true
+	WHEN INVENTORY_HAS FLASHLIGHT true
 END_IMAGE
 
-IMAGE gfx_left_closet_opened_idx 0 144 0.1
-WHEN STATE_IS hall_left_closet_opened true
-WHEN INVENTORY_HAS SCREWDRIVER false
+IMAGE left_closet_opened 0 144 0.1
+	WHEN STATE_IS hall_left_closet_opened true
+	WHEN INVENTORY_HAS SCREWDRIVER false
 END_IMAGE
 
-IMAGE gfx_left_closet_empty_idx 0 144 0.1
-WHEN STATE_IS hall_left_closet_opened true
-WHEN INVENTORY_HAS SCREWDRIVER true
+IMAGE left_closet_empty 0 144 0.1
+	WHEN STATE_IS hall_left_closet_opened true
+	WHEN INVENTORY_HAS SCREWDRIVER true
 END_IMAGE
 
-IMAGE gfx_carpet_moved_idx 22 169 0.2
-WHEN STATE_IS hall_carpet_moved true
+IMAGE carpet_moved 22 169 0.2
+	WHEN STATE_IS hall_carpet_moved true
 END_IMAGE
 
-IMAGE gfx_message_idx 124 200 0.3
-WHEN STATE_IS hall_carpet_moved true
-WHEN INVENTORY_HAS MESSAGE false
+IMAGE message 124 200 0.3
+	WHEN STATE_IS hall_carpet_moved true
+	WHEN INVENTORY_HAS MESSAGE false
 END_IMAGE
 
 
@@ -180,7 +180,7 @@ END_HOTSPOT
 
 PATH NORTH
 ACTION
-SFX door_open
+WAIT_SFX door_open
 ROOM diningroom
 END_ACTION
 END_PATH

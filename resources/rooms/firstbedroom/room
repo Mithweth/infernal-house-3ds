@@ -1,0 +1,175 @@
+# ---------------------------------------------------------------------------
+# Images
+# ---------------------------------------------------------------------------
+
+IMAGE dark_bg 0 0 0
+	WHEN STATE_IS firstbedroom_lights_on false
+END_IMAGE
+
+IMAGE dark_closet_opened 0 11 0.4
+	WHEN STATE_IS firstbedroom_lights_on false
+	WHEN STATE_IS firstbedroom_closet_opened true
+END_IMAGE
+
+IMAGE dark_invoice_taken 23 112 0.5
+	WHEN STATE_IS firstbedroom_lights_on false
+	WHEN STATE_IS firstbedroom_closet_opened true
+	WHEN INVENTORY_HAS INVOICE true
+END_IMAGE
+
+IMAGE dark_left_nightstand_opened 68 125 0.2
+	WHEN STATE_IS firstbedroom_lights_on false
+	WHEN STATE_IS firstbedroom_left_nightstand_opened true
+END_IMAGE
+
+IMAGE dark_left_nightstand_empty 80 129 0.3
+	WHEN STATE_IS firstbedroom_lights_on false
+	WHEN STATE_IS firstbedroom_left_nightstand_opened true
+	WHEN INVENTORY_HAS REVOLVER true
+END_IMAGE
+
+IMAGE dark_right_nightstand_opened 233 125 0.2
+	WHEN STATE_IS firstbedroom_lights_on false
+	WHEN STATE_IS firstbedroom_right_nightstand_opened true
+END_IMAGE
+
+IMAGE dark_stain_remover_taken 286 41 0.2
+	WHEN STATE_IS firstbedroom_lights_on false
+	WHEN INVENTORY_HAS STAIN_REMOVER true
+END_IMAGE
+
+IMAGE light_bg 0 0 0
+	WHEN STATE_IS firstbedroom_lights_on true
+END_IMAGE
+
+IMAGE light_closet_opened 0 11 0.4
+	WHEN STATE_IS firstbedroom_lights_on true
+	WHEN STATE_IS firstbedroom_closet_opened true
+END_IMAGE
+
+IMAGE light_invoice_taken 23 112 0.5
+	WHEN STATE_IS firstbedroom_lights_on true
+	WHEN STATE_IS firstbedroom_closet_opened true
+	WHEN INVENTORY_HAS INVOICE true
+END_IMAGE
+
+IMAGE light_left_nightstand_opened 68 124 0.2
+	WHEN STATE_IS firstbedroom_lights_on true
+	WHEN STATE_IS firstbedroom_left_nightstand_opened true
+END_IMAGE
+
+IMAGE light_left_nightstand_empty 80 127 0.3
+	WHEN STATE_IS firstbedroom_lights_on true
+	WHEN STATE_IS firstbedroom_left_nightstand_opened true
+	WHEN INVENTORY_HAS REVOLVER true
+END_IMAGE
+
+IMAGE light_right_nightstand_opened 237 127 0.2
+	WHEN STATE_IS firstbedroom_lights_on true
+	WHEN STATE_IS firstbedroom_right_nightstand_opened true
+END_IMAGE
+
+IMAGE light_stain_remover_taken 287 44 0.2
+	WHEN STATE_IS firstbedroom_lights_on true
+	WHEN INVENTORY_HAS STAIN_REMOVER true
+END_IMAGE
+
+# ---------------------------------------------------------------------------
+# Hotspots
+# ---------------------------------------------------------------------------
+
+HOTSPOT FIRSTBEDROOM_LAMP 159 58 24 24
+END_HOTSPOT
+
+HOTSPOT FIRSTBEDROOM_LAMP_SWITCH 217 88 16 16
+	ACTION
+		SET firstbedroom_lights_on
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT FIRSTBEDROOM_STAIN_REMOVER 285 43 20 26
+	WHEN INVENTORY_HAS STAIN_REMOVER false
+	ACTION
+		INVENTORY_ADD STAIN_REMOVER
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT FIRSTBEDROOM_BOOKS 249 45 28 23
+END_HOTSPOT
+
+HOTSPOT FIRSTBEDROOM_PILLOW 125 112 81 14
+	ACTION
+		MESSAGE FIRSTBEDROOM_PILLOW_MOVED
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT FIRSTBEDROOM_BED 119 125 111 60
+END_HOTSPOT
+
+HOTSPOT FIRSTBEDROOM_NIGHTSTAND 235 127 24 27
+	WHEN STATE_IS firstbedroom_right_nightstand_opened true
+	MESSAGE FIRSTBEDROOM_EMPTY_NIGHTSTAND_OPENED
+	ACTION
+		SET firstbedroom_right_nightstand_opened
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT FIRSTBEDROOM_NIGHTSTAND 235 127 24 27
+	ACTION
+		SET firstbedroom_right_nightstand_opened
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT FIRSTBEDROOM_NIGHTSTAND 78 127 24 27
+	WHEN STATE_IS firstbedroom_left_nightstand_opened true
+	WHEN INVENTORY_HAS REVOLVER false
+	MESSAGE FIRSTBEDROOM_LEFT_NIGHTSTAND_OPENED
+	ACTION
+		INVENTORY_ADD REVOLVER
+		INVENTORY_ADD GLASSES
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT FIRSTBEDROOM_NIGHTSTAND 78 127 24 27
+	ACTION
+		SET firstbedroom_left_nightstand_opened
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT FIRSTBEDROOM_CLOSET 23 113 10 12
+	WHEN STATE_IS firstbedroom_closet_opened true
+	WHEN INVENTORY_HAS INVOICE false
+	MESSAGE FIRSTBEDROOM_CLOSET_INVOICE
+	ACTION
+		INVENTORY_ADD INVOICE
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT FIRSTBEDROOM_CLOSET 20 74 41 72
+	WHEN STATE_IS firstbedroom_closet_opened true
+	MESSAGE FIRSTBEDROOM_CLOSET_OPENED
+	ACTION
+		SET firstbedroom_closet_opened
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT FIRSTBEDROOM_CLOSET_TISSUE 20 41 38 20
+	WHEN STATE_IS firstbedroom_closet_opened true
+END_HOTSPOT
+
+HOTSPOT FIRSTBEDROOM_CLOSET 2 21 64 143
+	ACTION
+		SET firstbedroom_closet_opened
+	END_ACTION
+END_HOTSPOT
+
+# ---------------------------------------------------------------------------
+# Exits
+# ---------------------------------------------------------------------------
+
+PATH SOUTH
+	ACTION
+		WAIT_SFX door_open
+		ROOM firstfloor
+	END_ACTION
+END_PATH

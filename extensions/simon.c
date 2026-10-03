@@ -251,11 +251,11 @@ static bool simon_init(void) {
         return false;
     }
 
-    img_background = gfxmap_get_image(assets, "gfx_background_idx");
-    img_yellow = gfxmap_get_image(assets, "gfx_yellow_idx");
-    img_red = gfxmap_get_image(assets, "gfx_red_idx");
-    img_green = gfxmap_get_image(assets, "gfx_green_idx");
-    img_blue = gfxmap_get_image(assets, "gfx_blue_idx");
+    img_background = gfxmap_get_image(assets, "background");
+    img_yellow = gfxmap_get_image(assets, "yellow");
+    img_red = gfxmap_get_image(assets, "red");
+    img_green = gfxmap_get_image(assets, "green");
+    img_blue = gfxmap_get_image(assets, "blue");
     mode = SIMON_OFF;
     return true;
 }

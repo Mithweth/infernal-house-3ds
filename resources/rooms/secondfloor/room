@@ -1,0 +1,43 @@
+# ---------------------------------------------------------------------------
+# Images
+# ---------------------------------------------------------------------------
+
+IMAGE background 0 0 0
+END_IMAGE
+
+# ---------------------------------------------------------------------------
+# Hotspots
+# ---------------------------------------------------------------------------
+
+HOTSPOT SECONDFLOOR_DOOR 12 38 52 170
+	WHEN STATE_IS secondfloor_door_unlocked true
+	MESSAGE SECONDFLOOR_DOOR_UNLOCKED
+END_HOTSPOT
+
+HOTSPOT SECONDFLOOR_DOOR 12 38 52 170
+	MESSAGE SECONDFLOOR_DOOR_LOCKED
+	USE KEY_ONE
+		SET secondfloor_door_unlocked
+		INVENTORY_REMOVE KEY_ONE
+		MESSAGE SECONDFLOOR_DOOR_UNLOCK
+	END_USE
+END_HOTSPOT
+
+# ---------------------------------------------------------------------------
+# Exits
+# ---------------------------------------------------------------------------
+
+PATH SOUTH
+	ACTION
+		WAIT_SFX wooden_stairs
+		ROOM firstfloor
+	END_ACTION
+END_PATH
+
+PATH WEST
+	WHEN STATE_IS secondfloor_door_unlocked true
+	ACTION
+		WAIT_SFX door_open
+		ROOM laboratory
+	END_ACTION
+END_PATH

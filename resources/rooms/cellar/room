@@ -1,0 +1,86 @@
+# ---------------------------------------------------------------------------
+# Images
+# ---------------------------------------------------------------------------
+
+IMAGE bg 0 0 0
+END_IMAGE
+
+IMAGE alarm_box_enabled 135 20 0.3
+	WHEN STATE_IS diningroom_lasers_disabled true
+END_IMAGE
+
+IMAGE alarm_box_opened 135 20 0.3
+	WHEN STATE_IS cellar_alarm_box_opened true
+	WHEN STATE_IS diningroom_lasers_disabled false
+END_IMAGE
+
+# ---------------------------------------------------------------------------
+# Hotspots
+# ---------------------------------------------------------------------------
+
+HOTSPOT CELLAR_OPENED_ALARM_BOX 129 24 40 45
+	WHEN STATE_IS cellar_alarm_box_opened true
+	ACTION
+		SET diningroom_lasers_disabled
+	END_ACTION
+	ACTION
+		WHEN STATE_IS diningroom_lasers_disabled true
+		MESSAGE CELLAR_DISABLE_ALARM_BOX
+	END_ACTION
+	ACTION
+		WHEN STATE_IS diningroom_lasers_disabled false
+		MESSAGE CELLAR_ENABLE_ALARM_BOX
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT CELLAR_ALARM_BOX 129 24 40 45
+	ACTION
+		WHEN STATE_IS cellar_alarm_box_unscrewed true
+		SET cellar_alarm_box_opened
+	END_ACTION
+    USE SCREWDRIVER
+        WHEN STATE_IS cellar_alarm_box_unscrewed false
+        SET cellar_alarm_box_unscrewed
+        MESSAGE CELLAR_OPEN_ALARM_BOX
+    END_USE
+    USE SCREWDRIVER
+        WHEN STATE_IS cellar_alarm_box_unscrewed true
+        MESSAGE CELLAR_ALARM_BOX_ALREADY_OPENED
+    END_USE
+END_HOTSPOT
+
+HOTSPOT CELLAR_JAM 211 39 74 29
+END_HOTSPOT
+
+HOTSPOT CELLAR_BOTTLES 212 70 73 40
+END_HOTSPOT
+
+HOTSPOT CELLAR_TOOLS 216 111 38 36
+END_HOTSPOT
+
+HOTSPOT CELLAR_CARPET 217 199 103 41
+END_HOTSPOT
+
+HOTSPOT CELLAR_SIMON 255 115 31 36
+	ACTION
+		MINIGAME simon
+	END_ACTION
+END_HOTSPOT
+
+# ---------------------------------------------------------------------------
+# Exits
+# ---------------------------------------------------------------------------
+
+PATH EAST
+	ACTION
+		WAIT_SFX door_open
+		ROOM corridor
+	END_ACTION
+END_PATH
+
+PATH SOUTH
+	ACTION
+		WAIT_SFX metal_ladder
+		ROOM firstunderground
+	END_ACTION
+END_PATH

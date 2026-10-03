@@ -82,8 +82,8 @@ typedef struct {
     bool exists;
     RoomCondition conditions[ROOM_MAX_CONDITIONS];
     size_t condition_count;
-    RoomAction actions[ROOM_MAX_ACTIONS];
-    size_t action_count;
+    RoomActionBlock action_blocks[ROOM_MAX_ACTION_BLOCKS];
+    size_t action_block_count;
 } Path;
 
 typedef struct {

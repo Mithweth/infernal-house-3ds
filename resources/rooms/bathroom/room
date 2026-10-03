@@ -1,0 +1,140 @@
+# ---------------------------------------------------------------------------
+# Images
+# ---------------------------------------------------------------------------
+
+IMAGE background 0 0 0
+END_IMAGE
+
+IMAGE shower_opened 5 30 0.2
+	WHEN STATE_IS bathroom_shower_curtain_opened true
+END_IMAGE
+
+IMAGE carpet_moved 0 186 0.3
+	WHEN STATE_IS bathroom_carpet_moved true
+END_IMAGE
+
+IMAGE doors_opened 164 133 0.2
+	WHEN STATE_IS bathroom_closet_doors_opened true
+END_IMAGE
+
+IMAGE drawer_opened 172 120 0.3
+	WHEN STATE_IS bathroom_closet_drawer_opened true
+END_IMAGE
+
+IMAGE perfume_taken 217 103 0.3
+	WHEN INVENTORY_HAS PERFUME true
+END_IMAGE
+
+IMAGE soap_taken 129 94 0.2
+	WHEN INVENTORY_HAS SOAP true
+END_IMAGE
+
+# ---------------------------------------------------------------------------
+# Hotspots
+# ---------------------------------------------------------------------------
+
+HOTSPOT BATHROOM_PERFUME 216 103 13 16
+	WHEN INVENTORY_HAS PERFUME false
+	ACTION
+		INVENTORY_ADD PERFUME
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT BATHROOM_TOILET_PAPER 252 131 22 18
+	ACTION
+		MESSAGE BATHROOM_TOILET_PAPER_EXAMINE
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT BATHROOM_TOILETS 252 126 58 88
+END_HOTSPOT
+
+HOTSPOT BATHROOM_DRAWER 181 119 52 18
+	WHEN STATE_IS bathroom_closet_drawer_opened true
+	WHEN INVENTORY_HAS TOOTHPASTE false
+	MESSAGE BATHROOM_DRAWER_EXAMINE
+	ACTION
+		INVENTORY_ADD TOOTHPASTE
+		INVENTORY_ADD COMB
+		INVENTORY_ADD RAZOR
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT BATHROOM_DRAWER 181 119 52 18
+	ACTION
+		SET bathroom_closet_drawer_opened
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT BATHROOM_CLOSET 181 113 77 79
+	WHEN STATE_IS bathroom_closet_doors_opened true
+	MESSAGE BATHROOM_CLOSET_EXAMINE
+	ACTION
+		SET bathroom_closet_doors_opened
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT BATHROOM_CLOSET 181 113 77 79
+	ACTION
+		SET bathroom_closet_doors_opened
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT BATHROOM_MIRROR 92 47 37 55
+END_HOTSPOT
+
+HOTSPOT BATHROOM_SINK 86 106 52 27
+END_HOTSPOT
+
+HOTSPOT BATHROOM_SOAP 129 91 12 10
+	WHEN INVENTORY_HAS SOAP false
+	ACTION
+		INVENTORY_ADD SOAP
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT BATHROOM_CARPET 85 174 57 17
+	ACTION
+		MESSAGE BATHROOM_CARPET_EXAMINE
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT BATHROOM_CARPET 230 208 72 25
+	ACTION
+		MESSAGE BATHROOM_CARPET_EXAMINE
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT BATHROOM_CARPET 1 193 74 25
+	ACTION
+		SET bathroom_carpet_moved
+	END_ACTION
+	ACTION
+		WHEN STATE_IS bathroom_carpet_moved true
+		MESSAGE BATHROOM_CARPET_EXAMINE
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT BATHROOM_SHOWER 4 28 74 163
+	ACTION
+		SET bathroom_shower_curtain_opened
+	END_ACTION
+	ACTION
+		WHEN STATE_IS bathroom_shower_curtain_opened true
+		MESSAGE BATHROOM_SHOWER_EXAMINE
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT BATHROOM_TOWEL 146 103 32 48
+END_HOTSPOT
+
+# ---------------------------------------------------------------------------
+# Exits
+# ---------------------------------------------------------------------------
+
+PATH WEST
+	ACTION
+		WAIT_SFX door_open
+		ROOM firstfloor
+	END_ACTION
+END_PATH
