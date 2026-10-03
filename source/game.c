@@ -14,7 +14,6 @@
 
 # define GAME_CALLBACK_MAX 8
 
-static Room *current_room = NULL;
 static GameMode game_mode = GAME_NORMAL;
 static bool circle_ready = true;
 static Hotspot *active_hotspot = NULL;
@@ -42,6 +41,10 @@ void game_ending(void) {
 
 void game_minigame_start(const char *name) {
     active_minigame = callbacks_minigame_find(name);
+    if (!active_minigame) {
+        printf("Unknown mini-game: %s\n", name);
+        return;
+    }
     music_stop();
     if (active_minigame->init) {
         if (!active_minigame->init()) {
@@ -62,22 +65,6 @@ void game_minigame_stop(void) {
     game_mode = GAME_NORMAL;
 }
 
-static bool path_is_available(const Path *path) {
-    if (!path || !path->action) {
-        return false;
-    }
-    if (!path->condition) {
-        return true;
-    }
-    return path->condition();
-}
-
-static void path_execute(const Path *path) {
-    if (path_is_available(path)) {
-        path->action();
-    }
-}
-
 void game_set_room(const char *name) {
     room_close();
     active_hotspot = NULL;
@@ -88,12 +75,7 @@ void game_set_room(const char *name) {
 }
 
 void game_close(void) {
-    if (current_room && current_room->close) {
-        current_room->close();
-    }
-
-    current_room = NULL;
-
+    room_close();
     if (text_buf) {
         C2D_TextBufDelete(text_buf);
         text_buf = NULL;
@@ -129,6 +111,9 @@ void game_init(void) {
 }
 
 void game_start(void) {
+    if (!text_buf) {
+        text_buf = C2D_TextBufNew(4096);
+    }
     title_close();
     inventory_reset();
     gamestate_reset();
@@ -142,7 +127,7 @@ void game_start(void) {
     inventory_add("MAGNETIC_CARD");
     inventory_add("SYRINGE");
     inventory_add("PAPER");
-    game_set_room(&hall);
+    game_set_room("hall");
 }
 
 void game_wait_for_sfx(const char *sfx, void (*callback)(void)) {
@@ -255,7 +240,7 @@ static void update_touch(touchPosition touch) {
 }
 
 
-static void game_draw(void) {
+static void game_draw_room(void) {
     room_draw();
     if (game_mode == GAME_MESSAGE) {
         if (examine_image.tex) {
@@ -393,7 +378,7 @@ void game_draw(C3D_RenderTarget *top, C3D_RenderTarget *bottom) {
 
         default:
             C2D_SceneBegin(bottom);
-            room_draw();
+            game_draw_room();
             C2D_SceneBegin(top);
             hud_draw();
             break;

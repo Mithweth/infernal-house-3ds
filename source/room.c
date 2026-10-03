@@ -243,12 +243,12 @@ static bool load_room(const char *filename) {
                 return false;
             }
             path = get_path(room, direction);
-            path->exists = true;
             if (!path) {
                 printf("%s:%zu: invalid PATH direction: %s\n", filename, line_number, direction);
                 fclose(f);
                 return false;
             }
+            path->exists = true;
             continue;
         }
 
@@ -456,7 +456,7 @@ static bool load_room(const char *filename) {
     return true;
 }
 
-void room_execute_actions(RoomAction *action, size_t count) {
+static void execute_actions(RoomAction *actions, size_t count) {
     for (size_t c = 0; c < count; c++) {
         RoomAction *action = &actions[c];
         if (action->type == ROOM_ACTION_SET) {
@@ -473,6 +473,7 @@ void room_execute_actions(RoomAction *action, size_t count) {
             sfx_play(path);
         } else if (action->type == ROOM_ACTION_ROOM) {
             game_set_room(action->argument);
+            return;
         } else if (action->type == ROOM_ACTION_TIMELINE) {
             game_timeline_start(action->argument);
         } else if (action->type == ROOM_ACTION_MINIGAME) {
@@ -507,7 +508,7 @@ static bool path_is_available(Path *path) {
 
 static void path_execute(Path *path) {
     if (path_is_available(path)) {
-        room_execute_actions(path->actions, path->action_count);
+        execute_actions(path->actions, path->action_count);
     }
 }
 
@@ -539,7 +540,7 @@ void room_move_west(void) {
     path_execute(&room->west);
 }
 
-void room_move_southwest(void) {
+void room_move_northwest(void) {
     path_execute(&room->northwest);
 }
 
@@ -552,7 +553,7 @@ bool room_execute_hotspot_use(Hotspot *hotspot, const char *id) {
         if (!match_conditions(use->conditions, use->condition_count)) {
             continue;
         }
-        room_execute_actions(use->actions, use->action_count);
+        execute_actions(use->actions, use->action_count);
         return true;
     }
 
@@ -565,7 +566,7 @@ void room_execute_hotspot_action(Hotspot *hotspot) {
         if (!match_conditions(room_action_block->conditions, room_action_block->condition_count)) {
             continue;
         }
-        room_execute_actions(room_action_block->actions, room_action_block->action_count);
+        execute_actions(room_action_block->actions, room_action_block->action_count);
     }
 }
 
@@ -604,8 +605,6 @@ Hotspot *room_find_hotspot_by_id(const char *id) {
         if (strcmp(hotspot->id, id) == 0 && room_hotspot_is_available(hotspot)) {
             return hotspot;
         }
-
-        return hotspot;
     }
 
     return NULL;
@@ -658,12 +657,14 @@ bool room_init(const char *name) {
     room->path = strdup(path);
     if (!gfxmap_load_assets(path, &room->assets)) {
         free(room);
+        room = NULL;
         return false;
     }
     snprintf(path, sizeof(path), "romfs:/rooms/%s/room", name);
     if (!load_room(path)) {
         C2D_SpriteSheetFree(room->assets);
         free(room);
+        room = NULL;
         return false;
     }
     printf("entering Room: %s\n", name);
@@ -737,7 +738,7 @@ void room_close(void) {
         &room->southwest,
     };
 
-    for (size_t i = 0; i < 4; i++) {
+    for (size_t i = 0; i < 8; i++) {
         Path *path = paths[i];
 
         for (size_t j = 0; j < path->condition_count; j++) {
@@ -748,6 +749,8 @@ void room_close(void) {
             action_remove(&path->actions[j]);
         }
     }
+    free(room->path);
     C2D_SpriteSheetFree(room->assets);
     free(room);
+    room = NULL;
 }

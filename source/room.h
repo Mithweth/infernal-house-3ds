@@ -103,7 +103,6 @@ typedef struct {
     Path southeast;
 } Room;
 
-void room_execute_actions(RoomAction *action, size_t count);
 void room_move_north(void);
 void room_move_northeast(void);
 void room_move_east(void);
