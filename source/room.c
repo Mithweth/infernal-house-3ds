@@ -28,7 +28,7 @@ static bool parse_bool(const char *str) {
 }
 
 
-static RoomCondition condition_init(const char *type, const char *name, const char *value) {
+static RoomCondition condition_add(const char *type, const char *name, const char *value) {
     RoomCondition condition = {0};
 
     if (strcmp(type, "STATE_IS") == 0) {
@@ -45,11 +45,11 @@ static RoomCondition condition_init(const char *type, const char *name, const ch
     return condition;
 }
 
-static void condition_close(RoomCondition *condition) {
+static void condition_remove(RoomCondition *condition) {
     free(condition->name);
 }
 
-static RoomAction action_init(const char *command,const char *argument) {
+static RoomAction action_add(const char *command, const char *argument) {
     RoomAction action = {0};
 
     if (!argument) {
@@ -83,7 +83,7 @@ static RoomAction action_init(const char *command,const char *argument) {
     return action;
 }
 
-static void action_close(RoomAction *action) {
+static void action_remove(RoomAction *action) {
     free(action->argument);
 }
 
@@ -325,7 +325,7 @@ static bool load_room(const char *filename) {
                 return false;
             }
 
-            RoomCondition condition = condition_init(type, name, value);
+            RoomCondition condition = condition_add(type, name, value);
 
             if (!condition.name) {
                 fclose(f);
@@ -403,7 +403,7 @@ static bool load_room(const char *filename) {
         if (action_block || use || path_action) {
             char *argument = strtok(NULL, " ");
 
-            RoomAction action = action_init(command, argument);
+            RoomAction action = action_add(command, argument);
 
             if (!action.argument) {
                 printf("%s:%zu: invalid action\n", filename, line_number);
@@ -456,7 +456,7 @@ static bool load_room(const char *filename) {
     return true;
 }
 
-static void execute_actions(RoomAction *action, size_t count) {
+void room_execute_actions(RoomAction *action, size_t count) {
     for (size_t c = 0; c < count; c++) {
         RoomAction *action = &actions[c];
         if (action->type == ROOM_ACTION_SET) {
@@ -505,12 +505,111 @@ static bool path_is_available(Path *path) {
     return match_conditions(path->conditions, path->condition_count);
 }
 
-static void room_path_execute(Path *path) {
+static void path_execute(Path *path) {
     if (path_is_available(path)) {
-        path->action();
+        room_execute_actions(path->actions, path->action_count);
     }
 }
 
+void room_move_north(void) {
+    path_execute(&room->north);
+}
+
+void room_move_northeast(void) {
+    path_execute(&room->northeast);
+}
+
+void room_move_east(void) {
+    path_execute(&room->east);
+}
+
+void room_move_southeast(void) {
+    path_execute(&room->southeast);
+}
+
+void room_move_south(void) {
+    path_execute(&room->south);
+}
+
+void room_move_southwest(void) {
+    path_execute(&room->southwest);
+}
+
+void room_move_west(void) {
+    path_execute(&room->west);
+}
+
+void room_move_southwest(void) {
+    path_execute(&room->northwest);
+}
+
+bool room_execute_hotspot_use(Hotspot *hotspot, const char *id) {
+    for (size_t i = 0; i < hotspot->use_count; i++) {
+        RoomUse *use = &hotspot->uses[i];
+        if (strcmp(use->item, id) != 0) {
+            continue;
+        }
+        if (!match_conditions(use->conditions, use->condition_count)) {
+            continue;
+        }
+        room_execute_actions(use->actions, use->action_count);
+        return true;
+    }
+
+    return false;
+}
+
+void room_execute_hotspot_action(Hotspot *hotspot) {
+    for (size_t i = 0; i < hotspot->action_block_count; i++) {
+        RoomActionBlock *room_action_block = &hotspot->action_blocks[i];
+        if (!match_conditions(room_action_block->conditions, room_action_block->condition_count)) {
+            continue;
+        }
+        room_execute_actions(room_action_block->actions, room_action_block->action_count);
+    }
+}
+
+bool room_hotspot_is_available(Hotspot *hotspot) {
+    if (!hotspot) {
+        return false;
+    }
+    return match_conditions(hotspot->conditions, hotspot->condition_count);
+}
+
+Hotspot *room_find_hotspot(int x, int y) {
+    if (!room) {
+        return NULL;
+    }
+    for (size_t i = 0; i < room->hotspot_count; i++) {
+        Hotspot *hotspot = &room->hotspots[i];
+
+        if (!room_hotspot_is_available(hotspot)) {
+            continue;
+        }
+
+        if (x >= hotspot->x && x < hotspot->x + hotspot->width && y >= hotspot->y && y < hotspot->y + hotspot->height) {
+            return hotspot;
+        }
+    }
+    return NULL;
+}
+
+Hotspot *room_find_hotspot_by_id(const char *id) {
+    if (!room) {
+        return NULL;
+    }
+    for (size_t i = 0; i < room->hotspot_count; i++) {
+        Hotspot *hotspot = &room->hotspots[i];
+
+        if (strcmp(hotspot->id, id) == 0 && room_hotspot_is_available(hotspot)) {
+            return hotspot;
+        }
+
+        return hotspot;
+    }
+
+    return NULL;
+}
 
 bool room_can_move_north(void) {
     return room && path_is_available(&room->north);
@@ -567,7 +666,7 @@ bool room_init(const char *name) {
         free(room);
         return false;
     }
-
+    printf("entering Room: %s\n", name);
     return true;
 }
 
@@ -591,7 +690,7 @@ void room_close(void) {
     for (size_t i = 0; i < room->image_count; i++) {
         RoomImage *image = &room->images[i];
         for (size_t j = 0; j < image->condition_count; j++) {
-            condition_close(&image->conditions[j]);
+            condition_remove(&image->conditions[j]);
         }
     }
 
@@ -602,16 +701,16 @@ void room_close(void) {
         free(hotspot->message_id);
 
         for (size_t j = 0; j < hotspot->condition_count; j++) {
-            condition_close(&hotspot->conditions[j]);
+            condition_remove(&hotspot->conditions[j]);
         }
 
         for (size_t j = 0; j < hotspot->action_block_count; j++) {
             RoomActionBlock *block = &hotspot->action_blocks[j];
             for (size_t k = 0; k < block->condition_count; k++) {
-                condition_close(&block->conditions[k]);
+                condition_remove(&block->conditions[k]);
             }
             for (size_t k = 0; k < block->action_count; k++) {
-                action_close(&block->actions[k]);
+                action_remove(&block->actions[k]);
             }
         }
 
@@ -619,10 +718,10 @@ void room_close(void) {
             RoomUse *use = &hotspot->uses[j];
             free(use->item);
             for (size_t k = 0; k < use->condition_count; k++) {
-                condition_close(&use->conditions[k]);
+                condition_remove(&use->conditions[k]);
             }
             for (size_t k = 0; k < use->action_count; k++) {
-                action_close(&use->actions[k]);
+                action_remove(&use->actions[k]);
             }
         }
     }
@@ -642,11 +741,11 @@ void room_close(void) {
         Path *path = paths[i];
 
         for (size_t j = 0; j < path->condition_count; j++) {
-            condition_close(&path->conditions[j]);
+            condition_remove(&path->conditions[j]);
         }
 
         for (size_t j = 0; j < path->action_count; j++) {
-            action_close(&path->actions[j]);
+            action_remove(&path->actions[j]);
         }
     }
     C2D_SpriteSheetFree(room->assets);

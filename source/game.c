@@ -5,7 +5,7 @@
 #include "lang.h"
 #include "inventory.h"
 #include "gamestate.h"
-#include "room_hall.h"
+#include "room.h"
 #include "hud.h"
 #include "audio.h"
 #include "title.h"
@@ -78,29 +78,13 @@ static void path_execute(const Path *path) {
     }
 }
 
-void game_set_room(Room *room) {
-    if (!room) {
-        return;
-    }
-    if (!text_buf) {
-        text_buf = C2D_TextBufNew(4096);
-    }
-
-    if (current_room && current_room->close) {
-        current_room->close();
-    }
-
-    current_room = room;
-
+void game_set_room(const char *name) {
+    room_close();
     active_hotspot = NULL;
     target = NULL;
     game_mode = GAME_NORMAL;
     message_text = NULL;
-
-    if (current_room && current_room->init) {
-        current_room->init();
-    }
-    printf("entering Room: %zu hotspots found\n", current_room->hotspot_count);
+    room_init(name);
 }
 
 void game_close(void) {
@@ -167,76 +151,6 @@ void game_wait_for_sfx(const char *sfx, void (*callback)(void)) {
     game_mode = GAME_BUSY;
 }
 
-static Hotspot *find_hotspot(int x, int y) {
-    if (!current_room) {
-        return NULL;
-    }
-
-    for (size_t i = 0; i < current_room->hotspot_count; i++) {
-        Hotspot *hotspot = &current_room->hotspots[i];
-
-        if (hotspot->condition && !hotspot->condition()) {
-            continue;
-        }
-
-        if (x >= hotspot->x && x <  hotspot->x + hotspot->width && y >= hotspot->y && y <  hotspot->y + hotspot->height) {
-            return hotspot;
-        }
-    }
-
-    return NULL;
-}
-
-static Hotspot *find_hotspot_by_id(const char *id) {
-    for (size_t i = 0; i < current_room->hotspot_count; i++) {
-        Hotspot *hotspot = &current_room->hotspots[i];
-
-        if (strcmp(hotspot->id, id) != 0) {
-            continue;
-        }
-
-        if (hotspot->condition && !hotspot->condition()) {
-            continue;
-        }
-
-        return hotspot;
-    }
-
-    return NULL;
-}
-
-bool game_can_move_north(void) {
-    return current_room && path_is_available(&current_room->north);
-}
-
-bool game_can_move_northeast(void) {
-    return current_room && path_is_available(&current_room->northeast);
-}
-
-bool game_can_move_east(void) {
-    return current_room && path_is_available(&current_room->east);
-}
-
-bool game_can_move_southeast(void) {
-    return current_room && path_is_available(&current_room->southeast);
-}
-
-bool game_can_move_south(void) {
-    return current_room && path_is_available(&current_room->south);
-}
-
-bool game_can_move_southwest(void) {
-    return current_room && path_is_available(&current_room->southwest);
-}
-
-bool game_can_move_west(void) {
-    return current_room && path_is_available(&current_room->west);
-}
-
-bool game_can_move_northwest(void) {
-    return current_room && path_is_available(&current_room->northwest);
-}
-
 void game_intro(void) {
     title_close();
     if (!timeline_init("romfs:/timelines/intro")) {
@@ -268,39 +182,39 @@ static void update_movement(circlePosition analog) {
     if (ay > ax * 2) {
         if (y > 0) {
             circle_ready = false;
-            path_execute(&current_room->north);
+            room_move_north();
             return;
         } else if (y < 0) {
             circle_ready = false;
-            path_execute(&current_room->south);
+            room_move_south();
             return;
         }
     } else if (ax > ay * 2) {
         if (x > 0) {
             circle_ready = false;
-            path_execute(&current_room->east);
+            room_move_east();
             return;
         } else if (x < 0) {
             circle_ready = false;
-            path_execute(&current_room->west);
+            room_move_west();
             return;
         }
     } else {
         if (x > 0 && y > 0) {
             circle_ready = false;
-            path_execute(&current_room->northeast);
+            room_move_northeast();
             return;
         } else if (x < 0 && y > 0) {
             circle_ready = false;
-            path_execute(&current_room->northwest);
+            room_move_northwest();
             return;
         } else if (x > 0 && y < 0) {
             circle_ready = false;
-            path_execute(&current_room->southeast);
+            room_move_southeast();
             return;
         } else if (x < 0 && y < 0) {
             circle_ready = false;
-            path_execute(&current_room->southwest);
+            room_move_southwest();
             return;
         }
     }
@@ -312,46 +226,37 @@ static void update_touch(touchPosition touch) {
         examine_image = (C2D_Image){0};
         return;
     }
-
-    Hotspot *hotspot = find_hotspot(touch.px, touch.py);
-
+    Hotspot *hotspot = room_find_hotspot(touch.px, touch.py);
     if (!hotspot) {
         return;
     }
 
     printf("current hotspot: %s\n", hotspot->id);
+
     if (hotspot != active_hotspot) {
         active_hotspot = hotspot;
         target = hotspot;
-        
+
         if (hotspot->message_id) {
             game_show_message(hotspot->message_id);
             return;
         }
     }
 
-    if (hotspot->action) {
-        hotspot->action();
+    room_execute_hotspot_action(hotspot);
+
+    if (target && !room_hotspot_is_available(target)) {
+        target = room_find_hotspot_by_id(target->id);
     }
 
-    if (target && target->condition && !target->condition()) {
-        target = find_hotspot_by_id(target->id);
-    }
-
-    if (active_hotspot && active_hotspot->condition && !active_hotspot->condition()) {
+    if (active_hotspot && !room_hotspot_is_available(active_hotspot)) {
         active_hotspot = NULL;
     }
 }
 
-static void room_draw(void) {
-    if (!current_room) {
-        return;
-    }
 
-    if (current_room->draw) {
-        current_room->draw();
-    }
-
+static void game_draw(void) {
+    room_draw();
     if (game_mode == GAME_MESSAGE) {
         if (examine_image.tex) {
             float x = (320 - examine_image.subtex->width) / 2;
@@ -380,10 +285,13 @@ bool game_use_item(const char *id) {
     if (!target) {
         return false;
     }
+    
     printf("Use item: %s\n", id);
-    if (target->use_item && target->use_item(id)) {
+
+    if (room_execute_hotspot_use(target, id)) {
         return true;
     }
+
     game_show_message("GAME_CANNOT_USE_MESSAGE");
     return false;
 }
