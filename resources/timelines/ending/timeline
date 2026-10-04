@@ -1,123 +1,123 @@
 MUSIC_START romfs:/audio/ending.ogg
-IMAGE_LEFT gfx_scene1_left_idx
+IMAGE_LEFT scene1_left
 PAUSE 1000
-IMAGE_CENTER gfx_scene1_center_idx
+IMAGE_CENTER scene1_center
 PAUSE 1000
-IMAGE_RIGHT gfx_scene1_right_idx
+IMAGE_RIGHT scene1_right
 PAUSE 1000
 TEXT BLUE ENDING_SCENE_1
 PAUSE 3000
 
 MUSIC_STOP
 FULL_SCREEN
-SPRITE gfx_bottom_idx 0 240
-SPRITE gfx_top_idx 0 0
+SPRITE bottom 0 240
+SPRITE top 0 0
 END_FULL_SCREEN
 PAUSE 400
 
 FULL_SCREEN
-SPRITE gfx_bottom_idx 0 240
-SPRITE gfx_top_idx 0 0
-SPRITE gfx_counter1_idx 15 378
+SPRITE bottom 0 240
+SPRITE top 0 0
+SPRITE counter1 15 378
 END_FULL_SCREEN
 PAUSE 400
 
 FULL_SCREEN
-SPRITE gfx_bottom_idx 0 240
-SPRITE gfx_top_idx 0 0
-SPRITE gfx_counter2_idx 15 378
+SPRITE bottom 0 240
+SPRITE top 0 0
+SPRITE counter2 15 378
 END_FULL_SCREEN
 PAUSE 400
 
 FULL_SCREEN
-SPRITE gfx_bottom_idx 0 240
-SPRITE gfx_top_idx 0 0
+SPRITE bottom 0 240
+SPRITE top 0 0
 END_FULL_SCREEN
 PAUSE 400
 
 FULL_SCREEN
-SPRITE gfx_bottom_idx 0 240
-SPRITE gfx_top_idx 0 0
-SPRITE gfx_counter1_idx 15 378
+SPRITE bottom 0 240
+SPRITE top 0 0
+SPRITE counter1 15 378
 END_FULL_SCREEN
 PAUSE 400
 
 FULL_SCREEN
-SPRITE gfx_bottom_idx 0 240
-SPRITE gfx_top_idx 0 0
-SPRITE gfx_counter2_idx 15 378
+SPRITE bottom 0 240
+SPRITE top 0 0
+SPRITE counter2 15 378
 END_FULL_SCREEN
 PAUSE 400
 
 FULL_SCREEN
-SPRITE gfx_bottom_idx 0 240
-SPRITE gfx_top_idx 0 0
+SPRITE bottom 0 240
+SPRITE top 0 0
 END_FULL_SCREEN
 PAUSE 400
 
 FULL_SCREEN
-SPRITE gfx_bottom_idx 0 240
-SPRITE gfx_top_idx 0 0
-SPRITE gfx_counter1_idx 15 378
+SPRITE bottom 0 240
+SPRITE top 0 0
+SPRITE counter1 15 378
 END_FULL_SCREEN
 PAUSE 400
 
 FULL_SCREEN
-SPRITE gfx_bottom_idx 0 240
-SPRITE gfx_top_idx 0 0
-SPRITE gfx_counter2_idx 15 378
+SPRITE bottom 0 240
+SPRITE top 0 0
+SPRITE counter2 15 378
 END_FULL_SCREEN
 PAUSE 400
 
 FULL_SCREEN
-SPRITE gfx_bottom_idx 0 240
-SPRITE gfx_top_idx 0 0
+SPRITE bottom 0 240
+SPRITE top 0 0
 END_FULL_SCREEN
 PAUSE 400
 
 FULL_SCREEN
-SPRITE gfx_bottom_idx 0 240
-SPRITE gfx_top_idx 0 0
-SPRITE gfx_counter1_idx 15 378
+SPRITE bottom 0 240
+SPRITE top 0 0
+SPRITE counter1 15 378
 END_FULL_SCREEN
 PAUSE 400
 
 FULL_SCREEN
-SPRITE gfx_bottom_idx 0 240
-SPRITE gfx_top_idx 0 0
-SPRITE gfx_counter2_idx 15 378
+SPRITE bottom 0 240
+SPRITE top 0 0
+SPRITE counter2 15 378
 END_FULL_SCREEN
 PAUSE 400
 END_SCENE
 
 FULL_SCREEN
-SPRITE gfx_bottom_idx 0 240
-SPRITE gfx_top_idx 0 0
+SPRITE bottom 0 240
+SPRITE top 0 0
 END_FULL_SCREEN
 PAUSE 400
 
 FULL_SCREEN
-SPRITE gfx_bottom_idx 0 240
-SPRITE gfx_top_idx 0 0
-SPRITE gfx_counter1_idx 15 378
+SPRITE bottom 0 240
+SPRITE top 0 0
+SPRITE counter1 15 378
 END_FULL_SCREEN
 PAUSE 400
 
 FULL_SCREEN
-SPRITE gfx_bottom_idx 0 240
-SPRITE gfx_top_idx 0 0
-SPRITE gfx_counter2_idx 15 378
+SPRITE bottom 0 240
+SPRITE top 0 0
+SPRITE counter2 15 378
 END_FULL_SCREEN
 PAUSE 400
 END_SCENE
 
 MUSIC_START romfs:/audio/ending.ogg
 TEXT RED ENDING_SCENE_2
-IMAGE_LEFT gfx_scene2_left_idx
+IMAGE_LEFT scene2_left
 TEXT RED ENDING_SCENE_3
-IMAGE_CENTER gfx_scene2_center_idx
+IMAGE_CENTER scene2_center
 TEXT RED ENDING_SCENE_4
-IMAGE_RIGHT gfx_scene2_right_idx
+IMAGE_RIGHT scene2_right
 TEXT RED ENDING_SCENE_5
 PAUSE 2500
 END_SCENE
@@ -131,9 +131,9 @@ PAUSE 2500
 END_SCENE
 
 MUSIC_STOP
-IMAGE_LEFT gfx_end_left_idx
-IMAGE_CENTER gfx_end_center_idx
-IMAGE_RIGHT gfx_end_right_idx
+IMAGE_LEFT end_left
+IMAGE_CENTER end_center
+IMAGE_RIGHT end_right
 PAUSE 0
 END_SCENE
 END

@@ -1,0 +1,61 @@
+# ---------------------------------------------------------------------------
+# Images
+# ---------------------------------------------------------------------------
+
+IMAGE background 0 0 0
+END_IMAGE
+
+IMAGE ring_taken 191 8 0.2
+	WHEN INVENTORY_HAS RING true
+END_IMAGE
+
+IMAGE rope_taken 0 186 0.2
+	WHEN STATE_IS underground_rope_taken true
+END_IMAGE
+
+# ---------------------------------------------------------------------------
+# Hotspots
+# ---------------------------------------------------------------------------
+
+HOTSPOT DEADROOM_ROPE 6 188 131 44
+	WHEN STATE_IS underground_rope_taken false
+	ACTION
+		INVENTORY_ADD ROPE
+		SET underground_rope_taken
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT DEADROOM_RING 191 9 21 31
+	WHEN INVENTORY_HAS RING false
+	ACTION
+		INVENTORY_ADD RING
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT DEADROOM_CHAINS 104 0 30 40
+	MESSAGE DEADROOM_CHAINS_EXAMINE
+END_HOTSPOT
+
+HOTSPOT DEADROOM_CHAINS 188 0 30 40
+	MESSAGE DEADROOM_CHAINS_EXAMINE
+END_HOTSPOT
+
+HOTSPOT DEADROOM_SKELETON 131 41 53 168
+	MESSAGE DEADROOM_SKELETON_EXAMINE
+END_HOTSPOT
+
+HOTSPOT DEADROOM_WALL 0 0 320 183
+END_HOTSPOT
+
+HOTSPOT DEADROOM_GROUND 18 193 282 49
+END_HOTSPOT
+
+# ---------------------------------------------------------------------------
+# Exits
+# ---------------------------------------------------------------------------
+
+PATH SOUTH
+	ACTION
+		ROOM secondunderground
+	END_ACTION
+END_PATH

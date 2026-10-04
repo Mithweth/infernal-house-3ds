@@ -86,13 +86,13 @@ void title_init(void) {
     if (!gfxmap_load_assets("romfs:/gfx/title", &assets)) {
         return;
     }
-    img_background = gfxmap_get_image(assets, "gfx_background_idx");
-    img_lankhor = gfxmap_get_image(assets, "gfx_lankhor_idx");
-    img_abutton = gfxmap_get_image(assets, "gfx_abutton_idx");
-    img_xbutton = gfxmap_get_image(assets, "gfx_xbutton_idx");
-    img_analogpad = gfxmap_get_image(assets, "gfx_analogpad_idx");
-    img_dpad = gfxmap_get_image(assets, "gfx_dpad_idx");
-    img_touch = gfxmap_get_image(assets, "gfx_touch_idx");
+    img_background = gfxmap_get_image(assets, "background");
+    img_lankhor = gfxmap_get_image(assets, "lankhor");
+    img_abutton = gfxmap_get_image(assets, "abutton");
+    img_xbutton = gfxmap_get_image(assets, "xbutton");
+    img_analogpad = gfxmap_get_image(assets, "analogpad");
+    img_dpad = gfxmap_get_image(assets, "dpad");
+    img_touch = gfxmap_get_image(assets, "touch");
     selected = TITLE_GAME;
     text_buf = C2D_TextBufNew(4096);
 }
@@ -128,8 +128,6 @@ void title_update(u32 keys) {
     }
 
     sfx_play("romfs:/audio/title_choice.raw");
-
-    printf("Title selected choice: %d\n", selected);
     switch (selected) {
         case TITLE_LANG:
             lang_next();

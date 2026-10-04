@@ -1,0 +1,236 @@
+# ---------------------------------------------------------------------------
+# Images
+# ---------------------------------------------------------------------------
+
+IMAGE light_background 0 0 0
+	WHEN STATE_IS secondbedroom_lights_on true
+END_IMAGE
+
+IMAGE light_nightstand_drawer 6 138 0.3
+	WHEN STATE_IS secondbedroom_lights_on true
+	WHEN STATE_IS secondbedroom_left_nightstand_opened true
+END_IMAGE
+
+IMAGE light_closet_left_door 127 40 0.3
+	WHEN STATE_IS secondbedroom_lights_on true
+	WHEN STATE_IS secondbedroom_left_closet_door_opened true
+END_IMAGE
+
+IMAGE light_closet_right_door 177 40 0.6
+	WHEN STATE_IS secondbedroom_lights_on true
+	WHEN STATE_IS secondbedroom_right_closet_door_opened true
+END_IMAGE
+
+IMAGE light_closet_drawer 144 151 0.3
+	WHEN STATE_IS secondbedroom_lights_on true
+	WHEN STATE_IS secondbedroom_closet_drawer_opened true
+END_IMAGE
+
+IMAGE light_bedpost 113 95 0.3
+	WHEN STATE_IS secondbedroom_lights_on true
+	WHEN STATE_IS secondbedroom_bedpost_pulled true
+END_IMAGE
+
+IMAGE light_paint_opened 218 54 0.4
+	WHEN STATE_IS secondbedroom_lights_on true
+	WHEN STATE_IS secondbedroom_bedpost_pulled true
+END_IMAGE
+
+IMAGE light_paint_empty 231 78 0.5
+	WHEN STATE_IS secondbedroom_lights_on true
+	WHEN STATE_IS secondbedroom_bedpost_pulled true
+	WHEN STATE_IS secondbedroom_key_taken true
+END_IMAGE
+
+IMAGE dark_background 0 0 0
+	WHEN STATE_IS secondbedroom_lights_on false
+END_IMAGE
+
+IMAGE dark_nightstand_drawer 6 139 0.3
+	WHEN STATE_IS secondbedroom_lights_on false
+	WHEN STATE_IS secondbedroom_left_nightstand_opened true
+END_IMAGE
+
+IMAGE dark_closet_left_door 126 40 0.3
+	WHEN STATE_IS secondbedroom_lights_on false
+	WHEN STATE_IS secondbedroom_left_closet_door_opened true
+END_IMAGE
+
+IMAGE dark_closet_right_door 179 40 0.6
+	WHEN STATE_IS secondbedroom_lights_on false
+	WHEN STATE_IS secondbedroom_right_closet_door_opened true
+END_IMAGE
+
+IMAGE dark_closet_drawer 144 150 0.3
+	WHEN STATE_IS secondbedroom_lights_on false
+	WHEN STATE_IS secondbedroom_closet_drawer_opened true
+END_IMAGE
+
+IMAGE dark_bedpost 113 94 0.3
+	WHEN STATE_IS secondbedroom_lights_on false
+	WHEN STATE_IS secondbedroom_bedpost_pulled true
+END_IMAGE
+
+IMAGE dark_paint_opened 218 54 0.4
+	WHEN STATE_IS secondbedroom_lights_on false
+	WHEN STATE_IS secondbedroom_bedpost_pulled true
+END_IMAGE
+
+IMAGE dark_paint_empty 231 75 0.5
+	WHEN STATE_IS secondbedroom_lights_on false
+	WHEN STATE_IS secondbedroom_bedpost_pulled true
+	WHEN STATE_IS secondbedroom_key_taken true
+END_IMAGE
+
+# ---------------------------------------------------------------------------
+# Hotspots
+# ---------------------------------------------------------------------------
+
+HOTSPOT SECONDBEDROOM_BEDSIDE_LAMP 12 97 27 37
+	ACTION
+		SET secondbedroom_lights_on
+	END_ACTION
+	ACTION
+		WHEN STATE_IS secondbedroom_lights_on true
+		MESSAGE SECONDBEDROOM_LAMP_TURNEDON
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT SECONDBEDROOM_NIGHTSTAND_DRAWER 7 136 22 29
+	WHEN STATE_IS secondbedroom_left_nightstand_opened true
+	WHEN INVENTORY_HAS RUBBER false
+	MESSAGE SECONDBEDROOM_NIGHTSTAND_DRAWER_OPENED
+	ACTION
+		INVENTORY_ADD RUBBER
+		INVENTORY_ADD LIGHTBULB
+		INVENTORY_ADD MEASURING_TAPE
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT SECONDBEDROOM_NIGHTSTAND_DRAWER 10 136 27 15
+	ACTION
+		SET secondbedroom_left_nightstand_opened
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT SECONDBEDROOM_PAINTING_1 59 51 53 47
+	ACTION
+		MESSAGE SECONDBEDROOM_PAINTING_1_MOVE
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT SECONDBEDROOM_CLOSET 143 51 35 26
+	WHEN STATE_IS secondbedroom_left_closet_door_opened true
+	MESSAGE SECONDBEDROOM_LEFT_CLOSET_TOP
+	ACTION
+		SET secondbedroom_left_closet_door_opened
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT SECONDBEDROOM_CLOSET 143 79 35 26
+	WHEN STATE_IS secondbedroom_left_closet_door_opened true
+	MESSAGE SECONDBEDROOM_LEFT_CLOSET_MIDDLE
+	ACTION
+		SET secondbedroom_left_closet_door_opened
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT SECONDBEDROOM_CLOSET 143 106 35 37
+	WHEN STATE_IS secondbedroom_left_closet_door_opened true
+	MESSAGE SECONDBEDROOM_LEFT_CLOSET_BOTTOM
+	ACTION
+		SET secondbedroom_left_closet_door_opened
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT SECONDBEDROOM_CLOSET 138 40 40 109
+	ACTION
+		SET secondbedroom_left_closet_door_opened
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT SECONDBEDROOM_RIGHT_CLOSET 180 61 34 76
+	WHEN STATE_IS secondbedroom_right_closet_door_opened true
+	WHEN INVENTORY_HAS CIGARETTES false
+	MESSAGE SECONDBEDROOM_RIGHT_CLOSET_POCKET
+	ACTION
+		INVENTORY_ADD BRACELET
+		INVENTORY_ADD CIGARETTES
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT SECONDBEDROOM_RIGHT_CLOSET 180 61 34 76
+	WHEN STATE_IS secondbedroom_right_closet_door_opened true
+END_HOTSPOT
+
+HOTSPOT SECONDBEDROOM_CLOSET 178 40 40 109
+	ACTION
+		SET secondbedroom_right_closet_door_opened
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT SECONDBEDROOM_PAINTING_2 230 60 28 53
+	WHEN STATE_IS secondbedroom_bedpost_pulled true
+	WHEN STATE_IS secondbedroom_key_taken false
+	MESSAGE SECONDBEDROOM_PAINTING_2_MOVED
+	ACTION
+		SET secondbedroom_key_taken
+		INVENTORY_ADD KEY_ONE
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT SECONDBEDROOM_PAINTING_2 230 60 28 53
+	WHEN STATE_IS secondbedroom_bedpost_pulled true
+	MESSAGE SECONDBEDROOM_PAINTING_2_EMPTY
+END_HOTSPOT
+
+HOTSPOT SECONDBEDROOM_PAINTING_2 222 60 39 53
+	ACTION
+		MESSAGE SECONDBEDROOM_PAINTING_2_MOVE
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT SECONDBEDROOM_CLOSET_DRAWER 142 150 79 26
+	WHEN STATE_IS secondbedroom_closet_drawer_opened true
+	MESSAGE SECONDBEDROOM_CLOSET_DRAWER_OPENED
+	ACTION
+		SET secondbedroom_closet_drawer_opened
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT SECONDBEDROOM_CLOSET_DRAWER 142 150 72 20
+	ACTION
+		SET secondbedroom_closet_drawer_opened
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT SECONDBEDROOM_CARPET 3 177 52 48
+END_HOTSPOT
+
+HOTSPOT SECONDBEDROOM_NIGHTSTAND 8 132 34 44
+END_HOTSPOT
+
+HOTSPOT SECONDBEDROOM_BED 110 100 16 16
+	MESSAGE SECONDBEDROOM_BED_FOOT
+	ACTION
+		SET secondbedroom_bedpost_pulled
+	END_ACTION
+	ACTION
+		WHEN STATE_IS secondbedroom_bedpost_pulled true
+		MESSAGE SECONDBEDROOM_BED_FOOT_PULLED
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT SECONDBEDROOM_BED 49 113 92 91
+END_HOTSPOT
+
+# ---------------------------------------------------------------------------
+# Exits
+# ---------------------------------------------------------------------------
+
+PATH EAST
+	ACTION
+		WAIT_SFX door_open
+		ROOM firstfloor
+	END_ACTION
+END_PATH

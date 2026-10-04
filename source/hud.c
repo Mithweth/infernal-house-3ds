@@ -167,7 +167,9 @@ void hud_update(void) {
     timer_update();
     if (!time_up_triggered && elapsed_time / 1000 > TIME_MAX_SECONDS) {
         time_up_triggered = true;
-        game_wait_for_sfx("romfs:/audio/footsteps_inside.raw", gameover_timeup);
+        if (!game_wait_for_sfx("romfs:/audio/footsteps_inside.raw", gameover_timeup)) {
+            gameover_timeup();
+        }
     }
 }
 

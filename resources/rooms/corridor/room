@@ -1,0 +1,57 @@
+# ---------------------------------------------------------------------------
+# Images
+# ---------------------------------------------------------------------------
+
+IMAGE bg 0 0 0
+END_IMAGE
+
+# ---------------------------------------------------------------------------
+# Hotspots
+# ---------------------------------------------------------------------------
+
+HOTSPOT CORRIDOR_WINDOW 0 15 15 125
+END_HOTSPOT
+
+HOTSPOT CORRIDOR_LAMP 27 47 32 32
+END_HOTSPOT
+
+HOTSPOT CORRIDOR_SWORD 168 68 50 45
+END_HOTSPOT
+
+# ---------------------------------------------------------------------------
+# Exits
+# ---------------------------------------------------------------------------
+
+PATH NORTH
+ACTION
+WAIT_SFX door_open
+ROOM cellar
+END_ACTION
+END_PATH
+
+PATH NORTHEAST
+ACTION
+WAIT_SFX door_open
+ROOM livingroom
+END_ACTION
+END_PATH
+
+PATH EAST
+ACTION
+WAIT_SFX door_open
+ROOM kitchen
+END_ACTION
+END_PATH
+
+PATH SOUTH
+ACTION
+WAIT_SFX door_open
+ROOM diningroom
+END_ACTION
+END_PATH
+
+PATH WEST
+ACTION
+ROOM library
+END_ACTION
+END_PATH

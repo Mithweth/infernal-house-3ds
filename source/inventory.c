@@ -439,18 +439,18 @@ bool inventory_init(void) {
         return false;
     }
 
-    int img_idx = gfxmap_get_index("gfx_selected_idx");
+    int img_idx = gfxmap_get_index("selected");
     if (img_idx < 0) {
-        printf("unknown image: gfx_selected_idx\n");
+        printf("unknown image: selected\n");
         C2D_SpriteSheetFree(inventory_assets);
         inventory_assets = NULL;
         return false;
     }
     img_selected = C2D_SpriteSheetGetImage(inventory_assets, img_idx);
 
-    img_idx = gfxmap_get_index("gfx_background_idx");
+    img_idx = gfxmap_get_index("background");
     if (img_idx < 0) {
-        printf("unknown image: gfx_background_idx\n");
+        printf("unknown image: background\n");
         C2D_SpriteSheetFree(inventory_assets);
         inventory_assets = NULL;
         return false;

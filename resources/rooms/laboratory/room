@@ -1,0 +1,68 @@
+# ---------------------------------------------------------------------------
+# Images
+# ---------------------------------------------------------------------------
+
+IMAGE background 0 0 0
+END_IMAGE
+
+IMAGE syringe_taken 23 177 0.1
+	WHEN STATE_IS laboratory_syringe_taken true
+END_IMAGE
+
+# ---------------------------------------------------------------------------
+# Hotspots
+# ---------------------------------------------------------------------------
+
+HOTSPOT LABORATORY_SYRINGE 23 178 64 30
+	WHEN STATE_IS laboratory_syringe_taken false
+	ACTION
+		SET laboratory_syringe_taken
+		INVENTORY_ADD SYRINGE
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT LABORATORY_BLACKBOARD 170 71 95 103
+END_HOTSPOT
+
+HOTSPOT LABORATORY_BLACKBOARD 170 71 95 103
+END_HOTSPOT
+
+HOTSPOT LABORATORY_TOOLS 3 47 32 52
+END_HOTSPOT
+
+HOTSPOT LABORATORY_TOOLS 7 98 92 23
+END_HOTSPOT
+
+HOTSPOT LABORATORY_TEST_TUBE 33 130 49 42
+END_HOTSPOT
+
+HOTSPOT LABORATORY_FLASK 113 181 16 13
+	MESSAGE LABORATORY_FLASK_LABEL
+END_HOTSPOT
+
+HOTSPOT LABORATORY_FLASK 99 152 37 52
+END_HOTSPOT
+
+HOTSPOT LABORATORY_LABCOAT 285 93 10 15
+	MESSAGE LABORATORY_LABCOAT_POCKET
+END_HOTSPOT
+
+HOTSPOT LABORATORY_LABCOAT 272 68 30 108
+END_HOTSPOT
+
+HOTSPOT LABORATORY_CONDITIONER 57 27 32 20
+END_HOTSPOT
+
+HOTSPOT LABORATORY_NEON_LIGHT 88 2 116 19
+END_HOTSPOT
+
+# ---------------------------------------------------------------------------
+# Exits
+# ---------------------------------------------------------------------------
+
+PATH EAST
+	ACTION
+		WAIT_SFX door_open
+		ROOM secondfloor
+	END_ACTION
+END_PATH

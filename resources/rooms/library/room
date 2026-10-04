@@ -1,0 +1,131 @@
+# ---------------------------------------------------------------------------
+# Images
+# ---------------------------------------------------------------------------
+
+IMAGE bg 0 0 0
+END_IMAGE
+
+IMAGE statue_taken 13 39 0.3
+	WHEN STATE_IS library_statue_taken true
+END_IMAGE
+
+IMAGE clock_taken 11 71 0.3
+	WHEN INVENTORY_HAS CLOCK true
+END_IMAGE
+
+IMAGE cup_taken 103 62 0.3
+	WHEN INVENTORY_HAS CUP true
+END_IMAGE
+
+IMAGE pushed_book 75 108 0.3
+	WHEN STATE_IS library_secret_passage_opened true
+END_IMAGE
+
+IMAGE passage_opened 127 29 0.3
+	WHEN STATE_IS library_secret_passage_opened true
+END_IMAGE
+
+# ---------------------------------------------------------------------------
+# Hotspots
+# ---------------------------------------------------------------------------
+
+HOTSPOT ITEM_STATUE 13 38 25 30
+	WHEN STATE_IS library_statue_taken false
+	ACTION
+		SET library_statue_taken
+		INVENTORY_ADD STATUE
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT ITEM_CLOCK 10 71 31 30
+	WHEN INVENTORY_HAS CLOCK false
+	ACTION
+		INVENTORY_ADD CLOCK
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT ITEM_CUP 103 61 21 25
+	WHEN INVENTORY_HAS CUP false
+	ACTION
+		INVENTORY_ADD CUP
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT LIBRARY_BOOK 73 108 16 24
+	WHEN STATE_IS library_secret_passage_opened false
+	ACTION
+		SET library_secret_passage_opened
+		SFX book_pushed
+		MESSAGE LIBRARY_SECRET_PASSAGE_MESSAGE
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT LIBRARY_BOOK 54 37 51 36
+END_HOTSPOT
+
+HOTSPOT LIBRARY_BOOK 10 104 48 30
+END_HOTSPOT
+
+HOTSPOT LIBRARY_BOOK 60 23 41 30
+END_HOTSPOT
+
+HOTSPOT LIBRARY_BOOK 95 78 35 30
+END_HOTSPOT
+
+HOTSPOT LIBRARY_BOOK 60 80 37 25
+END_HOTSPOT
+
+HOTSPOT LIBRARY_BOOK 60 108 13 24
+END_HOTSPOT
+
+HOTSPOT LIBRARY_BOOK 101 37 30 25
+END_HOTSPOT
+
+HOTSPOT LIBRARY_SECRET_PASSAGE 144 49 39 84
+	WHEN STATE_IS library_secret_passage_opened true
+END_HOTSPOT
+
+HOTSPOT LIBRARY_BOOK 144 49 39 84
+	MESSAGE LIBRARY_SCIENCE_BOOKS
+END_HOTSPOT
+
+HOTSPOT LIBRARY_BOOK 191 45 28 86
+	MESSAGE LIBRARY_RARE_BOOKS
+END_HOTSPOT
+
+HOTSPOT LIBRARY_BOOK 227 40 33 70
+	MESSAGE LIBRARY_NOVELS
+END_HOTSPOT
+
+HOTSPOT LIBRARY_BOOK 226 114 33 18
+	MESSAGE LIBRARY_EASTEREGGS
+END_HOTSPOT
+
+HOTSPOT LIBRARY_BOOK 0 196 40 26
+	MESSAGE LIBRARY_CLONE_BOOK
+END_HOTSPOT
+
+HOTSPOT LIBRARY_BOOK 238 152 40 17
+	MESSAGE LIBRARY_ROBOT_BOOK
+END_HOTSPOT
+
+HOTSPOT LIBRARY_BOOK 296 40 24 57
+	MESSAGE LIBRARY_PAINTING
+END_HOTSPOT
+
+# ---------------------------------------------------------------------------
+# Exits
+# ---------------------------------------------------------------------------
+
+PATH SOUTHEAST
+	ACTION
+		ROOM corridor
+	END_ACTION
+END_PATH
+
+PATH NORTH
+	WHEN STATE_IS library_secret_passage_opened true
+	ACTION
+		ROOM study
+	END_ACTION
+END_PATH

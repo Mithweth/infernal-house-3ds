@@ -1,7 +1,7 @@
 MUSIC_START romfs:/audio/gameover_sad.ogg
-IMAGE_LEFT gfx_left_idx
-IMAGE_CENTER gfx_center_idx
-IMAGE_RIGHT gfx_right_idx
+IMAGE_LEFT left
+IMAGE_CENTER center
+IMAGE_RIGHT right
 TEXT YELLOW GAMEOVER_FALLENDOWN
 PAUSE 0
 END_SCENE

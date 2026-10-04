@@ -51,7 +51,7 @@ void game_show_message(const char *message_id);
 void game_show_image(C2D_Image image);
 void game_minigame_start(const char *name);
 void game_minigame_stop(void);
-void game_wait_for_sfx(const char *sfx, void (*callback)(void));
+bool game_wait_for_sfx(const char *sfx, void (*callback)(void));
 void game_callback_register(const char *name, void (*callback)(void));
 void (*game_callback_find(const char *name))(void);
 void game_secret_code(void);

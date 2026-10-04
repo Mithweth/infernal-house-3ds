@@ -1,0 +1,65 @@
+# ---------------------------------------------------------------------------
+# Images
+# ---------------------------------------------------------------------------
+
+IMAGE bg 0 0 0
+END_IMAGE
+
+IMAGE carpet_moved 181 151 0.3
+	WHEN STATE_IS firstfloor_carpet_moved true
+END_IMAGE
+
+# ---------------------------------------------------------------------------
+# Hotspots
+# ---------------------------------------------------------------------------
+
+HOTSPOT FIRSTFLOOR_LARGE_PAINTING 46 34 49 51
+END_HOTSPOT
+
+HOTSPOT FIRSTFLOOR_SMALL_PAINTING 68 160 25 29
+END_HOTSPOT
+
+HOTSPOT FIRSTFLOOR_CARPET 229 165 82 46
+	ACTION
+		SET firstfloor_carpet_moved
+	END_ACTION
+END_HOTSPOT
+
+# ---------------------------------------------------------------------------
+# Exits
+# ---------------------------------------------------------------------------
+
+PATH NORTH
+	ACTION
+		WAIT_SFX wooden_stairs
+		ROOM secondfloor
+	END_ACTION
+END_PATH
+
+PATH EAST
+	ACTION
+		WAIT_SFX door_open
+		ROOM bathroom
+	END_ACTION
+END_PATH
+
+PATH SOUTHEAST
+	ACTION
+		WAIT_SFX door_open
+		ROOM secondbedroom
+	END_ACTION
+END_PATH
+
+PATH SOUTH
+	ACTION
+		WAIT_SFX wooden_stairs
+		ROOM diningroom
+	END_ACTION
+END_PATH
+
+PATH SOUTHWEST
+	ACTION
+		WAIT_SFX door_open
+		ROOM firstbedroom
+	END_ACTION
+END_PATH

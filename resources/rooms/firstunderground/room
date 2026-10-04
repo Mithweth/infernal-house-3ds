@@ -1,0 +1,92 @@
+# ---------------------------------------------------------------------------
+# Images
+# ---------------------------------------------------------------------------
+
+IMAGE bg 0 0 0
+END_IMAGE
+
+IMAGE shovel_taken 15 85 0.2
+	WHEN INVENTORY_HAS SHOVEL true
+END_IMAGE
+
+IMAGE sledgehammer_taken 46 83 0.2
+	WHEN INVENTORY_HAS SLEDGEHAMMER true
+END_IMAGE
+
+IMAGE hole_dug 261 174 0.3
+	WHEN STATE_IS underground_dug true
+	WHEN STATE_IS underground_card_taken false
+END_IMAGE
+
+IMAGE hole_empty 265 175 0.3
+	WHEN STATE_IS underground_dug true
+	WHEN STATE_IS underground_card_taken true
+END_IMAGE
+
+# ---------------------------------------------------------------------------
+# Hotspots
+# ---------------------------------------------------------------------------
+
+HOTSPOT UNDERGROUND_MAGNETIC_CARD 275 182 24 14
+	WHEN STATE_IS underground_card_taken false
+	WHEN STATE_IS underground_dug true
+	ACTION
+		SET underground_card_taken
+		INVENTORY_ADD MAGNETIC_CARD
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT UNDERGROUND_GROUND 284 176 12 12
+	WHEN STATE_IS underground_dug false
+    USE SHOVEL
+        SET underground_dug
+        MESSAGE UNDERGROUND_DIG
+    END_USE
+END_HOTSPOT
+
+HOTSPOT UNDERGROUND_X_FORM 141 190 17 16
+	MESSAGE UNDERGROUND_X_FORM_EXAMINE
+    USE MEASURING_TAPE
+        MINIGAME measure
+    END_USE
+END_HOTSPOT
+
+HOTSPOT UNDERGROUND_LADDER 132 32 104 176
+END_HOTSPOT
+
+HOTSPOT UNDERGROUND_SHOVEL 18 89 37 100
+	WHEN INVENTORY_HAS SHOVEL false
+	ACTION
+		INVENTORY_ADD SHOVEL
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT UNDERGROUND_SLEDGEHAMMER 53 84 35 102
+	WHEN INVENTORY_HAS SLEDGEHAMMER false
+	ACTION
+		INVENTORY_ADD SLEDGEHAMMER
+	END_ACTION
+END_HOTSPOT
+
+HOTSPOT UNDERGROUND_GROUND 45 171 275 68
+    USE SHOVEL
+        MESSAGE UNDERGROUND_DIG_ANYWHERE
+    END_USE
+END_HOTSPOT
+
+# ---------------------------------------------------------------------------
+# Exits
+# ---------------------------------------------------------------------------
+
+PATH EAST
+	ACTION
+		ROOM secondunderground
+	END_ACTION
+END_PATH
+
+PATH NORTH
+	ACTION
+		WAIT_SFX metal_ladder
+		ROOM cellar
+	END_ACTION
+END_PATH

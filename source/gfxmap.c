@@ -12,8 +12,10 @@ static GfxImageIndex image_indexes[GFX_MAX_IMAGES];
 static size_t image_index_count = 0;
 
 int gfxmap_get_index(const char *name) {
+	char index_name[256];
+	snprintf(index_name, sizeof(index_name), "gfx_%s_idx", name);
     for (size_t i = 0; i < image_index_count; i++) {
-        if (strcmp(image_indexes[i].name, name) == 0) {
+        if (strcmp(image_indexes[i].name, index_name) == 0) {
             return image_indexes[i].index;
         }
     }

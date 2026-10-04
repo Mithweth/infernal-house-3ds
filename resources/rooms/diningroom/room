@@ -1,0 +1,120 @@
+IMAGE bg 0 0 0
+END_IMAGE
+
+IMAGE laser_disabled 132 22 0.1
+WHEN STATE_IS diningroom_lasers_disabled true
+END_IMAGE
+
+IMAGE left_closet_opened 5 135 0.1
+WHEN STATE_IS diningroom_left_cabinet_door_opened true
+END_IMAGE
+
+IMAGE right_closet_opened 68 133 0.1
+WHEN STATE_IS diningroom_right_cabinet_door_opened true
+END_IMAGE
+
+IMAGE soup_opened 26 106 0.2
+WHEN STATE_IS diningroom_soup_opened true
+WHEN INVENTORY_HAS SCORE false
+END_IMAGE
+
+IMAGE soup_empty 26 106 0.2
+WHEN STATE_IS diningroom_soup_opened true
+WHEN INVENTORY_HAS SCORE true
+END_IMAGE
+
+
+HOTSPOT DINING_STAIRS 130 24 100 168
+WHEN STATE_IS diningroom_lasers_disabled false
+MESSAGE DINING_LASERS
+END_HOTSPOT
+
+HOTSPOT DINING_STAIRS 130 24 100 168
+END_HOTSPOT
+
+
+HOTSPOT DINING_SOUP 36 103 36 30
+WHEN STATE_IS diningroom_soup_opened true
+WHEN INVENTORY_HAS SCORE false
+MESSAGE DINING_SOUP_CONTENTS
+ACTION
+INVENTORY_ADD SCORE
+END_ACTION
+END_HOTSPOT
+
+HOTSPOT DINING_SOUP 36 103 36 30
+ACTION
+SET diningroom_soup_opened
+END_ACTION
+END_HOTSPOT
+
+
+HOTSPOT DINING_CABINET 5 135 60 75
+WHEN STATE_IS diningroom_left_cabinet_door_opened true
+MESSAGE DINING_LEFT_CABINET_CONTENTS
+ACTION
+SFX closet_close
+SET diningroom_left_cabinet_door_opened
+END_ACTION
+END_HOTSPOT
+
+HOTSPOT DINING_CABINET 66 134 55 60
+WHEN STATE_IS diningroom_right_cabinet_door_opened true
+MESSAGE DINING_RIGHT_CABINET_CONTENTS
+ACTION
+SFX closet_close
+SET diningroom_right_cabinet_door_opened
+END_ACTION
+END_HOTSPOT
+
+HOTSPOT DINING_CABINET 5 135 60 75
+ACTION
+SFX closet_open
+SET diningroom_left_cabinet_door_opened
+END_ACTION
+END_HOTSPOT
+
+HOTSPOT DINING_CABINET 66 134 55 60
+ACTION
+SFX closet_open
+SET diningroom_right_cabinet_door_opened
+END_ACTION
+END_HOTSPOT
+
+HOTSPOT DINING_CABINET 3 101 111 109
+END_HOTSPOT
+
+HOTSPOT DINING_CABINET 3 22 101 79
+MESSAGE DINING_UP_CABINET
+END_HOTSPOT
+
+HOTSPOT DINING_SWITCH 265 105 25 25
+END_HOTSPOT
+
+
+PATH NORTH
+ACTION
+WHEN STATE_IS diningroom_lasers_disabled false
+WAIT_SFX police_siren
+TIMELINE gameover_prison
+END_ACTION
+
+ACTION
+WHEN STATE_IS diningroom_lasers_disabled true
+WAIT_SFX wooden_stairs
+ROOM firstfloor
+END_ACTION
+END_PATH
+
+PATH WEST
+ACTION
+ROOM corridor
+END_ACTION
+END_PATH
+
+PATH EAST
+ACTION
+WAIT_SFX door_open
+ROOM hall
+END_ACTION
+END_PATH
