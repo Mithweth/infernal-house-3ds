@@ -9,6 +9,12 @@ END_IMAGE
 # Hotspots
 # ---------------------------------------------------------------------------
 
+HOTSPOT SECONDFLOOR_LAMP 67 41 26 38
+	USE SCREWDRIVER
+		MESSAGE USE_SCREWDRIVER_WITH_LAMP
+	END_USE
+END_HOTSPOT
+
 HOTSPOT SECONDFLOOR_DOOR 12 38 52 170
 	WHEN STATE_IS secondfloor_door_unlocked true
 	MESSAGE SECONDFLOOR_DOOR_UNLOCKED
