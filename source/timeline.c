@@ -5,16 +5,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include "audio.h"
 #include "lang.h"
 #include "game.h"
 #include "gfxmap.h"
+#include "str_utils.h"
 
-#define TIMELINE_MAX_EVENTS       256
-#define TIMELINE_MAX_SPRITES       16
-
-#define TIMELINE_CHAR_DELAY      100
+#define TIMELINE_MAX_EVENTS   256
+#define TIMELINE_MAX_SPRITES  16
+#define TIMELINE_CHAR_DELAY   100
 
 typedef enum {
     TIMELINE_TEXT,
@@ -76,24 +75,6 @@ static TimelineEvent events[TIMELINE_MAX_EVENTS];
 static size_t event_count = 0;
 
 
-static char *trim(char *str) {
-    while (*str && isspace((unsigned char)*str)) {
-        str++;
-    }
-
-    if (*str == '\0') {
-        return str;
-    }
-
-    char *end = str + strlen(str) - 1;
-
-    while (end > str && isspace((unsigned char)*end)) {
-        *end-- = '\0';
-    }
-
-    return str;
-}
-
 static TimelineTextColor parse_color(const char *str) {
     if (strcmp(str, "WHITE") == 0) {
         return TIMELINE_COLOR_WHITE;
@@ -142,7 +123,7 @@ static bool load_timeline(const char *filename) {
 
     while (fgets(line, sizeof(line), f)) {
         line_number++;
-        char *p = trim(line);
+        char *p = str_trim(line);
 
         if (*p == '\0' || *p == '#') {
             continue;
