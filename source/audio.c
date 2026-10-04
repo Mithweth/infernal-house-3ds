@@ -1,4 +1,9 @@
 // audio.c
+// Implementation notes: the music streams on NDSP channel 0 through
+// BUFFER_COUNT wave buffers of SAMPLES_PER_BUFFER frames, decoded with Tremor
+// and refilled from audio_update() in the main loop. Effects use channels 1-4,
+// each sample loaded entirely in linear memory. The piano mini-game drives
+// channels 5-10 itself.
 #include <3ds.h>
 #include <stdio.h>
 #include <string.h>
@@ -15,6 +20,8 @@
 #define SAMPLES_PER_BUFFER  4096
 #define BUFFER_COUNT        2
 
+// One sound-effect channel. sample is non-NULL while the effect is playing;
+// sfx_update frees it once the DSP has finished with the buffer.
 typedef struct {
     s16 *sample;
     ndspWaveBuf wavebuf;
@@ -22,6 +29,8 @@ typedef struct {
 
 static SfxChannel channels[SFX_CHANNEL_LAST - SFX_CHANNEL_FIRST + 1];
 
+// Music decoder state. ov_clear() also closes ogg_file, which is why the file
+// is never fclose'd directly once ov_open has succeeded.
 static OggVorbis_File ogg;
 static FILE *ogg_file = NULL;
 
@@ -32,8 +41,12 @@ static int music_channels;
 static long sample_rate;
 
 static bool music_playing = false;
+// False when ndspInit failed: public functions then return early, so the game
+// runs silently and WAIT_SFX doesn't wait for a sound that never ends.
 static bool audio_available = false;
 
+// Decodes up to SAMPLES_PER_BUFFER frames into buf, seeking back to the start
+// at end of stream so the music loops. Returns false if nothing was decoded.
 static bool fill_buffer(ndspWaveBuf *buf) {
     const size_t bytes_per_frame = music_channels * sizeof(s16);
     const size_t buffer_size = SAMPLES_PER_BUFFER * bytes_per_frame;
@@ -101,6 +114,8 @@ bool music_play(const char *filename) {
 
     const size_t buffer_size = SAMPLES_PER_BUFFER * bytes_per_frame;
 
+// The DSP reads samples by DMA: buffers must live in linear memory and be
+// flushed from the data cache once written (see fill_buffer).
     audio_buffer = linearAlloc(buffer_size * BUFFER_COUNT);
 
     if (!audio_buffer) {
@@ -195,6 +210,7 @@ int sfx_play(const char *filename) {
 
     ndspChnReset(channel);
     ndspChnSetInterp(channel, NDSP_INTERP_LINEAR);
+// Effects are headerless PCM: mono, signed 16-bit, 22050 Hz.
     ndspChnSetRate(channel, 22050.0f);
     ndspChnSetFormat(channel, NDSP_FORMAT_MONO_PCM16);
 
@@ -208,6 +224,9 @@ int sfx_play(const char *filename) {
     return channel;
 }
 
+// Requeues every music buffer the DSP has finished playing. At 44.1 kHz a
+// buffer lasts about 93 ms, so a frame that blocks longer than that (e.g. a
+// room load) can make the music stutter.
 static void music_update(void) {
     if (!music_playing) {
         return;
@@ -224,6 +243,8 @@ static void music_update(void) {
     }
 }
 
+// Frees the sample of every finished effect, which makes its channel available
+// to sfx_play and makes sfx_is_playing return false.
 static void sfx_update(void) {
     for (int i = SFX_CHANNEL_FIRST; i <= SFX_CHANNEL_LAST; i++) {
         SfxChannel *sfx = &channels[i - SFX_CHANNEL_FIRST];

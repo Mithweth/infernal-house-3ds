@@ -1,4 +1,7 @@
 // gamestate.c
+// Fixed-size table of named boolean flags loaded from game.state.
+// Lookups are linear strcmp scans: the table is small (GAMESTATE_MAX) and
+// conditions are re-evaluated every frame by room_draw() and the HUD.
 
 #include "gamestate.h"
 #include "str_utils.h"
@@ -76,6 +79,7 @@ bool gamestate_init(const char *filename) {
             return false;
         }
 
+        // All flags start false; gamestate_reset() restores that state.
         GameState *state = &states[state_count++];
 
         state->name = strdup(name);
@@ -111,10 +115,13 @@ void gamestate_set(const char *name) {
         return;
     }
 
+    // KEEP flags are one-way: once true they never go back to false.
     if (state->type == GAMESTATE_KEEP && state->value) {
         return;
     }
 
+    // TOGGLE flags invert on every set, so scripts calling SET twice on the
+    // same flag end up where they started.
     state->value = !state->value;
 }
 

@@ -1,4 +1,8 @@
 // title.c
+// Title screen implementation. The menu entries are translation keys looked
+// up on every frame, so switching language (lang_next) takes effect at once.
+// Assets are loaded by title_init and released by title_close (called when
+// a game or the intro starts).
 
 #include <3ds.h>
 #include <citro2d.h>
@@ -16,12 +20,14 @@ typedef enum {
     TITLE_COUNT
 } TitleChoice;
 
+// Sub-page currently shown instead of the menu.
 typedef enum {
     OPTION_NONE,
     OPTION_CONTROLS,
     OPTION_CREDITS
 } OptionChoice;
 
+// One credits line: a translated role and an untranslated name.
 typedef struct {
     const char *role_id;
     const char *name;
@@ -41,6 +47,7 @@ static C2D_Image img_dpad;
 static C2D_Image img_touch;
 static C2D_Text version_text;
 
+// Translation keys of the menu entries, in TitleChoice order.
 static const char *choices[] = {
     "LANG_NAME",
     "TITLE_INTRO",
@@ -98,6 +105,7 @@ void title_init(void) {
 }
 
 void title_update(u32 keys) {
+    // While the controls or credits page is open, A or B only closes it.
     if (option != OPTION_NONE) {
         if (keys & (KEY_A | KEY_B)) {
             sfx_play("romfs:/audio/title_choice.raw");
@@ -106,6 +114,7 @@ void title_update(u32 keys) {
         return;
     }
 
+    // KEY_UP / KEY_DOWN match both the D-pad and the circle pad.
     if (keys & KEY_UP) {
         if (selected == 0) {
             selected = TITLE_COUNT - 1;
@@ -205,6 +214,8 @@ static void title_draw_menu(void) {
         } else {
             color = C2D_Color32(64, 64, 64, 255);
         }
+        // Each entry is drawn right after being parsed, so the buffer can be
+        // cleared and reused for the next one.
         C2D_TextBufClear(text_buf);
         C2D_TextParse(&text[i], text_buf, lang_get(choices[i]));
         C2D_TextOptimize(&text[i]);

@@ -1,4 +1,7 @@
 // gfxmap.c
+// Global sprite name -> spritesheet index table, filled from tex3ds headers.
+// There is a single table for the whole game: each gfxmap_load() replaces
+// it, so callers resolve their images immediately after loading.
 #include <citro2d.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -11,6 +14,8 @@
 static GfxImageIndex image_indexes[GFX_MAX_IMAGES];
 static size_t image_index_count = 0;
 
+// Callers pass the short PNG name; tex3ds names the macros gfx_<name>_idx
+// because every header is generated from a file named gfx.t3s.
 int gfxmap_get_index(const char *name) {
 	char index_name[256];
 	snprintf(index_name, sizeof(index_name), "gfx_%s_idx", name);
@@ -39,6 +44,7 @@ bool gfxmap_load(const char *filename) {
         return false;
     }
 
+    // Drop the previous table: indexes are only valid for this header.
     image_index_count = 0;
 
     char line[256];
@@ -52,6 +58,8 @@ bool gfxmap_load(const char *filename) {
             continue;
         }
 
+        // Keep only "#define <name>_idx <n>" lines; anything else in the
+        // header is ignored.
         if (strcmp(directive, "#define") != 0) {
             continue;
         }

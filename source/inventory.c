@@ -1,4 +1,9 @@
 // inventory.c
+// Implementation notes: items[] is the catalogue parsed from the inventory
+// file; inventory[] holds pointers into it for the items the player carries,
+// in pickup order. Images are resolved while parsing because gfxmap keeps a
+// single global index table, overwritten by the next gfxmap_load (room,
+// timeline, mini-game...).
 #include <citro2d.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -35,6 +40,7 @@ static C2D_Image img_selected;
 static C2D_Image img_background;
 static InventoryMode inventory_mode = INVENTORY_NORMAL;
 
+// Looks an item up in the catalogue, whether the player holds it or not.
 static Item *inventory_find(const char *id) {
     for (size_t i = 0; i < item_count; i++) {
         if (strcmp(items[i].id, id) == 0) {
@@ -45,6 +51,7 @@ static Item *inventory_find(const char *id) {
     return NULL;
 }
 
+// Appends a catalogue entry; returns NULL when the catalogue is full.
 static Item *add_item(const char *id, const char *name_id) {
     if (item_count >= ITEM_MAX) {
         return NULL;
@@ -56,6 +63,8 @@ static Item *add_item(const char *id, const char *name_id) {
     return item;
 }
 
+// Parses the ITEM <id> <name_id> ... END_ITEM blocks of the catalogue file.
+// On error, logs file:line and returns false with an empty catalogue.
 static bool load_inventory(const char *filename) {
     FILE *f = fopen(filename, "r");
 
@@ -135,6 +144,7 @@ static bool load_inventory(const char *filename) {
                 item->use_callback = callbacks_inventory_find(cb);
                 continue;
             }
+// DETAIL <image> <x> <y> [FULLSCREEN]
             if (strcmp(command, "DETAIL") == 0) {
                 char *image_id = strtok(NULL, " ");
                 if (!image_id) {
@@ -228,6 +238,7 @@ static bool load_inventory(const char *filename) {
 
 bool inventory_update(u32 keys) {
     if (inventory_mode == INVENTORY_ACTION) {
+// While examining, every key is swallowed; only X or B leave the view.
         if ((keys & KEY_X) || (keys & KEY_B)) {
             inventory_mode = INVENTORY_NORMAL;
         }
@@ -256,6 +267,7 @@ bool inventory_update(u32 keys) {
     }
 
 
+// Up/down move by one grid row, clamped to the first/last item.
     if (keys & KEY_DDOWN) {
         selected += INVENTORY_COLUMNS;
 
@@ -282,6 +294,8 @@ bool inventory_update(u32 keys) {
         return true;
     }
 
+// A uses the selected item: its use_callback if it has one, otherwise the
+// USE blocks of the current target (game_use_item).
     if (keys & KEY_A) {
         if (item && item->use_callback) {
             item->use_callback();
@@ -313,11 +327,14 @@ void inventory_draw(void) {
             C2D_TextOptimize(&text);
             C2D_DrawText(&text, C2D_WithColor, 20.0f, 62.0f, 0.5f, 0.55f, 0.55f, C2D_Color32(192, 192, 192, 255));
         }
+// Extra drawing provided by an extension, e.g. the generated secret code.
         if (item->examine_callback) {
             item->examine_callback();
         }
         return;
     }
+// Only INVENTORY_ROWS rows fit: show the selected row and the one above it
+// (rows 0-1 while the selection is on the first row).
     int selected_row = selected / INVENTORY_COLUMNS;
     int first_row = selected_row > 0 ? selected_row - 1 : 0;
     size_t first = first_row * INVENTORY_COLUMNS;
@@ -439,6 +456,8 @@ bool inventory_init(void) {
         return false;
     }
 
+// Looked up right after load_inventory, while gfxmap still holds the
+// inventory's gfx.h.
     int img_idx = gfxmap_get_index("selected");
     if (img_idx < 0) {
         printf("unknown image: selected\n");
@@ -473,6 +492,8 @@ void inventory_close(void) {
         free(items[i].name_id);
         free(items[i].examine_text);
     }
+// Resetting item_count makes a second call harmless: hud_init closes the
+// inventory on failure, and game_close closes it again.
     item_count = 0;
     if (inventory_assets) {
         C2D_SpriteSheetFree(inventory_assets);

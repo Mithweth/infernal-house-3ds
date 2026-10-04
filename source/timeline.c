@@ -1,5 +1,10 @@
 // timeline.c
 
+// Implementation notes: the whole script is parsed up front into events[];
+// timeline_update then runs the current event, so each instant event (music,
+// image, scene change...) takes one frame. Images and sprites are resolved at
+// load time from the timeline's own spritesheet, because the gfxmap table is
+// global. Script format: docs/TIMELINES.en.md.
 #include <citro2d.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -54,6 +59,11 @@ typedef struct {
     char *sound;
 } TimelineEvent;
 
+// Typewriter state. event_pos is the byte offset reached in the current TEXT
+// string; text_position is the length of current_str, which accumulates every
+// TEXT of the scene until END_SCENE. previous_str is current_str minus the last
+// character typed: it is drawn in the event color over current_str (drawn in
+// light grey), so the newest character stands out.
 static size_t event_pos = 0;
 static size_t text_position = 0;
 static char current_str[2048];
@@ -65,7 +75,10 @@ static u32 current_color;
 
 static size_t current_event;
 static u64 next_char_time;
+// 0 when no PAUSE is running.
 static u64 pause_start;
+// Set by FULL_SCREEN until END_SCENE: its sprites replace the text and the
+// left/center/right images.
 static const TimelineEvent *active_full_screen = NULL;
 static C2D_Image image_left;
 static C2D_Image image_center;
@@ -75,6 +88,7 @@ static TimelineEvent events[TIMELINE_MAX_EVENTS];
 static size_t event_count = 0;
 
 
+// Unknown color names fall back to white.
 static TimelineTextColor parse_color(const char *str) {
     if (strcmp(str, "WHITE") == 0) {
         return TIMELINE_COLOR_WHITE;
@@ -94,6 +108,7 @@ static TimelineTextColor parse_color(const char *str) {
     return TIMELINE_COLOR_WHITE;
 }
 
+// Appends a zeroed event; returns NULL when TIMELINE_MAX_EVENTS is reached.
 static TimelineEvent *add_event(TimelineEventType type) {
     if (event_count >= TIMELINE_MAX_EVENTS) {
         return NULL;
@@ -106,6 +121,8 @@ static TimelineEvent *add_event(TimelineEventType type) {
     return event;
 }
 
+// Parses the script into events[]. The script must end with END: a missing
+// END, an unknown command or a full event table makes the load fail.
 static bool load_timeline(const char *filename) {
     FILE *f = fopen(filename, "r");
 
@@ -135,6 +152,7 @@ static bool load_timeline(const char *filename) {
             continue;
         }
 
+// Inside FULL_SCREEN ... END_FULL_SCREEN, only SPRITE lines are allowed.
         if (full_screen) {
             if (strcmp(command, "SPRITE") == 0) {
                 char *image_name = strtok(NULL, " ");
@@ -364,6 +382,8 @@ static bool load_timeline(const char *filename) {
     return false;
 }
 
+// Byte length of the UTF-8 character starting at s, so the typewriter never
+// splits a multi-byte character.
 static size_t utf8_char_size(const char *s) {
     unsigned char c = *s;
 
@@ -375,6 +395,7 @@ static size_t utf8_char_size(const char *s) {
     return 1;
 }
 
+// Re-parses both strings; called whenever they change, not every frame.
 static void update_text(void) {
     C2D_TextBufClear(text_buf);
     C2D_TextParse(&text_current, text_buf, current_str);
@@ -390,6 +411,9 @@ void timeline_update(u32 keys) {
     }
     const TimelineEvent *event = &events[current_event];
 
+// A only skips blocking events: the rest of a TEXT appears at once, a PAUSE
+// ends. Instant events must still run through the switch below, so A is
+// ignored on them.
     if ((keys & KEY_A) && (event->type == TIMELINE_TEXT || event->type == TIMELINE_PAUSE)) {
         if (event->type == TIMELINE_TEXT) {
             const char *str = lang_get(event->text);
@@ -451,6 +475,7 @@ void timeline_update(u32 keys) {
 
             if (str[event_pos] != '\0') {
                 size_t len = utf8_char_size(&str[event_pos]);
+// Script error: the scene's text doesn't fit. Drop the rest of this TEXT.
                 if (text_position + len >= sizeof(current_str)) {
                     printf("Timeline text buffer overflow\n");
                     event_pos = 0;
@@ -474,6 +499,7 @@ void timeline_update(u32 keys) {
         break;
 
     case TIMELINE_PAUSE:
+// duration is in milliseconds; PAUSE 0 waits until the player presses A.
         if (event->duration == 0) {
             break;
         }
@@ -519,6 +545,7 @@ void timeline_update(u32 keys) {
         current_event++;
         break;
 
+// Back to the title screen; game_init also closes this timeline.
     case TIMELINE_END:
         game_init();
         return;
@@ -546,6 +573,8 @@ void timeline_draw_top(void) {
             float z = i * 0.01f;
             const TimelineSprite *sprite = &active_full_screen->sprites[i];
             if ((sprite->image.tex) && (sprite->y < 240.0f)) {
+// Sprite coordinates treat both screens as one 320x480 area: y < 240 is the
+// top screen, 400 px wide, hence the 40 px offset to center it.
                 C2D_DrawImageAt(sprite->image, sprite->x + 40.0f, sprite->y, z, NULL, 1.0f, 1.0f);
             }
         }

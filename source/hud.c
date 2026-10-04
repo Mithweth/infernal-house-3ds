@@ -1,4 +1,8 @@
 // hud.c
+// Implementation notes: unlike the room graphics loaded from romfs, the HUD
+// spritesheet is embedded in the executable (gfx_hud_t3x). All HUD text is
+// re-parsed into text_buf every frame. The countdown lasts TIME_MAX_SECONDS
+// of game time, measured with osGetTime().
 #include <3ds.h>
 #include <citro2d.h>
 #include <citro3d.h>
@@ -26,6 +30,9 @@ static C2D_Image img_arrow_sw;
 static C2D_Image img_arrow_se;
 static C2D_TextBuf text_buf;
 static C2D_Text text;
+// Game time already spent, in milliseconds. last_time is the osGetTime() value
+// at the previous update; timer_resume resets it after a suspension so the time
+// spent in the home menu or in sleep mode isn't counted.
 static u64 elapsed_time;
 static u64 last_time;
 static bool time_up_triggered;
@@ -46,6 +53,7 @@ void timer_resume(void) {
     last_time = osGetTime();
 }
 
+// Fake bold: draws the text twice, one pixel apart.
 static void draw_bold_text(C2D_Text *text, float x, float y, float z, float sx, float sy, u32 color) {
     C2D_DrawText(text, C2D_WithColor, x, y, z, sx, sy, color);
     C2D_DrawText(text, C2D_WithColor, x + 1.0f, y, z, sx, sy, color);
@@ -62,6 +70,8 @@ static void selected_item_draw(void) {
     }
 }
 
+// Doesn't clear text_buf: it appends to what background_draw parsed earlier in
+// the same hud_draw call.
 static void target_draw(void) {
     const char* target_name = game_target_name();
     if (target_name) {
@@ -86,6 +96,7 @@ static void background_draw(void) {
     draw_bold_text(&text, 115.0f, 52.0f, 0.3f, 0.5f, 0.5f, C2D_Color32(0, 0, 0, 255));
 }
 
+// Shows the remaining time, clamped at 0 while the time-up sequence plays.
 static void timer_draw() {
     int total_seconds = TIME_MAX_SECONDS - elapsed_time / 1000;
     if (total_seconds < 0) {
@@ -101,6 +112,7 @@ static void timer_draw() {
     draw_bold_text(&text, 335.0f, 23.0f, 0.7f, 0.4f, 0.4f, C2D_Color32(128, 128, 128, 255));
 }
 
+// Lights an arrow for every direction the current room allows.
 static void movement_draw(void) {
     C2D_DrawImageAt(img_directions, 303.0f, 51.0f, 0.0f, NULL, 1.0f, 1.0f);
     if (room_can_move_north()) {
@@ -167,6 +179,8 @@ void hud_reset(void) {
     timer_start();
 }
 
+// Runs once the footsteps effect has finished, or immediately if it couldn't
+// be played.
 static void gameover_timeup(void) {
     game_timeline_start("gameover_timeup");
 }

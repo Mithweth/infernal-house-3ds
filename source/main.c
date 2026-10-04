@@ -1,4 +1,9 @@
 // main.c
+// Program entry point: initializes the 3DS services and every engine module,
+// runs the main loop (input -> audio -> game update -> draw) until START is
+// pressed or the system asks the application to quit, then tears everything
+// down in reverse order. Built with DEBUG, stdout/stderr are sent over the
+// network to 3dslink.
 #include <citro2d.h>
 #include <stdlib.h>
 #include <3ds.h>
@@ -10,6 +15,8 @@
 #include "gamestate.h"
 
 #ifdef DEBUG
+
+// Redirects stdout/stderr to the 3dslink host (run with `3dslink -s`).
 
 #include <malloc.h>
 #include <unistd.h>
@@ -47,6 +54,8 @@ static void debug_close(void) {}
 
 static aptHookCookie apt_cookie;
 
+// When the game comes back from the HOME menu or from sleep mode, restart the
+// timer's reference time so the time spent away is not counted.
 static void apt_callback(APT_HookType hook, void *param) {
     if (hook == APTHOOK_ONRESTORE || hook == APTHOOK_ONWAKEUP) {
         timer_resume();
@@ -71,13 +80,17 @@ int main(int argc, char **argv) {
     C3D_RenderTarget *top = C2D_CreateScreenTarget(GFX_TOP, GFX_LEFT);
     C3D_RenderTarget *bottom = C2D_CreateScreenTarget(GFX_BOTTOM, GFX_LEFT);
     aptHook(&apt_cookie, apt_callback, NULL);
+    // audio_init never fails: without a DSP firmware the game runs silently.
     audio_init();
+    // The HUD (and the inventory it owns) is loaded once for the whole run;
+    // game_init can then be called again on every return to the title screen.
     if (hud_init()) {
         game_init();
     } else {
         printf("Cannot initialize HUD\n");
         ret = 1;
     }
+    // ret != 0 means initialization failed: skip the loop and clean up.
     while (ret == 0 && aptMainLoop()) {
         hidScanInput();
         u32 keys = hidKeysDown();
@@ -99,6 +112,7 @@ int main(int argc, char **argv) {
         C3D_FrameEnd(0);
     }
 
+    // game_close also closes the HUD, which must happen before C2D_Fini.
     aptUnhook(&apt_cookie);
     gamestate_close();
     audio_close();

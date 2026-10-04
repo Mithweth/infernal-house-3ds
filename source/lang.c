@@ -1,4 +1,8 @@
 // lang.c
+// Implementation notes: lang_init reads each file only up to its ORDER key to
+// sort the languages; lang_load then parses the current one fully. Lookups are
+// a linear search over the loaded keys. Values may contain \n escapes, which
+// are turned into new lines.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -28,12 +32,14 @@ static Translation translations[MAX_TRANSLATIONS];
 static size_t translation_count = 0;
 static const char *LANG_DIR = "romfs:/lang";
 
+// qsort comparator: ascending ORDER (a file without ORDER sorts as 0).
 static int compare_languages(const void *a, const void *b) {
     const Language *lang_a = a;
     const Language *lang_b = b;
     return lang_a->order - lang_b->order;
 }
 
+// Replaces each two-character sequence \n with a newline, in place.
 static void unescape(char *str) {
     char *src = str;
     char *dst = str;
@@ -58,6 +64,8 @@ void lang_close(void) {
     translation_count = 0;
 }
 
+// Loads the language at current_language, replacing the current translations.
+// If the file can't be opened, the previous translations stay loaded.
 static bool lang_load(void) {
     Language *lang = &languages[current_language];
     FILE *file = fopen(lang->filename, "r");
@@ -168,6 +176,7 @@ bool lang_init(void) {
                 continue;
             }
             if (strcmp(key, "ORDER") == 0) {
+// Only ORDER is needed here; lang_load parses the full file later.
                 lang->order = atoi(value);
                 break;
             }
@@ -186,5 +195,7 @@ const char *lang_get(const char *key) {
         if (strcmp(translations[i].key, key) == 0)
             return translations[i].value;
     }
+// Missing keys fall back to the key itself, so untranslated text shows up on
+// screen instead of crashing.
     return key;
 }

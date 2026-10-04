@@ -1,4 +1,5 @@
 // str_utils.c
+// See str_utils.h.
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>

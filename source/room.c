@@ -1,3 +1,8 @@
+// room.c
+// Room loading, drawing and action execution. The current room is a single
+// heap-allocated Room owned by this module (NULL when none is loaded).
+// See docs/ROOMS.en.md for the room script format and its semantics.
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,8 +15,12 @@
 #include "audio.h"
 #include "str_utils.h"
 
+// The currently loaded room, or NULL.
 static Room *room = NULL;
 
+// Remaining actions of a block interrupted by WAIT_SFX. game.c calls
+// continue_actions() once the sound is over to resume at `next`. The
+// pointer refers to arrays inside the room, so room_close() clears it.
 typedef struct {
     RoomAction *actions;
     size_t count;
@@ -22,6 +31,8 @@ static PendingActions pending_actions;
 
 static void continue_actions(void);
 
+// Build a condition from a WHEN directive. On an unknown type, returns a
+// condition with a NULL name, which the parser treats as a load error.
 static RoomCondition condition_add(const char *type, const char *name, const char *value) {
     RoomCondition condition = {0};
 
@@ -39,10 +50,13 @@ static RoomCondition condition_add(const char *type, const char *name, const cha
     return condition;
 }
 
+// Free the strings owned by a condition, action or action block.
 static void condition_remove(RoomCondition *condition) {
     free(condition->name);
 }
 
+// Build an action from a directive and its argument. On an unknown command
+// or a missing argument, returns an action with a NULL argument (load error).
 static RoomAction action_add(const char *command, const char *argument) {
     RoomAction action = {0};
 
@@ -91,6 +105,7 @@ static void action_block_remove(RoomActionBlock *block) {
     }
 }
 
+// Path of `room` for a PATH direction keyword, or NULL if invalid.
 static Path *get_path(Room *room, const char *direction) {
     if (strcmp(direction, "NORTH") == 0) {
         return &room->north;
@@ -127,6 +142,10 @@ static Path *get_path(Room *room, const char *direction) {
     return NULL;
 }
 
+// Parse a room script into the already allocated `room`. The parser is
+// line-based: each line starts with a directive, blocks are opened by
+// IMAGE/HOTSPOT/PATH/ACTION/USE and closed by the matching END_*. Any error
+// stops the load and returns false; room_init() then frees the room.
 static bool load_room(const char *filename) {
     if (!room) {
         return NULL;
@@ -141,6 +160,8 @@ static bool load_room(const char *filename) {
 
     char line[512];
 
+    // Currently open blocks. They are tracked independently, so the parser
+    // does not check proper nesting: a missing END_* leaves a block open.
     RoomImage *image = NULL;
     Hotspot *hotspot = NULL;
     Path *path = NULL;
@@ -185,6 +206,8 @@ static bool load_room(const char *filename) {
             image = &room->images[room->image_count++];
             memset(image, 0, sizeof(*image));
 
+            // An unknown image name only prints a warning and leaves an empty
+            // image (tex == NULL) in the room, so check the log when adding one.
             image->image = gfxmap_get_image(room->assets, image_name);
             image->x = atof(x);
             image->y = atof(y);
@@ -259,6 +282,7 @@ static bool load_room(const char *filename) {
             continue;
         }
 
+        // ACTION belongs to the open hotspot first, otherwise to the open path.
         if (strcmp(command, "ACTION") == 0) {
             if (hotspot) {
                 if (hotspot->action_block_count >= ROOM_MAX_ACTION_BLOCKS) {
@@ -335,6 +359,8 @@ static bool load_room(const char *filename) {
                 return false;
             }
 
+            // Attach the condition to the innermost open block, in this order of
+            // precedence: action block > use > image > hotspot > path.
             if (action_block) {
                 if (action_block->condition_count >= ROOM_MAX_CONDITIONS) {
                     printf("%s:%zu: too many ACTION conditions\n", filename, line_number);
@@ -390,6 +416,8 @@ static bool load_room(const char *filename) {
             continue;
         }
 
+        // MESSAGE directly inside a HOTSPOT (not in ACTION/USE) is the
+        // hotspot's first-touch message; elsewhere it is a regular action.
         if (strcmp(command, "MESSAGE") == 0 && hotspot && !action_block && !use) {
 
             char *message = strtok(NULL, " ");
@@ -403,6 +431,7 @@ static bool load_room(const char *filename) {
             continue;
         }
 
+        // Inside ACTION or USE, any other directive is an action.
         if (action_block || use) {
             char *argument = strtok(NULL, " ");
 
@@ -445,6 +474,10 @@ static bool load_room(const char *filename) {
     return true;
 }
 
+// Run actions[start..count). Returns true when the action flow ended early:
+// a mode-changing action (ROOM, TIMELINE, MINIGAME) or a WAIT_SFX that will
+// resume later through continue_actions(). Callers must then stop running
+// further blocks, since the game mode (and possibly the room) has changed.
 static bool execute_actions(RoomAction *actions, size_t count, size_t start) {
     char path[256];
     for (size_t c = start; c < count; c++) {
@@ -471,6 +504,8 @@ static bool execute_actions(RoomAction *actions, size_t count, size_t start) {
             pending_actions.actions = actions;
             pending_actions.count = count;
             pending_actions.next = c + 1;
+            // Save where to resume before handing control to game.c; if the
+            // sound can't be played, forget it and keep going immediately.
             if (game_wait_for_sfx(path, continue_actions)) {
                 return true;
             }
@@ -479,6 +514,7 @@ static bool execute_actions(RoomAction *actions, size_t count, size_t start) {
             pending_actions.next = 0;
             break;
         case ROOM_ACTION_ROOM:
+            // Frees the current room: `actions` must not be touched after this.
             game_set_room(action->argument);
             return true;
         case ROOM_ACTION_TIMELINE:
@@ -492,6 +528,7 @@ static bool execute_actions(RoomAction *actions, size_t count, size_t start) {
     return false;
 }
 
+// True if every condition matches (an empty list always matches).
 static bool match_conditions(RoomCondition *conditions, size_t count) {
     for (size_t c = 0; c < count; c++) {
         RoomCondition *condition = &conditions[c];
@@ -509,6 +546,10 @@ static bool match_conditions(RoomCondition *conditions, size_t count) {
     return true;
 }
 
+// ACTION blocks are sequential, not alternatives: every block whose
+// conditions match runs, in declaration order, and conditions are evaluated
+// when each block is reached, so an earlier block can enable or disable a
+// later one. Stops early if a block ends the action flow.
 static void execute_action_blocks(RoomActionBlock *action_blocks, size_t count) {
     for (size_t i = 0; i < count; i++) {
         RoomActionBlock *action_block = &action_blocks[i];
@@ -523,6 +564,8 @@ static void execute_action_blocks(RoomActionBlock *action_blocks, size_t count) 
     }
 }
 
+// Callback passed to game_wait_for_sfx(): resumes the interrupted block.
+// Only the rest of that block runs; following ACTION blocks are not resumed.
 static void continue_actions(void) {
     RoomAction *actions = pending_actions.actions;
     size_t count = pending_actions.count;
@@ -535,6 +578,7 @@ static void continue_actions(void) {
     }
 }
 
+// A path is usable if it was declared in the script and its conditions match.
 static bool path_is_available(Path *path) {
     if (!path->exists) {
         return false;
@@ -613,6 +657,7 @@ bool room_execute_hotspot_use(Hotspot *hotspot, const char *id) {
         if (!match_conditions(use->conditions, use->condition_count)) {
             continue;
         }
+        // USE blocks are alternatives: only the first match runs.
         execute_actions(use->actions, use->action_count, 0);
         return true;
     }
@@ -739,6 +784,7 @@ void room_close(void) {
         return;
     }
 
+    // The pending WAIT_SFX continuation points into this room's memory.
     pending_actions.actions = NULL;
     pending_actions.count = 0;
     pending_actions.next = 0;

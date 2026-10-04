@@ -1,4 +1,8 @@
 // game.c
+// Game controller: the GameMode state machine, room input (circle pad
+// movement, touch on hotspots, inventory keys), the message box, and the
+// glue used by room actions and extensions to change mode. See game.h for the
+// public API.
 #include <3ds.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,13 +20,21 @@
 # define GAME_CALLBACK_MAX 8
 
 static GameMode game_mode = GAME_NORMAL;
+// Circle pad must go back to the dead zone before the next move is accepted,
+// so holding the stick only moves one room.
 static bool circle_ready = true;
+// Last hotspot touched; a second touch on it runs its actions (see update_touch).
 static Hotspot *active_hotspot = NULL;
+// Hotspot shown in the HUD and used as the target of inventory items.
+// Both pointers point into the current room and are reset by game_set_room.
 static Hotspot *target = NULL;
+// Message shown in GAME_MESSAGE; when examine_image is set, it is shown
+// instead of the text.
 static const char *message_text = NULL;
 static C2D_Image examine_image;
 static C2D_TextBuf text_buf;
 static C2D_Text text;
+// Called once the GAME_BUSY sound effect has finished playing.
 static void (*game_busy_callback)(void) = NULL;
 static MiniGame *active_minigame = NULL;
 static int game_busy_sfx_channel = -1;
@@ -54,6 +66,8 @@ void game_minigame_stop(void) {
 }
 
 void game_set_room(const char *name) {
+    // name usually comes from a ROOM action owned by the current room, which
+    // room_close is about to free: copy it first.
     char room_name[64];
     snprintf(room_name, sizeof(room_name), "%s", name);
     room_close();
@@ -75,6 +89,10 @@ void game_close(void) {
     hud_close();
 }
 
+// An action may have hidden the target since it was selected (its WHEN
+// conditions no longer match). Fall back to an available hotspot with the same
+// id, e.g. an open door replacing a closed one, or to no target at all.
+// Called lazily wherever target is read, so every path is covered.
 static void refresh_target(void) {
     if (target && !room_hotspot_is_available(target)) {
         target = room_find_hotspot_by_id(target->id);
@@ -144,6 +162,9 @@ void game_intro(void) {
     game_mode = GAME_TIMELINE;
 }
 
+// Turns the circle pad position into one of eight directions. A direction is
+// a cardinal one when one axis is more than twice the other, otherwise a
+// diagonal. Only one move is made per push of the stick.
 static void update_movement(circlePosition analog) {
     const int DEADZONE = 60;
 
@@ -203,6 +224,10 @@ static void update_movement(circlePosition analog) {
     }
 }
 
+// Handles a tap on the room. The first tap on a hotspot selects it as target
+// and, if it has a MESSAGE, only shows that message; tapping the same hotspot
+// again runs its ACTION blocks. Hotspots without a MESSAGE run their actions
+// on the first tap.
 static void update_touch(touchPosition touch) {
     if (active_hotspot && !room_hotspot_is_available(active_hotspot)) {
         active_hotspot = NULL;
@@ -229,6 +254,8 @@ static void update_touch(touchPosition touch) {
 }
 
 
+// Draws the room on the bottom screen, plus the examine image or the message
+// box when in GAME_MESSAGE. The text is parsed again on every frame.
 static void game_draw_room(void) {
     room_draw();
     if (game_mode == GAME_MESSAGE) {
@@ -309,6 +336,8 @@ void game_update(u32 keys, circlePosition analog, touchPosition touch) {
 
         case GAME_BUSY:
             hud_update();
+            // The callback is cleared before being called because it may
+            // start a new wait (e.g. the next WAIT_SFX of a room action list).
             if (!sfx_is_playing(game_busy_sfx_channel)) {
                 game_mode = GAME_NORMAL;
                 if (game_busy_callback) {
@@ -325,6 +354,8 @@ void game_update(u32 keys, circlePosition analog, touchPosition touch) {
             break;
     }
 
+    // GAME_NORMAL: the inventory gets the keys first (D-pad, A, X); when it
+    // consumes them, no movement or touch is handled this frame.
     if ((inventory_is_active()) | (inventory_update(keys))) {
         return;
     }
@@ -355,6 +386,7 @@ void game_draw(C3D_RenderTarget *top, C3D_RenderTarget *bottom) {
             break;
 
         case GAME_MINIGAME:
+            // The mini-game draws over the room, with a higher depth.
             C2D_SceneBegin(bottom);
             room_draw();
             if (active_minigame && active_minigame->draw) {
