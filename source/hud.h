@@ -1,7 +1,9 @@
 // hud.h
 #pragma once
 
-void hud_init(void);
+#include <stdbool.h>
+
+bool hud_init(void);
 void hud_reset(void);
 void hud_update(void);
 void hud_draw(void);

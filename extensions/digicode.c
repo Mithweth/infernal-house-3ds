@@ -47,7 +47,7 @@ static void digicode_stop(bool success) {
         if (gamestate_get("item_syringe_injected")) {
             game_timeline_start("ending");
         } else {
-            game_timeline_start("bacteria");
+            game_timeline_start("gameover_bacteria");
         }
     }
 
@@ -111,7 +111,7 @@ static bool digicode_init(void) {
     if (!gfxmap_load_assets("romfs:/minigames/digicode", &assets)) {
         return false;
     }
-    img_background = gfxmap_get_image(assets, "gfx_background_idx");
+    img_background = gfxmap_get_image(assets, "background");
     if (!text_buf) {
         text_buf = C2D_TextBufNew(256);
     }

@@ -1,4 +1,5 @@
-// str_utils.c
+// str_utils.h
+#pragma once
 #include <stdbool.h>
 
 char *str_trim(char *str);

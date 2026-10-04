@@ -9,5 +9,6 @@ int sfx_play(const char *filename);
 bool sfx_is_playing(int channel);
 void sfx_stop(int channel);
 void audio_init(void);
+bool audio_is_available(void);
 void audio_update(void);
 void audio_close(void);

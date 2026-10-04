@@ -32,6 +32,7 @@ static int music_channels;
 static long sample_rate;
 
 static bool music_playing = false;
+static bool audio_available = false;
 
 static bool fill_buffer(ndspWaveBuf *buf) {
     const size_t bytes_per_frame = music_channels * sizeof(s16);
@@ -67,6 +68,9 @@ static bool fill_buffer(ndspWaveBuf *buf) {
 
 
 bool music_play(const char *filename) {
+    if (!audio_available) {
+        return false;
+    }
     music_stop();
     
     ogg_file = fopen(filename, "rb");
@@ -135,6 +139,9 @@ bool music_play(const char *filename) {
 }
 
 int sfx_play(const char *filename) {
+    if (!audio_available) {
+        return -1;
+    }
     int channel = -1;
     SfxChannel *sfx = NULL;
 
@@ -253,7 +260,7 @@ void music_stop(void) {
 }
 
 void sfx_stop(int channel) {
-    if (channel < SFX_CHANNEL_FIRST || channel > SFX_CHANNEL_LAST) {
+    if (!audio_available || channel < SFX_CHANNEL_FIRST || channel > SFX_CHANNEL_LAST) {
         return;
     }
     SfxChannel *sfx = &channels[channel - SFX_CHANNEL_FIRST];
@@ -275,7 +282,15 @@ bool sfx_is_playing(int channel) {
 }
 
 void audio_init(void) {
-    ndspInit();
+    if (R_FAILED(ndspInit())) {
+        printf("Cannot initialize audio (missing dspfirm.cdc?)");
+        return;
+    }
+    audio_available = true;
+}
+
+bool audio_is_available(void) {
+    return audio_available;
 }
 
 void audio_update(void) {
@@ -284,9 +299,13 @@ void audio_update(void) {
 }
 
 void audio_close(void) {
+    if (!audio_available) {
+        return;
+    }
     music_stop();
     for (int i = SFX_CHANNEL_FIRST; i <= SFX_CHANNEL_LAST; i++) {
         sfx_stop(i);
     }
     ndspExit();
+    audio_available = false;
 }

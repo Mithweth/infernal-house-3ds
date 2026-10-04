@@ -739,6 +739,9 @@ void room_close(void) {
         return;
     }
 
+    pending_actions.actions = NULL;
+    pending_actions.count = 0;
+    pending_actions.next = 0;
     for (size_t i = 0; i < room->image_count; i++) {
         RoomImage *image = &room->images[i];
         for (size_t j = 0; j < image->condition_count; j++) {

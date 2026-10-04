@@ -1,35 +1,16 @@
 // gamestate.c
 
 #include "gamestate.h"
-
+#include "str_utils.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 
 #define GAMESTATE_MAX 128
 
 static GameState states[GAMESTATE_MAX];
 static size_t state_count = 0;
 
-
-static char *trim(char *str) {
-    while (*str && isspace((unsigned char)*str)) {
-        str++;
-    }
-
-    if (*str == '\0') {
-        return str;
-    }
-
-    char *end = str + strlen(str) - 1;
-
-    while (end > str && isspace((unsigned char)*end)) {
-        *end-- = '\0';
-    }
-
-    return str;
-}
 
 static GameState *gamestate_find(const char *name) {
     for (size_t i = 0; i < state_count; i++) {
@@ -54,7 +35,7 @@ bool gamestate_init(const char *filename) {
 
     while (fgets(line, sizeof(line), file)) {
         line_number++;
-        char *p = trim(line);
+        char *p = str_trim(line);
 
         if (*p == '\0' || *p == '#')
             continue;
@@ -68,8 +49,8 @@ bool gamestate_init(const char *filename) {
             return false;
         }
 
-        name = trim(name);
-        type = trim(type);
+        name = str_trim(name);
+        type = str_trim(type);
 
         if (state_count >= GAMESTATE_MAX) {
             printf("romfs:/game.state:%zu: too many gamestates\n", line_number);

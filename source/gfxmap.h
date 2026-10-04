@@ -1,4 +1,4 @@
-// inventory.h
+// gfxmap.h
 #pragma once
 
 #include <citro2d.h>

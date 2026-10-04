@@ -75,7 +75,14 @@ void game_close(void) {
     hud_close();
 }
 
+static void refresh_target(void) {
+    if (target && !room_hotspot_is_available(target)) {
+        target = room_find_hotspot_by_id(target->id);
+    }
+}
+
 const char *game_target_name(void) {
+    refresh_target();
     if (!target) {
         return NULL;
     }
@@ -96,7 +103,6 @@ void game_init(void) {
     timeline_close();
     music_stop();
     callbacks_init();
-    hud_init();
     game_mode = GAME_TITLE;
     examine_image = (C2D_Image){0};
     title_init();
@@ -198,11 +204,10 @@ static void update_movement(circlePosition analog) {
 }
 
 static void update_touch(touchPosition touch) {
-    if (game_mode == GAME_MESSAGE) {
-        game_mode = GAME_NORMAL;
-        examine_image = (C2D_Image){0};
-        return;
+    if (active_hotspot && !room_hotspot_is_available(active_hotspot)) {
+        active_hotspot = NULL;
     }
+
     Hotspot *hotspot = room_find_hotspot(touch.px, touch.py);
     if (!hotspot) {
         return;
@@ -221,14 +226,6 @@ static void update_touch(touchPosition touch) {
     }
 
     room_execute_hotspot_action(hotspot);
-
-    if (target && !room_hotspot_is_available(target)) {
-        target = room_find_hotspot_by_id(target->id);
-    }
-
-    if (active_hotspot && !room_hotspot_is_available(active_hotspot)) {
-        active_hotspot = NULL;
-    }
 }
 
 
@@ -259,6 +256,7 @@ static void game_draw_room(void) {
 }
 
 bool game_use_item(const char *id) {
+    refresh_target();
     if (!target) {
         return false;
     }
