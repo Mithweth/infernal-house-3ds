@@ -25,14 +25,9 @@ jobs:
           echo "DEVKITARM=/opt/devkitpro/devkitARM" >> "$GITHUB_ENV"
           echo "/opt/devkitpro/tools/bin" >> "$GITHUB_PATH"
 
-      - name: update version number
-        if: github.event_name == 'release'
-        shell: bash
-        run : sed -i 's/VERSION = "dev"/VERSION = "${{ github.event.release.tag_name }}"/1' source/title.c
-
       - name: build
         shell: bash
-        run: make
+        run: make APP_VERSION=$(cut -c2- <<< "${{ github.event.release.tag_name }}")
 
       - name: create CIA file
         shell: bash

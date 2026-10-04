@@ -39,7 +39,6 @@ static C2D_Image img_xbutton;
 static C2D_Image img_analogpad;
 static C2D_Image img_dpad;
 static C2D_Image img_touch;
-static char *VERSION = "dev";
 static C2D_Text version_text;
 
 static const char *choices[] = {
