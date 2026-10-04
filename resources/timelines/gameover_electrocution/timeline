@@ -1,0 +1,8 @@
+MUSIC_START romfs:/audio/gameover_sad.ogg
+IMAGE_LEFT left
+IMAGE_CENTER center
+IMAGE_RIGHT right
+TEXT YELLOW GAMEOVER_CABLE
+PAUSE 0
+END_SCENE
+END
