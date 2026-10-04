@@ -88,6 +88,9 @@ static void background_draw(void) {
 
 static void timer_draw() {
     int total_seconds = TIME_MAX_SECONDS - elapsed_time / 1000;
+    if (total_seconds < 0) {
+        total_seconds = 0;
+    }
     int hours   = (total_seconds / 3600) % 100;
     int minutes = (total_seconds / 60) % 60;
     int seconds = total_seconds % 60;
@@ -133,11 +136,15 @@ static void movement_draw(void) {
     }
 }
 
-void hud_init(void) {
+bool hud_init(void) {
     if (!inventory_init()) {
-        return;
+        return false;
     }
     hud_assets = C2D_SpriteSheetLoadFromMem(gfx_hud_t3x, gfx_hud_t3x_size);
+    if (!hud_assets) {
+        inventory_close();
+        return false;
+    }
     img_background = C2D_SpriteSheetGetImage(hud_assets, gfx_hud_background_idx);
     img_inventory = C2D_SpriteSheetGetImage(hud_assets, gfx_hud_inventory_idx);
     img_directions = C2D_SpriteSheetGetImage(hud_assets, gfx_hud_directions_idx);
@@ -153,6 +160,7 @@ void hud_init(void) {
         text_buf = C2D_TextBufNew(1024);
     }
     timer_start();
+    return true;
 }
 
 void hud_reset(void) {
@@ -160,7 +168,7 @@ void hud_reset(void) {
 }
 
 static void gameover_timeup(void) {
-    game_timeline_start("timeup");
+    game_timeline_start("gameover_timeup");
 }
 
 void hud_update(void) {
@@ -179,7 +187,10 @@ void hud_close(void) {
         C2D_TextBufDelete(text_buf);
         text_buf = NULL;
     }
-    C2D_SpriteSheetFree(hud_assets);
+    if (hud_assets) {
+        C2D_SpriteSheetFree(hud_assets);
+        hud_assets = NULL;
+    }
 }
 
 void hud_draw(void) {

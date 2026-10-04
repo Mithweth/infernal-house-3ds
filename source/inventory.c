@@ -473,6 +473,7 @@ void inventory_close(void) {
         free(items[i].name_id);
         free(items[i].examine_text);
     }
+    item_count = 0;
     if (inventory_assets) {
         C2D_SpriteSheetFree(inventory_assets);
         inventory_assets = NULL;

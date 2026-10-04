@@ -2,7 +2,7 @@
 #include <citro2d.h>
 #include <stdlib.h>
 #include <3ds.h>
-
+#include <time.h>
 #include "game.h"
 #include "lang.h"
 #include "hud.h"
@@ -48,12 +48,13 @@ static void debug_close(void) {}
 static aptHookCookie apt_cookie;
 
 static void apt_callback(APT_HookType hook, void *param) {
-    if (hook == APTHOOK_ONRESTORE) {
+    if (hook == APTHOOK_ONRESTORE || hook == APTHOOK_ONWAKEUP) {
         timer_resume();
     }
 }
 
 int main(int argc, char **argv) {
+    int ret = 0;
     gfxInitDefault();
     romfsInit();
     debug_init();
@@ -71,8 +72,13 @@ int main(int argc, char **argv) {
     C3D_RenderTarget *bottom = C2D_CreateScreenTarget(GFX_BOTTOM, GFX_LEFT);
     aptHook(&apt_cookie, apt_callback, NULL);
     audio_init();
-    game_init();
-    while (aptMainLoop()) {
+    if (hud_init()) {
+        game_init();
+    } else {
+        printf("Cannot initialize HUD\n");
+        ret = 1;
+    }
+    while (ret == 0 && aptMainLoop()) {
         hidScanInput();
         u32 keys = hidKeysDown();
 
@@ -104,5 +110,5 @@ int main(int argc, char **argv) {
     gfxExit();
     debug_close();
     
-    return 0;
+    return ret;
 }

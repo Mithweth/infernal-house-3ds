@@ -1,4 +1,7 @@
 // callbacks.c
+
+#include <stdio.h>
+#include <string.h>
 #include "callbacks.h"
 #include "game.h"
 #include "secret_code.h"

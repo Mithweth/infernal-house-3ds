@@ -219,12 +219,15 @@ static bool piano_init(void) {
         return false;
     }
 
-    img_background = gfxmap_get_image(assets, "gfx_background_idx");
+    img_background = gfxmap_get_image(assets, "background");
 
     if (!text_buf) {
         text_buf = C2D_TextBufNew(1024);
     }
     note_count = 0;
+    if (!audio_is_available()) {
+        return true;
+    }
     FILE *f = fopen("romfs:/audio/piano_a4.raw", "rb");
     if (!f) {
         printf("cannot load sample romfs:/audio/piano_a4.raw\n");
@@ -265,9 +268,11 @@ static void piano_close(void) {
         C2D_SpriteSheetFree(assets);
         assets = NULL;
     }
-    for (int i = 0; i < PIANO_CHANNEL_LAST - PIANO_CHANNEL_FIRST + 1; i++) {
-        ndspChnWaveBufClear(PIANO_CHANNEL_FIRST + i);
-        memset(&wavebuf[i], 0, sizeof(wavebuf[i]));
+    if (audio_is_available()) {
+        for (int i = 0; i < PIANO_CHANNEL_LAST - PIANO_CHANNEL_FIRST + 1; i++) {
+            ndspChnWaveBufClear(PIANO_CHANNEL_FIRST + i);
+            memset(&wavebuf[i], 0, sizeof(wavebuf[i]));
+        }
     }
 
     if (sample) {
