@@ -1,10 +1,14 @@
 // hud.c
-// Implementation notes: unlike the room graphics loaded from romfs, the HUD
-// spritesheet is embedded in the executable (gfx_hud_t3x). All HUD text is
-// re-parsed into text_buf every frame. The countdown lasts TIME_MAX_SECONDS
-// of game time, measured with osGetTime().
+// Implementation notes: the layout is read from romfs:/hud/hud (format in
+// docs/HUD.en.md) into hud_config. Its images come from the romfs:/hud
+// spritesheet and are resolved while parsing, because the gfxmap table is
+// global. All HUD text is re-parsed into text_buf every frame. The countdown
+// lasts the TIMER block's MAX_DURATION seconds of game time, measured with
+// osGetTime(); the timer functions do nothing when there is no TIMER block.
 #include <3ds.h>
 #include <citro2d.h>
+#include <string.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include "hud.h"
 #include "game.h"
@@ -112,6 +116,7 @@ static u64 last_time;
 static bool time_up_triggered;
 static HudConfig hud_config;
 
+// Index in HudDirections.directions for a direction keyword, or -1.
 static int parse_direction(const char *name) {
     if (strcmp(name, "NORTH") == 0) {
         return HUD_DIRECTION_NORTH;
@@ -141,6 +146,8 @@ static int parse_direction(const char *name) {
     return -1;
 }
 
+// Parses the HUD layout file into hud_config. On error, logs file:line and
+// returns false; strings already allocated are freed by hud_close().
 static bool load_hud(const char *filename) {
     FILE *f = fopen(filename, "r");
 
@@ -159,6 +166,7 @@ static bool load_hud(const char *filename) {
 
     char line[256];
     size_t line_number = 0;
+    bool inventory_found = false;
     HudBlock block = HUD_BLOCK_NONE;
 
     while (fgets(line, sizeof(line), f)) {
@@ -202,6 +210,7 @@ static bool load_hud(const char *filename) {
 
             if (strcmp(command, "INVENTORY") == 0) {
                 block = HUD_BLOCK_INVENTORY;
+                inventory_found = true;
                 continue;
             }
 
@@ -341,6 +350,12 @@ static bool load_hud(const char *filename) {
                 }
 
                 hud_config.inventory.columns = atoi(columns);
+
+                if (hud_config.inventory.columns == 0) {
+                    printf("%s:%zu: syntax error: COLUMNS cannot be equal to 0\n", filename, line_number);
+                    fclose(f);
+                    return false;
+                }                
                 continue;
             }
 
@@ -354,6 +369,12 @@ static bool load_hud(const char *filename) {
                 }
 
                 hud_config.inventory.rows = atoi(rows);
+
+                if (hud_config.inventory.rows == 0) {
+                    printf("%s:%zu: syntax error: ROWS cannot be equal to 0\n", filename, line_number);
+                    fclose(f);
+                    return false;
+                }  
                 continue;
             }
 
@@ -442,8 +463,7 @@ static bool load_hud(const char *filename) {
                 continue;
             }
 
-            printf("%s:%zu: unknown command: %s\n",
-                   filename, line_number, command);
+            printf("%s:%zu: unknown command: %s\n", filename, line_number, command);
             fclose(f);
             return false;
         }
@@ -589,8 +609,7 @@ static bool load_hud(const char *filename) {
                 continue;
             }
 
-            printf("%s:%zu: unknown command: %s\n",
-                   filename, line_number, command);
+            printf("%s:%zu: unknown command: %s\n", filename, line_number, command);
             fclose(f);
             return false;
         }
@@ -655,7 +674,7 @@ static bool load_hud(const char *filename) {
                     return false;
                 }
 
-                hud_config.timer.max_duration = atoi(duration);
+                hud_config.timer.max_duration = atoi(duration);         
                 continue;
             }
 
@@ -672,21 +691,60 @@ static bool load_hud(const char *filename) {
                 continue;
             }
 
-            printf("%s:%zu: unknown command: %s\n",
-                   filename, line_number, command);
+            printf("%s:%zu: unknown command: %s\n", filename, line_number, command);
             fclose(f);
             return false;
         }
     }
 
     if (block != HUD_BLOCK_NONE) {
-        printf("%s:%zu: missing END_* directive\n",
-               filename, line_number);
+        printf("%s:%zu: missing END_* directive\n", filename, line_number);
         fclose(f);
         return false;
     }
 
     fclose(f);
+
+    if (!hud_config.background.tex) {
+        printf("%s: missing BACKGROUND\n", filename);
+        return false;
+    }
+
+    if (hud_config.timer.enabled && !hud_config.timer.timeline) {
+        printf("%s: TIMER: TIMELINE is required\n", filename);
+        return false;
+    }
+
+    if (hud_config.timer.enabled && hud_config.timer.max_duration == 0) {
+        printf("%s: TIMER: MAX_DURATION is required\n", filename);
+        return false;
+    }
+
+    if (!inventory_found) {
+        printf("%s: missing INVENTORY block\n", filename);
+        return false;
+    }
+
+    if (!hud_config.inventory.text.id) {
+        printf("%s: INVENTORY: TEXT is required\n", filename);
+        return false;
+    }
+
+    if (!hud_config.inventory.selection.image.tex) {
+        printf("%s: INVENTORY: SELECTION is required\n", filename);
+        return false;
+    }
+
+    if (hud_config.object.enabled && !hud_config.object.text.id) {
+        printf("%s: OBJECT: TEXT is required\n", filename);
+        return false;
+    }
+
+    if (hud_config.target.enabled && !hud_config.target.text.id) {
+        printf("%s: TARGET: TEXT is required\n", filename);
+        return false;
+    }
+
     return true;
 }
 
@@ -752,6 +810,8 @@ static void inventory_draw(void) {
         }
         return;
     }
+    // Only `rows` rows fit: show the selected row and the one above it
+    // (the first rows while the selection is on the first row).
     int selected_row = inventory_get_selected() / hud->columns;
     int first_row = selected_row > 0 ? selected_row - 1 : 0;
     size_t first = first_row * hud->columns;
@@ -934,6 +994,7 @@ void hud_close(void) {
 }
 
 void hud_draw(void) {
+    // Cleared once per frame: every element below appends its text to it.
     C2D_TextBufClear(text_buf);
     C2D_DrawImageAt(hud_config.background, 0.0f, 0.0f, 0.0f, NULL, 1.0f, 1.0f);
     target_draw();

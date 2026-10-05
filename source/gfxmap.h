@@ -32,4 +32,7 @@ bool gfxmap_load(const char *filename);
 // On failure returns false and leaves *assets NULL. The caller owns the
 // spritesheet and frees it with C2D_SpriteSheetFree().
 bool gfxmap_load_assets(const char *path, C2D_SpriteSheet *assets);
+// Converts a color name used in the HUD and timeline files (RED, BLUE, GREEN,
+// YELLOW, BLACK, WHITE) to a C2D color. WHITE is a light grey; unknown names
+// silently fall back to the same light grey.
 u32 gfxmap_parse_color(const char *name);

@@ -131,5 +131,9 @@ u32 gfxmap_parse_color(const char *name) {
         return C2D_Color32(0, 0, 0, 255);
     }
 
+    if (strcmp(name, "WHITE") == 0) {
+        return C2D_Color32(164, 164, 164, 255);
+    }
+
     return C2D_Color32(164, 164, 164, 255);
 }

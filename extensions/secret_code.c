@@ -11,11 +11,14 @@ static C2D_TextBuf text_buf;
 
 
 void secret_code_init(void) {
-    for (size_t i = 0; i < 4; i++) {
-        secret_code[i] = rand() % 10;
-    }
     if (!text_buf) {
         text_buf = C2D_TextBufNew(32);
+    }
+}
+
+void secret_code_reset(void) {
+    for (size_t i = 0; i < 4; i++) {
+        secret_code[i] = rand() % 10;
     }
 }
 

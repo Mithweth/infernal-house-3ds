@@ -14,7 +14,8 @@
 
 typedef struct {
     const char *name;
-    void (*init)(void);
+    void (*init)(void);     // once per session (allocations)
+    void (*reset)(void);    // at the start of every game (game state)
     void (*callback)(void);
 } InventoryCallback;
 
@@ -34,6 +35,7 @@ static InventoryCallback inventory_callbacks[] = {
     {
         .name = "secret_code",
         .init = secret_code_init,
+        .reset = secret_code_reset,
         .callback = secret_code_draw
     },
     {
@@ -73,6 +75,15 @@ void callbacks_init(void) {
         InventoryCallback *cb = &inventory_callbacks[i];
         if (cb->init) {
             cb->init();
+        }
+    }
+}
+
+void callbacks_reset(void) {
+    for (size_t i = 0; i < inventory_callback_count; i++) {
+        InventoryCallback *cb = &inventory_callbacks[i];
+        if (cb->reset) {
+            cb->reset();
         }
     }
 }

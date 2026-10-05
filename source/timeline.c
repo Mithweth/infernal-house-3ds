@@ -378,21 +378,22 @@ static void update_text(void) {
 
 void timeline_update(u32 keys) {
     if (keys & KEY_B) {
-        game_init();
+        game_title_start();
         return;
     }
     const TimelineEvent *event = &events[current_event];
 
-// A only skips blocking events: the rest of a TEXT appears at once, a PAUSE
-// ends. Instant events must still run through the switch below, so A is
-// ignored on them.
     if ((keys & KEY_A) && (event->type == TIMELINE_TEXT || event->type == TIMELINE_PAUSE)) {
         if (event->type == TIMELINE_TEXT) {
             const char *str = lang_get(event->text);
             const char *remaining = &str[event_pos];
             size_t len = strlen(remaining);
-            memcpy(&current_str[text_position], remaining, len + 1);
-            text_position += len;
+            if (text_position + len >= sizeof(current_str)) {
+                printf("Timeline text buffer overflow\n");
+            } else {
+                memcpy(&current_str[text_position], remaining, len + 1);
+                text_position += len;
+            }
             memcpy(previous_str, current_str, text_position + 1);
             event_pos = 0;
             update_text();
@@ -432,7 +433,6 @@ void timeline_update(u32 keys) {
 
             if (str[event_pos] != '\0') {
                 size_t len = utf8_char_size(&str[event_pos]);
-// Script error: the scene's text doesn't fit. Drop the rest of this TEXT.
                 if (text_position + len >= sizeof(current_str)) {
                     printf("Timeline text buffer overflow\n");
                     event_pos = 0;
@@ -456,7 +456,7 @@ void timeline_update(u32 keys) {
         break;
 
     case TIMELINE_PAUSE:
-// duration is in milliseconds; PAUSE 0 waits until the player presses A.
+        // duration is in milliseconds; PAUSE 0 waits until the player presses A.
         if (event->duration == 0) {
             break;
         }
@@ -502,9 +502,8 @@ void timeline_update(u32 keys) {
         current_event++;
         break;
 
-// Back to the title screen; game_init also closes this timeline.
     case TIMELINE_END:
-        game_init();
+        game_title_start();
         return;
     }
 }
@@ -530,8 +529,8 @@ void timeline_draw_top(void) {
             float z = i * 0.01f;
             const TimelineSprite *sprite = &active_full_screen->sprites[i];
             if ((sprite->image.tex) && (sprite->y < 240.0f)) {
-// Sprite coordinates treat both screens as one 320x480 area: y < 240 is the
-// top screen, 400 px wide, hence the 40 px offset to center it.
+                // Sprite coordinates treat both screens as one 320x480 area: y < 240 is the
+                // top screen, 400 px wide, hence the 40 px offset to center it.
                 C2D_DrawImageAt(sprite->image, sprite->x + 40.0f, sprite->y, z, NULL, 1.0f, 1.0f);
             }
         }

@@ -44,8 +44,10 @@ TIMER
 END_TIMER
 ```
 
-`INVENTORY` defines the inventory area. `DIRECTIONS`, `OBJECT`, `TARGET` and
-`TIMER` are optional and are enabled by declaring their corresponding block.
+The global `BACKGROUND` and the `INVENTORY` block are required: the HUD fails
+to load without them. `DIRECTIONS`, `OBJECT`, `TARGET` and `TIMER` are optional
+and are enabled by declaring their corresponding block. See section 11 for the
+complete list of required directives.
 
 Blank lines are ignored. A line whose first non-whitespace character is `#` is
 a comment. Comments should be written on their own line; inline comments are
@@ -73,6 +75,8 @@ BACKGROUND background
 
 Defines the main HUD background. It is drawn at `(0, 0)`.
 
+This directive is required.
+
 Do not specify an image file extension.
 
 ## 3. Inventory
@@ -84,6 +88,8 @@ INVENTORY
     ...
 END_INVENTORY
 ```
+
+This block is required.
 
 ### Background
 
@@ -117,7 +123,7 @@ Example:
 TEXT BLACK HUD_INVENTORY 115 52 0.5
 ```
 
-Defines the inventory title.
+Defines the inventory title. This directive is required.
 
 `text` is a localization key. `x` and `y` define the text position and `size`
 defines its rendering scale.
@@ -210,7 +216,7 @@ COLUMNS 6
 Defines the number of inventory columns.
 
 It also determines the vertical navigation step when moving through the
-inventory.
+inventory. The value must be at least 1.
 
 Default:
 
@@ -232,7 +238,8 @@ Example:
 ROWS 2
 ```
 
-Defines the number of inventory rows displayed at once.
+Defines the number of inventory rows displayed at once. The value must be at
+least 1.
 
 Default:
 
@@ -255,6 +262,7 @@ SELECTION selected -4 -4
 ```
 
 Defines the image used to highlight the currently selected inventory item.
+This directive is required.
 
 Unlike most HUD image coordinates, `x` and `y` are offsets relative to the
 position of the selected inventory item. Negative values can therefore be used
@@ -426,7 +434,8 @@ Example:
 TEXT YELLOW HUD_OBJECT 60 172 0.5
 ```
 
-Defines the static localized label of the panel.
+Defines the static localized label of the panel. This directive is required
+when the `OBJECT` block is present.
 
 `text` is a localization key.
 
@@ -480,8 +489,9 @@ TARGET
 END_TARGET
 ```
 
-`TEXT` defines the static localized label. `ITEM` defines how the localized
-name of the current target is displayed.
+`TEXT` defines the static localized label and is required when the `TARGET`
+block is present. `ITEM` defines how the localized name of the current target
+is displayed.
 
 ## 7. Timer
 
@@ -548,7 +558,9 @@ Example:
 MAX_DURATION 3600
 ```
 
-Defines the initial duration of the countdown in seconds.
+Defines the initial duration of the countdown in seconds. This directive is
+required when the `TIMER` block is present, and the value must be greater
+than 0.
 
 ### Timeout timeline
 
@@ -564,7 +576,8 @@ Example:
 TIMELINE gameover_timeup
 ```
 
-Defines the timeline started when the timer reaches zero.
+Defines the timeline started when the timer reaches zero. This directive is
+required when the `TIMER` block is present.
 
 ## 8. Images
 
@@ -682,7 +695,28 @@ TIMER
 END_TIMER
 ```
 
-## 11. Optional components
+## 11. Required and optional components
+
+The following directives are required. If one of them is missing, the HUD
+fails to load:
+
+```text
+BACKGROUND              (global background)
+INVENTORY ... END_INVENTORY
+    TEXT                (inventory title)
+    SELECTION           (selection marker)
+```
+
+When an optional block is present, some of its directives become required:
+
+| Block    | Required directives        |
+|----------|----------------------------|
+| `OBJECT` | `TEXT`                     |
+| `TARGET` | `TEXT`                     |
+| `TIMER`  | `MAX_DURATION`, `TIMELINE` |
+
+`COLUMNS` and `ROWS` are optional, but when they are declared their value must
+be at least 1.
 
 The following complete HUD components can be disabled by omitting their block:
 

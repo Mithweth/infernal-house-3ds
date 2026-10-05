@@ -49,9 +49,11 @@ TIMER
 END_TIMER
 ```
 
-`INVENTORY` définit la zone d'inventaire. `DIRECTIONS`, `OBJECT`,
-`TARGET` et `TIMER` sont optionnels et sont activés par la présence de
-leur bloc correspondant.
+Le `BACKGROUND` global et le bloc `INVENTORY` sont obligatoires : sans
+eux, le chargement du HUD échoue. `DIRECTIONS`, `OBJECT`, `TARGET` et
+`TIMER` sont optionnels et sont activés par la présence de leur bloc
+correspondant. La liste complète des directives obligatoires se trouve
+dans la section 11.
 
 Les lignes vides sont ignorées. Une ligne dont le premier caractère non
 blanc est `#` est un commentaire. Les commentaires doivent être placés
@@ -81,6 +83,8 @@ BACKGROUND background
 
 Définit l'arrière-plan principal du HUD. Il est affiché en `(0, 0)`.
 
+Cette directive est obligatoire.
+
 Ne pas spécifier l'extension du fichier image.
 
 ## 3. Inventaire
@@ -92,6 +96,8 @@ INVENTORY
     ...
 END_INVENTORY
 ```
+
+Ce bloc est obligatoire.
 
 ### Arrière-plan
 
@@ -125,7 +131,7 @@ Exemple :
 TEXT BLACK HUD_INVENTORY 115 52 0.5
 ```
 
-Définit le titre de l'inventaire.
+Définit le titre de l'inventaire. Cette directive est obligatoire.
 
 `text` est une clé de localisation. `x` et `y` définissent la position
 du texte et `size` définit son échelle d'affichage.
@@ -219,7 +225,7 @@ COLUMNS 6
 Définit le nombre de colonnes de l'inventaire.
 
 Cette valeur détermine également le déplacement vertical lors de la
-navigation dans l'inventaire.
+navigation dans l'inventaire. Elle doit être au moins égale à 1.
 
 Valeur par défaut :
 
@@ -242,6 +248,7 @@ ROWS 2
 ```
 
 Définit le nombre de lignes de l'inventaire affichées simultanément.
+La valeur doit être au moins égale à 1.
 
 Valeur par défaut :
 
@@ -264,7 +271,7 @@ SELECTION selected -4 -4
 ```
 
 Définit l'image utilisée pour mettre en évidence l'objet actuellement
-sélectionné dans l'inventaire.
+sélectionné dans l'inventaire. Cette directive est obligatoire.
 
 Contrairement à la plupart des coordonnées d'images du HUD, `x` et `y`
 sont des décalages relatifs à la position de l'objet sélectionné. Des
@@ -441,7 +448,8 @@ Exemple :
 TEXT YELLOW HUD_OBJECT 60 172 0.5
 ```
 
-Définit le libellé statique localisé du panneau.
+Définit le libellé statique localisé du panneau. Cette directive est
+obligatoire lorsque le bloc `OBJECT` est présent.
 
 `text` est une clé de localisation.
 
@@ -495,8 +503,9 @@ TARGET
 END_TARGET
 ```
 
-`TEXT` définit le libellé statique localisé. `ITEM` définit la manière
-dont le nom localisé de la cible courante est affiché.
+`TEXT` définit le libellé statique localisé ; il est obligatoire lorsque
+le bloc `TARGET` est présent. `ITEM` définit la manière dont le nom
+localisé de la cible courante est affiché.
 
 ## 7. Chronomètre
 
@@ -563,7 +572,9 @@ Exemple :
 MAX_DURATION 3600
 ```
 
-Définit la durée initiale du compte à rebours en secondes.
+Définit la durée initiale du compte à rebours en secondes. Cette
+directive est obligatoire lorsque le bloc `TIMER` est présent, et la
+valeur doit être supérieure à 0.
 
 ### Timeline d'expiration
 
@@ -579,7 +590,8 @@ Exemple :
 TIMELINE gameover_timeup
 ```
 
-Définit la timeline lancée lorsque le chronomètre atteint zéro.
+Définit la timeline lancée lorsque le chronomètre atteint zéro. Cette
+directive est obligatoire lorsque le bloc `TIMER` est présent.
 
 ## 8. Images
 
@@ -702,7 +714,29 @@ TIMER
 END_TIMER
 ```
 
-## 11. Composants optionnels
+## 11. Composants obligatoires et optionnels
+
+Les directives suivantes sont obligatoires. Si l'une d'elles manque, le
+chargement du HUD échoue :
+
+``` text
+BACKGROUND              (arrière-plan global)
+INVENTORY ... END_INVENTORY
+    TEXT                (titre de l'inventaire)
+    SELECTION           (marqueur de sélection)
+```
+
+Lorsqu'un bloc optionnel est présent, certaines de ses directives
+deviennent obligatoires :
+
+| Bloc     | Directives obligatoires    |
+|----------|----------------------------|
+| `OBJECT` | `TEXT`                     |
+| `TARGET` | `TEXT`                     |
+| `TIMER`  | `MAX_DURATION`, `TIMELINE` |
+
+`COLUMNS` et `ROWS` sont optionnels, mais lorsqu'ils sont déclarés, leur
+valeur doit être au moins égale à 1.
 
 Les composants complets suivants du HUD peuvent être désactivés en
 omettant leur bloc :

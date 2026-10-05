@@ -307,8 +307,11 @@ const Item *inventory_get_selected_item(void) {
     return inventory[selected];
 }
 
-const Item *inventory_get_item(int id) {
+const Item *inventory_get_item(size_t id) {
     if (inventory_count == 0) {
+        return NULL;
+    }
+    if (id >= inventory_count) {
         return NULL;
     }
     return inventory[id];
@@ -412,7 +415,7 @@ bool inventory_init(void) {
         inventory_assets = NULL;
         return false;
     }
-    
+
     printf("Loaded %zu items\n", item_count);
     inventory_count = 0;
     selected = 0;
@@ -426,8 +429,7 @@ void inventory_close(void) {
         free(items[i].name_id);
         free(items[i].examine_text);
     }
-// Resetting item_count makes a second call harmless: hud_init closes the
-// inventory on failure, and game_close closes it again.
+// Resetting item_count makes a second call harmless.
     item_count = 0;
     if (inventory_assets) {
         C2D_SpriteSheetFree(inventory_assets);

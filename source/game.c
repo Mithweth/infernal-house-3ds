@@ -108,17 +108,25 @@ const char *game_target_name(void) {
     return target->id;
 }
 
-static bool game_title_start(void) {
+bool game_title_start(void) {
+    if (active_minigame && active_minigame->close) {
+        active_minigame->close();
+    }
+    active_minigame = NULL;
+    room_close();
+    active_hotspot = NULL;
+    target = NULL;
+    message_text = NULL;
+    game_busy_callback = NULL;
+    title_close();
     timeline_close();
     music_stop();
     game_mode = GAME_TITLE;
     examine_image = (C2D_Image){0};
-
     if (!title_init()) {
         printf("Cannot initialize title screen\n");
         return false;
     }
-
     return true;
 }
 
@@ -127,9 +135,10 @@ bool game_timeline_start(const char *name) {
     snprintf(path, sizeof(path), "romfs:/timelines/%s", name);
     if (timeline_init(path)) {
         game_mode = GAME_TIMELINE;
-        return false;
+        return true;
     }
-    return game_title_start();
+    game_title_start();
+    return false;
 }
 
 bool game_init(void) {
@@ -150,6 +159,7 @@ void game_start(void) {
         text_buf = C2D_TextBufNew(4096);
     }
     title_close();
+    callbacks_reset();
     inventory_reset();
     gamestate_reset();
     hud_reset();
@@ -173,8 +183,7 @@ bool game_wait_for_sfx(const char *sfx, void (*callback)(void)) {
 void game_intro(void) {
     title_close();
     if (!timeline_init("romfs:/timelines/intro")) {
-        game_mode = GAME_TITLE;
-        title_init();
+        game_title_start();
         return;
     }
     game_mode = GAME_TIMELINE;

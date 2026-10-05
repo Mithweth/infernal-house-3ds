@@ -7,10 +7,13 @@
 
 #include "game.h"
 
-// Runs the init function of every inventory callback that has one (e.g.
-// generates a new secret code). Called by game_init on each return to the
-// title screen.
+// Runs the init function of every inventory callback that has one (one-time
+// allocations). Called once by game_init.
 void callbacks_init(void);
+
+// Runs the reset function of every inventory callback that has one (e.g.
+// draws a new secret code). Called by game_start at the start of each game.
+void callbacks_reset(void);
 
 // Returns the inventory callback registered under name, or NULL (and logs it)
 // if there is none.
