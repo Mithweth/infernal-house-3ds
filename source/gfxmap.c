@@ -109,3 +109,31 @@ bool gfxmap_load_assets(const char *path, C2D_SpriteSheet *assets) {
 
     return true;
 }
+
+u32 gfxmap_parse_color(const char *name) {
+    if (strcmp(name, "RED") == 0) {
+        return C2D_Color32(164, 0, 0, 255);
+    }
+
+    if (strcmp(name, "BLUE") == 0) {
+        return C2D_Color32(0, 0, 164, 255);
+    }
+
+    if (strcmp(name, "GREEN") == 0) {
+        return C2D_Color32(0, 164, 0, 255);
+    }
+
+    if (strcmp(name, "YELLOW") == 0) {
+        return C2D_Color32(164, 164, 0, 255);
+    }
+
+    if (strcmp(name, "BLACK") == 0) {
+        return C2D_Color32(0, 0, 0, 255);
+    }
+
+    if (strcmp(name, "WHITE") == 0) {
+        return C2D_Color32(164, 164, 164, 255);
+    }
+
+    return C2D_Color32(164, 164, 164, 255);
+}

@@ -49,25 +49,31 @@ void game_update(u32 keys, circlePosition analog, touchPosition touch);
 void game_draw(C3D_RenderTarget *top, C3D_RenderTarget *bottom);
 
 // Starts the timeline in romfs:/timelines/<name> and switches to
-// GAME_TIMELINE. If it cannot be loaded, falls back to the title screen.
-void game_timeline_start(const char *name);
+// GAME_TIMELINE. Returns true if it started; otherwise goes back to the title
+// screen and returns false.
+bool game_timeline_start(const char *name);
 
-// Releases the room, the message text buffer and the HUD. Called once by main
-// at exit.
+// Releases the room, the message text buffer, the HUD and the inventory.
+// Called once by main at exit.
 void game_close(void);
 
-// Goes (back) to the title screen: closes any timeline, stops the music and
-// regenerates the extensions' state (e.g. a new secret code). Called by main
-// at start-up and whenever a timeline ends. The HUD must already be
-// initialized (hud_init is called once by main).
-void game_init(void);
+// Loads the inventory, the HUD and the extensions, then shows the title
+// screen. Must be called exactly once, from main, at start-up; a second call
+// is refused. Use game_title_start to come back to the title screen.
+bool game_init(void);
+
+// Goes (back) to the title screen from any state: closes the mini-game, the
+// room and the timeline, and stops the music. May be called any number of
+// times. Returns false if the title screen can't be loaded.
+bool game_title_start(void);
 
 // Leaves the title screen and plays the intro timeline. Returns to the title
 // screen if the intro cannot be loaded.
 void game_intro(void);
 
-// Leaves the title screen and starts a new game: resets inventory, game states
-// and timer, starts the music, gives the measuring tape and enters the hall.
+// Leaves the title screen and starts a new game: resets the extensions (new
+// secret code), inventory, game states and timer, starts the music and enters
+// the hall.
 void game_start(void);
 
 // Leaves the current room and loads romfs:/rooms/<name>. Clears the target,

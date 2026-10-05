@@ -5,8 +5,8 @@
 #pragma once
 
 // Loads the title graphics (romfs:/gfx/title) and creates the text buffer.
-// Called by game_init and when the intro fails to start.
-void title_init(void);
+// Called by game_title_start.
+bool title_init(void);
 
 // Handles menu navigation for this frame. Choosing "intro" or "new game" calls
 // game_intro / game_start, which close the title screen.

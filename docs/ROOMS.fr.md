@@ -1,28 +1,24 @@
-# Fichiers de description des Rooms
+# Fichiers de description des pièces
 
-Ce document décrit le format déclaratif utilisé pour définir les Rooms
+Ce document décrit le format déclaratif utilisé pour définir les pièces
 du jeu.
 
-Une description de Room remplace les anciens fichiers `room_<name>.c`
-pour les données propres à la Room : images affichées, hotspots,
-conditions, interactions, utilisation des objets de l’inventaire et
-sorties.
-
-Le moteur reste responsable de l’analyse du fichier et de l’exécution du
-comportement déclaré.
+Une description de pièce définit le contenu et le comportement d'une
+pièce : images affichées, hotspots, conditions, interactions,
+utilisation des objets de l'inventaire et sorties.
 
 ## 1. Emplacement et structure générale
 
-Une Room nommée `livingroom` est chargée depuis :
+Une pièce nommée `livingroom` est chargée depuis :
 
 ``` text
 romfs:/rooms/livingroom/room
 ```
 
-Ses ressources graphiques sont chargées depuis le jeu de ressources
-correspondant à la Room.
+Ses ressources graphiques sont chargées depuis l'ensemble de ressources
+correspondant à la pièce.
 
-Une Room contient généralement trois sections :
+Une pièce contient généralement trois sections :
 
 ``` text
 # Images
@@ -51,12 +47,13 @@ blanc est `#` est un commentaire. Les commentaires doivent être placés
 sur leur propre ligne ; les commentaires en fin de ligne ne font pas
 partie du format.
 
-Les éléments sont séparés par des espaces. Les identifiants tels que les
-noms d’états, d’objets, de messages, de Rooms, de sons et d’images ne
-contiennent donc pas d’espaces et ne sont pas placés entre guillemets.
+Les tokens sont séparés par des espaces. Les identifiants tels que les
+noms d'états, d'objets, les IDs de messages, les noms de pièces, de sons
+et d'images ne contiennent donc pas d'espaces et ne sont pas placés
+entre guillemets.
 
-L’indentation sert uniquement à améliorer la lisibilité ; la structure
-des blocs est déterminée par les directives `END_*`.
+L'indentation ne sert qu'à améliorer la lisibilité ; la structure des
+blocs est déterminée par les directives `END_*`.
 
 ## 2. Conditions
 
@@ -74,16 +71,16 @@ WHEN STATE_IS underground_dug true
 WHEN INVENTORY_HAS SHOVEL false
 ```
 
-Plusieurs directives `WHEN` dans un même bloc sont combinées avec un
+Plusieurs directives `WHEN` dans un même bloc sont combinées par un
 **ET** logique : toutes les conditions doivent être satisfaites.
 
-Une condition s’applique au bloc dans lequel elle apparaît. Elle peut
+Une condition s'applique au bloc dans lequel elle apparaît. Elle peut
 donc contrôler un `IMAGE`, un `HOTSPOT`, un `ACTION`, un `USE` ou un
 `PATH`.
 
-Les identifiants d’états et d’objets doivent correspondre à des
-identifiants connus respectivement par les systèmes de gestion des états
-du jeu et de l’inventaire.
+Les identifiants d'états et d'objets doivent correspondre à des
+identifiants connus respectivement par les systèmes d'état du jeu et
+d'inventaire.
 
 ## 3. Images
 
@@ -104,34 +101,20 @@ IMAGE hole_dug 261 174 0.3
 END_IMAGE
 ```
 
-`image` est le nom du fichier image sans son extension. Dans l’exemple
-précédent, `hole_dug` désigne l’image `hole_dug.png`. Les noms d’images
-peuvent contenir des lettres, des chiffres et des underscores (`_`) ;
-les tirets (`-`) ne doivent pas être utilisés.
+Ne pas spécifier l'extension du fichier image. Les noms d'images peuvent
+contenir des lettres, des chiffres et des underscores (`_`) ; les tirets
+(`-`) ne doivent pas être utilisés.
 
-`x` (de 0 à 320) et `y` (de 0 à 240) sont les coordonnées d’affichage.
-`z` (de -1.0 à 1.0) contrôle la profondeur d’affichage.
+`x` (de 0 à 320) et `y` (de 0 à 240) sont les coordonnées d'affichage.
+`z` (de -1.0 à 1.0) contrôle la profondeur d'affichage.
 
-L’image n’est affichée que lorsque toutes ses conditions sont vraies.
-Sans `WHEN`, l’image est toujours affichée.
+L'image n'est affichée que lorsque toutes ses conditions sont vraies.
+Sans `WHEN`, l'image est toujours affichée.
 
 Les images conditionnelles sont indépendantes. Si les conditions de deux
-blocs `IMAGE` sont vraies, les deux images sont affichées. Lors de la
-conversion de code C contenant un `if ... else if ...`, les conditions
-doivent donc rendre explicitement les alternatives mutuellement
-exclusives.
-
-Par exemple, ce code C :
-
-``` c
-if (gamestate_get("card_taken")) {
-    draw(empty);
-} else {
-    draw(full);
-}
-```
-
-doit devenir quelque chose d’équivalent à :
+blocs `IMAGE` sont vraies, les deux images sont affichées. Lorsqu'une
+seule variante doit être visible, leurs conditions doivent être
+explicitement mutuellement exclusives :
 
 ``` text
 IMAGE full ...
@@ -171,19 +154,19 @@ END_HOTSPOT
 
 Le rectangle est défini par `x`, `y`, `width` et `height`.
 
-Les directives `WHEN` placées au niveau du hotspot déterminent si
-celui-ci est actif du point de vue du joueur. Un hotspot inactif est
-ignoré lors de la détection de la zone sélectionnée.
+Les directives `WHEN` au niveau du hotspot déterminent si celui-ci
+existe du point de vue du joueur. Un hotspot inactif est ignoré lors de
+la détection du point sélectionné.
 
-### L’ordre des hotspots est important
+### L'ordre des hotspots est important
 
 Les hotspots sont testés dans leur ordre de déclaration. Le premier
 hotspot actif dont le rectangle contient le point sélectionné est
 retenu.
 
-Ce comportement est notamment utilisé lorsque des hotspots se
+Ce comportement est utilisé intentionnellement pour les hotspots qui se
 chevauchent. Un grand hotspot générique doit donc normalement être
-déclaré **après** les hotspots plus petits et plus spécifiques qu’il
+déclaré **après** les hotspots plus petits et plus spécifiques qu'il
 recouvre.
 
 Par exemple :
@@ -198,14 +181,14 @@ HOTSPOT UNDERGROUND_GROUND 45 171 275 68
 END_HOTSPOT
 ```
 
-Déclarer le grand hotspot du sol en premier masquerait le petit hotspot
-en forme de X.
+Placer le grand hotspot du sol en premier rendrait le petit hotspot en
+forme de X inaccessible.
 
-## 5. Messages d’examen
+## 5. Messages d'examen
 
-Un `MESSAGE` placé directement dans un `HOTSPOT`, en dehors d’un
-`ACTION` ou d’un `USE`, définit le message affiché lorsque le joueur
-examine l’objet :
+Un `MESSAGE` placé directement dans un `HOTSPOT`, en dehors d'un
+`ACTION` ou d'un `USE`, définit le message affiché lorsque l'objet est
+examiné :
 
 ``` text
 HOTSPOT LIVINGROOM_FIREPLACE 163 72 26 17
@@ -213,7 +196,7 @@ HOTSPOT LIVINGROOM_FIREPLACE 163 72 26 17
 END_HOTSPOT
 ```
 
-C’est différent d’un `MESSAGE` utilisé comme action :
+Ceci est différent d'un `MESSAGE` utilisé comme action :
 
 ``` text
 ACTION
@@ -221,13 +204,13 @@ ACTION
 END_ACTION
 ```
 
-Dans ce cas, le message est affiché lorsque le bloc d’actions est
+Dans ce cas, le message est affiché lorsque le bloc d'action est
 exécuté.
 
 ## 6. Blocs ACTION
 
 Un bloc `ACTION` décrit ce qui se produit lorsque le joueur effectue
-l’action normale sur un hotspot :
+l'action normale sur un hotspot :
 
 ``` text
 HOTSPOT UNDERGROUND_SHOVEL 18 89 37 100
@@ -238,7 +221,7 @@ HOTSPOT UNDERGROUND_SHOVEL 18 89 37 100
 END_HOTSPOT
 ```
 
-Un `ACTION` peut lui-même posséder des conditions :
+Un `ACTION` peut lui-même comporter des conditions :
 
 ``` text
 ACTION
@@ -252,12 +235,12 @@ END_ACTION
 Les blocs `ACTION` ne sont **pas** des alternatives de type
 `if / else if`.
 
-Tous les blocs d’actions dont les conditions correspondent sont évalués
-dans leur ordre de déclaration. Les conditions sont réévaluées lorsque
-chaque bloc est atteint : un bloc précédent peut donc modifier l’état du
-jeu et influencer les conditions d’un bloc suivant.
+Tous les blocs d'action dont les conditions correspondent sont évalués
+dans leur ordre de déclaration. Leurs conditions sont réévaluées lorsque
+chaque bloc est atteint ; un bloc précédent peut donc modifier l'état du
+jeu et affecter un bloc suivant.
 
-Ce comportement est intentionnel et utile pour les transitions d’état :
+Ce comportement est intentionnel et utile pour les transitions d'état :
 
 ``` text
 ACTION
@@ -276,15 +259,16 @@ END_ACTION
 ```
 
 Si `diningroom_lasers_disabled` est un état de type `TOGGLE`, le premier
-bloc modifie sa valeur. Les blocs suivants examinent ensuite cette
-**nouvelle** valeur.
+bloc le modifie. Les blocs suivants examinent alors sa **nouvelle**
+valeur.
 
-Il ne faut donc pas interpréter ou réécrire ce type de construction
-comme « seul le premier bloc correspondant est exécuté ».
+Ce comportement est différent de celui des blocs `USE` : les blocs
+`ACTION` correspondants ne s'arrêtent pas après la première
+correspondance.
 
 ## 7. Blocs USE
 
-`USE` décrit l’utilisation d’un objet de l’inventaire sur un hotspot.
+`USE` décrit l'utilisation d'un objet de l'inventaire sur un hotspot.
 
 Syntaxe :
 
@@ -305,7 +289,7 @@ USE SCREWDRIVER
 END_USE
 ```
 
-Un bloc `USE` contient directement des actions. Il n’y a **pas de bloc
+Un bloc `USE` contient directement les actions. Il n'y a **pas de bloc
 `ACTION` imbriqué** dans un `USE`.
 
 Incorrect :
@@ -326,8 +310,8 @@ USE SCREWDRIVER
 END_USE
 ```
 
-Cette distinction est importante : `ACTION` appartient à la grammaire du
-hotspot ou du chemin englobant, et non à celle de `USE`.
+Cette distinction est importante car `ACTION` appartient à la grammaire
+du hotspot ou du chemin englobant, et non à `USE`.
 
 ### Plusieurs blocs USE
 
@@ -347,14 +331,14 @@ USE SCREWDRIVER
 END_USE
 ```
 
-Contrairement aux blocs `ACTION` d’un hotspot, les blocs `USE` sont des
-alternatives : le premier bloc correspondant à l’objet et dont toutes
-les conditions sont satisfaites est exécuté, puis le traitement de
-l’utilisation de l’objet s’arrête.
+Contrairement aux blocs `ACTION` des hotspots, les blocs `USE` sont des
+alternatives : le premier bloc correspondant à l'objet et à toutes ses
+conditions est exécuté, puis le traitement de l'utilisation de l'objet
+s'arrête.
 
 ### USE générique
 
-`USE *` correspond à n’importe quel objet de l’inventaire :
+`USE *` correspond à n'importe quel objet de l'inventaire :
 
 ``` text
 HOTSPOT STUDY_DARK 0 0 320 240
@@ -366,9 +350,9 @@ HOTSPOT STUDY_DARK 0 0 320 240
 END_HOTSPOT
 ```
 
-Les blocs `USE` étant testés dans leur ordre de déclaration, un `USE *`
-doit être placé après les traitements d’objets plus spécifiques lorsque
-les deux sont présents.
+Comme les blocs `USE` sont testés dans leur ordre de déclaration, un
+bloc générique doit être placé après les gestionnaires d'objets plus
+spécifiques lorsque les deux sont présents.
 
 ## 8. Chemins et sorties
 
@@ -397,7 +381,7 @@ PATH EAST
 END_PATH
 ```
 
-Un chemin peut posséder des conditions déterminant si la direction est
+Un chemin peut comporter des conditions déterminant si la direction est
 disponible :
 
 ``` text
@@ -418,49 +402,70 @@ PATH NORTH
 END_PATH
 ```
 
-Les conditions placées au niveau du `PATH` déterminent si le joueur peut
-utiliser cette sortie.
+Les conditions au niveau du `PATH` déterminent si le joueur peut
+utiliser la sortie.
 
-Les conditions placées à l’intérieur des blocs `ACTION` du chemin
-déterminent ce qui se produit lorsque le chemin est emprunté.
+Les conditions placées dans les blocs `ACTION` d'un chemin déterminent
+ce qui se produit après l'utilisation du chemin.
 
-Les blocs `ACTION` d’un `PATH` suivent la même sémantique séquentielle
-que ceux d’un hotspot.
+Les blocs `ACTION` d'un `PATH` suivent la même sémantique séquentielle
+que les blocs `ACTION` d'un hotspot.
 
 ## 9. Actions disponibles
 
-Les actions sont valides à l’intérieur des blocs `ACTION` et `USE`.
+Les actions sont valides dans les blocs `ACTION` et `USE`.
 
-| Directive                 | Effet                                                                                                  |
-|---------------------------|--------------------------------------------------------------------------------------------------------|
-| `SET <state>`             | Modifie l’état selon son type déclaré. Pour un `TOGGLE`, inverse la valeur courante.                   |
-| `INVENTORY_ADD <item>`    | Ajoute un objet à l’inventaire.                                                                        |
-| `INVENTORY_REMOVE <item>` | Retire un objet de l’inventaire.                                                                       |
-| `MESSAGE <message_id>`    | Affiche un message localisé du jeu.                                                                    |
-| `SFX <name>`              | Lance un effet sonore et continue immédiatement.                                                       |
-| `WAIT_SFX <name>`         | Lance un effet sonore et attend sa fin avant de continuer.                                             |
-| `ROOM <room>`             | Change de Room. **Termine le flux d’actions courant et doit être la dernière action de son bloc.**     |
-| `TIMELINE <name>`         | Lance une timeline. **Termine le flux d’actions courant et doit être la dernière action de son bloc.** |
-| `MINIGAME <name>`         | Lance un mini-jeu. **Termine le flux d’actions courant et doit être la dernière action de son bloc.**  |
+  -----------------------------------------------------------------------
+  Directive                           Effet
+  ----------------------------------- -----------------------------------
+  `SET <state>`                       Met à jour l'état selon son type
+                                      déclaré. Pour un `TOGGLE`, inverse
+                                      sa valeur actuelle.
 
-Les noms des sons sont indiqués sans l’extension `.raw` :
+  `INVENTORY_ADD <item>`              Ajoute un objet à l'inventaire.
+
+  `INVENTORY_REMOVE <item>`           Retire un objet de l'inventaire.
+
+  `MESSAGE <message_id>`              Affiche un message localisé du jeu.
+
+  `SFX <name>`                        Démarre un effet sonore et poursuit
+                                      immédiatement l'exécution.
+
+  `WAIT_SFX <name>`                   Démarre un effet sonore et suspend
+                                      l'exécution jusqu'à sa fin.
+
+  `ROOM <room>`                       Passe à une autre pièce. **Termine
+                                      le flux d'actions courant et doit
+                                      être la dernière action de son
+                                      bloc.**
+
+  `TIMELINE <name>`                   Démarre une timeline. **Termine le
+                                      flux d'actions courant et doit être
+                                      la dernière action de son bloc.**
+
+  `MINIGAME <name>`                   Démarre un mini-jeu. **Termine le
+                                      flux d'actions courant et doit être
+                                      la dernière action de son bloc.**
+  -----------------------------------------------------------------------
+
+Les noms des sons sont spécifiés sans l'extension `.raw` :
 
 ``` text
 SFX closet_open
 WAIT_SFX metal_ladder
 ```
 
-Le moteur les résout à partir du répertoire de la room.
+Les effets sonores sont résolus depuis le répertoire de la pièce.
 
-### SET ne signifie pas nécessairement « passer à true »
+### SET ne signifie pas nécessairement « mettre à true »
 
-L’effet de `SET` dépend du type de l’état.
+L'effet de `SET` dépend du type de l'état.
 
 Pour un état déclaré comme `TOGGLE`, `SET` **inverse sa valeur
-courante** :
+actuelle** :
 
-- `false` devient `true` ;
-- `true` devient `false`.
+-   `false` devient `true` ;
+-   `true` devient `false`.
 
 Par exemple :
 
@@ -471,23 +476,23 @@ END_ACTION
 ```
 
 ouvre un piano fermé si `livingroom_piano_opened` vaut actuellement
-`false`, et le ferme si l’état vaut actuellement `true`.
+`false`, et le ferme si l'état vaut actuellement `true`.
 
-Il ne faut donc pas interpréter `SET foo` comme l’équivalent de
-`foo = true` sans vérifier la définition de l’état.
+Ne pas interpréter `SET foo` comme l'équivalent de `foo = true` sans
+vérifier la définition de l'état.
 
-## 10. Effets sonores et flux d’actions
+## 10. Effets sonores et flux d'actions
 
-`SFX` lance un effet sonore puis passe immédiatement à l’action suivante
-:
+`SFX` démarre un effet sonore et poursuit immédiatement avec l'action
+suivante :
 
 ``` text
 SFX closet_open
 SET closet_opened
 ```
 
-`WAIT_SFX` lance un effet sonore et attend qu’il soit terminé avant de
-poursuivre avec l’action suivante **du même bloc** :
+`WAIT_SFX` démarre un effet sonore et attend qu'il se termine avant de
+poursuivre avec l'action suivante **dans le même bloc** :
 
 ``` text
 ACTION
@@ -496,14 +501,14 @@ ACTION
 END_ACTION
 ```
 
-Il ne faut pas compter sur l’exécution de blocs `ACTION` ultérieurs
-après un `WAIT_SFX`. Toutes les actions qui doivent suivre le son
-doivent être placées après `WAIT_SFX` dans le même bloc.
+Ne pas compter sur l'exécution de blocs `ACTION` ultérieurs après un
+`WAIT_SFX`. Toute action devant suivre le son doit être placée après
+`WAIT_SFX` dans le même bloc.
 
 ### Actions terminales
 
-`ROOM`, `TIMELINE` et `MINIGAME` terminent le flux d’actions courant.
-Elles doivent donc toujours être la **dernière action de leur bloc**.
+`ROOM`, `TIMELINE` et `MINIGAME` terminent le flux d'actions courant.
+Ils doivent donc toujours être la **dernière action de leur bloc**.
 
 Correct :
 
@@ -523,11 +528,12 @@ ACTION
 END_ACTION
 ```
 
-Le `MESSAGE` ne sera jamais exécuté, car `ROOM` termine le flux
-d’actions.
+Le `MESSAGE` ne sera jamais exécuté car `ROOM` termine le flux
+d'actions.
 
-**Un `MESSAGE` ne doit pas être suivi de `WAIT_SFX`, `ROOM`, `TIMELINE` ou `MINIGAME`.**
-Ces actions changent immédiatement le mode du jeu et remplacent le message avant qu'il puisse être affiché. Les actions telles que `SET`, `INVENTORY_ADD`, `INVENTORY_REMOVE` ou `SFX` peuvent en revanche précéder un `MESSAGE`.
+Ne pas placer `WAIT_SFX`, `ROOM`, `TIMELINE` ou `MINIGAME` après un
+`MESSAGE` dans le même bloc. L'action suivante remplace immédiatement
+l'état du message, qui ne sera donc pas affiché.
 
 ## 11. Exemple complet
 
@@ -602,32 +608,31 @@ PATH NORTH
 END_PATH
 ```
 
-## 12. Résumé du modèle d’exécution
+## 12. Résumé du modèle d'exécution
 
-Lorsqu’une Room est active :
+Lorsqu'une pièce est active :
 
-1.  Les images dont les conditions sont satisfaites sont affichées.
+1.  Les images dont les conditions correspondent sont affichées.
 2.  La détection des hotspots parcourt les hotspots actifs dans leur
     ordre de déclaration et sélectionne le premier rectangle
     correspondant.
-3.  L’examen d’un hotspot utilise son `MESSAGE` direct, s’il existe.
-4.  L’action normale sur un hotspot parcourt tous ses blocs `ACTION`
-    dans leur ordre de déclaration. Chaque bloc dont les conditions sont
-    satisfaites est exécuté, sauf si le flux d’actions est suspendu par
-    `WAIT_SFX` ou terminé par `ROOM`, `TIMELINE` ou `MINIGAME`.
-5.  L’utilisation d’un objet parcourt les blocs `USE` dans leur ordre de
-    déclaration et exécute le premier bloc dont l’objet et les
+3.  L'examen d'un hotspot utilise son `MESSAGE` direct, s'il existe.
+4.  Les actions normales d'un hotspot parcourent tous les blocs `ACTION`
+    dans leur ordre de déclaration. Chaque bloc correspondant est
+    exécuté, sauf si le flux d'actions est suspendu par `WAIT_SFX` ou
+    terminé par `ROOM`, `TIMELINE` ou `MINIGAME`.
+5.  L'utilisation d'un objet parcourt les blocs `USE` dans leur ordre de
+    déclaration et exécute le premier bloc dont l'objet et les
     conditions correspondent.
-6.  Un chemin n’existe que lorsque ses conditions de niveau `PATH` sont
-    satisfaites ; lorsqu’il est emprunté, ses blocs `ACTION` sont
-    évalués dans leur ordre de déclaration.
+6.  Un chemin n'existe que lorsque ses conditions au niveau du `PATH`
+    correspondent ; son utilisation évalue ses blocs `ACTION` dans leur
+    ordre de déclaration.
 
-Le format conserve volontairement un moteur simple : les fichiers de
-Room sont supposés être correctement écrits. Les erreurs du parser ou
-d’exécution sont signalées par les sorties de debug habituelles plutôt
-que masquées derrière une importante couche de validation.
+Les fichiers de pièce sont supposés être correctement écrits. Les
+erreurs de syntaxe et d'exécution sont signalées via la sortie de debug
+habituelle.
 
-## 13. Erreurs fréquentes
+## 13. Erreurs courantes
 
 ### Imbriquer ACTION dans USE
 
@@ -645,30 +650,29 @@ Les actions doivent être placées directement dans le bloc `USE`.
 
 ### Traiter les blocs ACTION comme des else-if
 
-Plusieurs blocs `ACTION` peuvent être exécutés. Les changements d’état
-effectués dans un bloc peuvent modifier les conditions des blocs
-suivants.
+Plusieurs blocs `ACTION` correspondants peuvent être exécutés. Les
+changements d'état effectués dans un bloc peuvent affecter les
+conditions des blocs suivants.
 
 ### Oublier la priorité des hotspots
 
-Un grand hotspot déclaré avant un hotspot plus petit qui le chevauche
-peut rendre ce dernier inaccessible.
+Un grand hotspot déclaré avant un hotspot plus petit qu'il recouvre peut
+rendre ce dernier inaccessible.
 
-### Traduire littéralement des images provenant d’un else-if en C
+### Oublier que les images conditionnelles sont indépendantes
 
-Les images sont évaluées indépendamment. Il faut ajouter des conditions
-complémentaires lorsque seule une variante doit être visible.
+Les images sont évaluées indépendamment. Ajouter des conditions
+complémentaires lorsqu'une seule variante doit être visible.
 
 ### Supposer que SET force un booléen à true
 
-Il faut vérifier la définition de l’état. Sur un état `TOGGLE`, `SET`
-inverse la valeur courante : `false` devient `true` et `true` devient
-`false`.
+Vérifier la définition de l'état. Sur un état `TOGGLE`, `SET` inverse la
+valeur courante : `false` devient `true` et `true` devient `false`.
 
-### Séparer WAIT_SFX et sa suite dans plusieurs blocs ACTION
+### Séparer WAIT_SFX et sa suite dans différents blocs ACTION
 
-Les actions qui doivent se produire après un `WAIT_SFX` doivent être
-placées dans le même bloc :
+Les actions devant être exécutées après un `WAIT_SFX` doivent se trouver
+dans le même bloc :
 
 ``` text
 ACTION
@@ -679,13 +683,13 @@ END_ACTION
 
 ### Placer des actions après ROOM, TIMELINE ou MINIGAME
 
-`ROOM`, `TIMELINE` et `MINIGAME` terminent le flux d’actions courant.
+`ROOM`, `TIMELINE` et `MINIGAME` terminent le flux d'actions courant.
 Rien ne doit les suivre dans le même bloc.
 
 ## 14. Style recommandé
 
-Pour faciliter la lecture, les fichiers de Room devraient normalement
-être organisés dans cet ordre :
+Pour améliorer la lisibilité, les fichiers de pièce doivent normalement
+être organisés dans l'ordre suivant :
 
 ``` text
 Images
@@ -693,14 +697,13 @@ Hotspots
 Sorties
 ```
 
-Utilisez des commentaires de section et indentez les directives
-imbriquées de manière cohérente. Placez les hotspots spécifiques avant
-les hotspots génériques qui les recouvrent. Regroupez dans un même bloc
-les `WAIT_SFX` et les actions de transition qui leur sont associées.
+Utiliser des commentaires de section et indenter les directives
+imbriquées de manière cohérente. Placer les hotspots spécifiques avant
+les hotspots génériques qui les recouvrent. Conserver ensemble les
+actions `WAIT_SFX` et les actions de transition associées.
 
-Le format des Rooms est volontairement un petit DSL spécifique au jeu,
-et non un langage de script généraliste. Si une Room nécessite un
+Le format des pièces est volontairement un petit DSL spécifique au jeu,
+et non un langage de script généraliste. Si une pièce nécessite un
 comportement qui ne peut pas être exprimé proprement avec les primitives
-existantes, il est préférable d’ajouter au moteur une petite primitive
-réutilisable plutôt que de réintroduire des callbacks C spécifiques à
-une Room.
+existantes, préférer l'ajout d'une petite primitive réutilisable au
+format.

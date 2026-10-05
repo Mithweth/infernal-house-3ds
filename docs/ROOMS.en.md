@@ -3,18 +3,14 @@
 This document describes the declarative format used to define game
 rooms.
 
-A room description replaces the former `room_<name>.c` files for data
-that belongs to the room itself: displayed images, hotspots, conditions,
-interactions, inventory use and exits.
-
-The engine remains responsible for parsing the file and executing the
-declared behavior.
+A room description defines the content and behavior of a room: displayed
+images, hotspots, conditions, interactions, inventory use and exits.
 
 ## 1. Location and general structure
 
 A room named `livingroom` is loaded from:
 
-``` text
+```text
 romfs:/rooms/livingroom/room
 ```
 
@@ -22,7 +18,7 @@ Its graphical assets are loaded from the corresponding room asset set.
 
 A typical room contains three sections:
 
-``` text
+```text
 # Images
 
 IMAGE bg 0 0 0
@@ -48,7 +44,7 @@ Blank lines are ignored. A line whose first non-whitespace character is
 `#` is a comment. Comments should be written on their own line; inline
 comments are not part of the format.
 
-Tokens are whitespace-separated. Identifiers such as state names, item
+Tokens are separated by spaces. Identifiers such as state names, item
 names, message IDs, room names, sound names and image names therefore do
 not contain spaces and are not quoted.
 
@@ -59,14 +55,14 @@ the `END_*` directives.
 
 Conditions are introduced by `WHEN`:
 
-``` text
+```text
 WHEN STATE_IS <state> <true|false>
 WHEN INVENTORY_HAS <item> <true|false>
 ```
 
 Examples:
 
-``` text
+```text
 WHEN STATE_IS underground_dug true
 WHEN INVENTORY_HAS SHOVEL false
 ```
@@ -84,7 +80,7 @@ the game-state and inventory systems.
 
 Syntax:
 
-``` text
+```text
 IMAGE <image> <x> <y> <z>
     [WHEN ...]
 END_IMAGE
@@ -92,42 +88,28 @@ END_IMAGE
 
 Example:
 
-``` text
+```text
 IMAGE hole_dug 261 174 0.3
     WHEN STATE_IS underground_dug true
     WHEN STATE_IS underground_card_taken false
 END_IMAGE
 ```
 
-`image` is the image filename without its extension. In the previous
-example, `hole_dug` refers to the image `hole_dug.png`. Image names may
-contain letters, digits and underscores (`_`); hyphens (`-`) must not be
-used.
+Do not specify an image file extension. Image names may contain letters,
+digits and underscores (`_`); hyphens (`-`) must not be used.
 
 `x` (from 0 to 320) and `y` (from 0 to 240) are the drawing coordinates.
 `z` (from -1.0 to 1.0) controls the drawing depth.
+
 
 The image is drawn only while all its conditions are true. With no
 `WHEN`, the image is always drawn.
 
 Conditional images are independent. If two image blocks have true
-conditions, both are drawn. When translating C code containing
-`if ... else if ...`, the conditions must therefore explicitly make the
-alternatives mutually exclusive.
+conditions, both are drawn. When only one variant should be visible, make
+their conditions explicitly mutually exclusive:
 
-For example, this C logic:
-
-``` c
-if (gamestate_get("card_taken")) {
-    draw(empty);
-} else {
-    draw(full);
-}
-```
-
-must become something equivalent to:
-
-``` text
+```text
 IMAGE full ...
     WHEN STATE_IS card_taken false
 END_IMAGE
@@ -141,7 +123,7 @@ END_IMAGE
 
 Syntax:
 
-``` text
+```text
 HOTSPOT <id> <x> <y> <width> <height>
     [WHEN ...]
     [MESSAGE <message_id>]
@@ -152,7 +134,7 @@ END_HOTSPOT
 
 Example:
 
-``` text
+```text
 HOTSPOT UNDERGROUND_MAGNETIC_CARD 275 182 24 14
     WHEN STATE_IS underground_card_taken false
     WHEN STATE_IS underground_dug true
@@ -180,7 +162,7 @@ specific hotspots that overlap it.
 
 For example:
 
-``` text
+```text
 HOTSPOT UNDERGROUND_X_FORM 141 190 17 16
     ...
 END_HOTSPOT
@@ -198,7 +180,7 @@ hotspot.
 A `MESSAGE` directly inside a `HOTSPOT`, outside an `ACTION` or `USE`,
 defines the message shown when the object is examined:
 
-``` text
+```text
 HOTSPOT LIVINGROOM_FIREPLACE 163 72 26 17
     MESSAGE LIVINGROOM_FIREPLACE_EXAMINE
 END_HOTSPOT
@@ -206,7 +188,7 @@ END_HOTSPOT
 
 This is different from `MESSAGE` used as an action:
 
-``` text
+```text
 ACTION
     MESSAGE CELLAR_DISABLE_ALARM_BOX
 END_ACTION
@@ -219,7 +201,7 @@ In that case the message is displayed when the action block executes.
 An `ACTION` block describes what happens when the player performs the
 normal action on a hotspot:
 
-``` text
+```text
 HOTSPOT UNDERGROUND_SHOVEL 18 89 37 100
     WHEN INVENTORY_HAS SHOVEL false
     ACTION
@@ -230,7 +212,7 @@ END_HOTSPOT
 
 An `ACTION` may itself have conditions:
 
-``` text
+```text
 ACTION
     WHEN STATE_IS cellar_alarm_box_unscrewed true
     SET cellar_alarm_box_opened
@@ -247,7 +229,7 @@ block may change game state and thereby affect a later block.
 
 This is intentional and is useful for state transitions:
 
-``` text
+```text
 ACTION
     SET diningroom_lasers_disabled
 END_ACTION
@@ -266,8 +248,8 @@ END_ACTION
 If `diningroom_lasers_disabled` is a toggle state, the first block
 changes it. The following blocks then inspect the **new** value.
 
-Do not rewrite such constructs as a single “first matching block wins”
-operation.
+This is different from `USE` blocks: matching `ACTION` blocks do not stop
+after the first match.
 
 ## 7. USE blocks
 
@@ -275,7 +257,7 @@ operation.
 
 Syntax:
 
-``` text
+```text
 USE <item>
     [WHEN ...]
     <actions>
@@ -284,7 +266,7 @@ END_USE
 
 Example:
 
-``` text
+```text
 USE SCREWDRIVER
     WHEN STATE_IS cellar_alarm_box_unscrewed false
     SET cellar_alarm_box_unscrewed
@@ -297,7 +279,7 @@ block** inside `USE`.
 
 Incorrect:
 
-``` text
+```text
 USE SCREWDRIVER
     ACTION
         SET cellar_alarm_box_unscrewed
@@ -307,7 +289,7 @@ END_USE
 
 Correct:
 
-``` text
+```text
 USE SCREWDRIVER
     SET cellar_alarm_box_unscrewed
 END_USE
@@ -321,7 +303,7 @@ hotspot/path grammar, not to `USE`.
 Several `USE` blocks may refer to the same item and use conditions to
 select the appropriate behavior:
 
-``` text
+```text
 USE SCREWDRIVER
     WHEN STATE_IS cellar_alarm_box_unscrewed false
     SET cellar_alarm_box_unscrewed
@@ -342,7 +324,7 @@ item-use processing stops.
 
 `USE *` matches any inventory item:
 
-``` text
+```text
 HOTSPOT STUDY_DARK 0 0 320 240
     WHEN STATE_IS study_lights_on false
     MESSAGE STUDY_MESSAGE_NO_LIGHT
@@ -361,7 +343,7 @@ A `PATH` declares an available movement direction.
 
 Supported directions are:
 
-``` text
+```text
 NORTH
 NORTHEAST
 EAST
@@ -374,7 +356,7 @@ NORTHWEST
 
 Basic example:
 
-``` text
+```text
 PATH EAST
     ACTION
         ROOM secondunderground
@@ -385,7 +367,7 @@ END_PATH
 A path can have conditions controlling whether the direction is
 available:
 
-``` text
+```text
 PATH NORTH
     WHEN STATE_IS livingroom_secret_passage_opened true
 
@@ -430,12 +412,12 @@ Actions are valid inside `ACTION` and `USE` blocks.
 
 Sound names are specified without the `.raw` extension:
 
-``` text
+```text
 SFX closet_open
 WAIT_SFX metal_ladder
 ```
 
-The engine resolves them from the room directory.
+Sound effects are resolved from the room directory.
 
 ### SET does not necessarily mean “set to true”
 
@@ -448,7 +430,7 @@ For a state declared as `TOGGLE`, `SET` **inverts its current value**:
 
 For example:
 
-``` text
+```text
 ACTION
     SET livingroom_piano_opened
 END_ACTION
@@ -465,7 +447,7 @@ checking the state definition.
 `SFX` starts a sound effect and immediately continues with the next
 action:
 
-``` text
+```text
 SFX closet_open
 SET closet_opened
 ```
@@ -473,7 +455,7 @@ SET closet_opened
 `WAIT_SFX` starts a sound effect and waits for it to finish before
 continuing with the next action **in the same block**:
 
-``` text
+```text
 ACTION
     WAIT_SFX metal_ladder
     ROOM cellar
@@ -491,7 +473,7 @@ They must therefore always be the **last action in their block**.
 
 Correct:
 
-``` text
+```text
 ACTION
     WAIT_SFX door_open
     ROOM corridor
@@ -500,7 +482,7 @@ END_ACTION
 
 Incorrect:
 
-``` text
+```text
 ACTION
     ROOM corridor
     MESSAGE UNREACHABLE_MESSAGE
@@ -510,12 +492,13 @@ END_ACTION
 The `MESSAGE` will never be executed because `ROOM` terminates the
 action flow.
 
-**`MESSAGE` should be the last action that changes the game mode in a block.**
-A `MESSAGE` followed by `WAIT_SFX`, `ROOM`, `TIMELINE`, or `MINIGAME` will not be displayed, because the following action immediately replaces the message state.
+Do not place `WAIT_SFX`, `ROOM`, `TIMELINE` or `MINIGAME` after a
+`MESSAGE` in the same block. The following action immediately replaces the
+message state, so the message will not be displayed.
 
 ## 11. Complete example
 
-``` text
+```text
 # ---------------------------------------------------------------------------
 # Images
 # ---------------------------------------------------------------------------
@@ -603,10 +586,8 @@ When a room is active:
 6.  A path exists only when its path-level conditions match; using it
     evaluates its `ACTION` blocks in declaration order.
 
-The format deliberately keeps the engine simple: room files are expected
-to be authored correctly. Parser/runtime errors are reported through the
-normal debug output rather than being hidden behind a large validation
-layer.
+Room files are expected to be authored correctly. Syntax and runtime
+errors are reported through the normal debug output.
 
 ## 13. Common mistakes
 
@@ -614,7 +595,7 @@ layer.
 
 Do not do this:
 
-``` text
+```text
 USE KEY_ONE
     ACTION
         MESSAGE SOMETHING
@@ -634,7 +615,7 @@ can affect conditions in following blocks.
 A large hotspot declared before a smaller overlapping hotspot can make
 the smaller one unreachable.
 
-### Translating C else-if images literally
+### Forgetting that conditional images are independent
 
 Images are evaluated independently. Add complementary conditions when
 only one variant must be visible.
@@ -648,7 +629,7 @@ current value: `false` becomes `true`, and `true` becomes `false`.
 
 Actions that must occur after a `WAIT_SFX` belong in the same block:
 
-``` text
+```text
 ACTION
     WAIT_SFX door_open
     ROOM hall
@@ -664,7 +645,7 @@ Nothing should follow them in the same block.
 
 For readability, room files should normally be ordered as:
 
-``` text
+```text
 Images
 Hotspots
 Exits
@@ -677,5 +658,4 @@ specific overlapping hotspots before generic ones. Keep related
 The room format is intentionally a small game-specific DSL, not a
 general scripting language. If a room requires behavior that cannot be
 expressed cleanly with the existing primitives, prefer adding one small,
-reusable primitive to the engine rather than embedding room-specific C
-callbacks again.
+reusable primitive to the format.

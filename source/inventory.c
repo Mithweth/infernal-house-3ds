@@ -17,14 +17,6 @@
 #include "str_utils.h"
 
 #define ITEM_MAX       64
-#define INVENTORY_COLUMNS  6
-#define INVENTORY_ROWS     2
-#define ITEM_SIZE       32.0f
-#define ITEM_INNER_SPACING       4.0f
-#define ITEM_OUTER_SPACING_X    14.0f
-#define ITEM_OUTER_SPACING_Y    10.0f
-#define ITEM_Y          75.0f
-#define ITEM_X          20.0f
 
 static Item items[ITEM_MAX];
 static size_t item_count = 0;
@@ -34,11 +26,8 @@ static Item *inventory[ITEM_MAX];
 static size_t inventory_count = 0;
 
 static C2D_SpriteSheet inventory_assets;
-static C2D_TextBuf text_buf;
-static C2D_Text text;
-static C2D_Image img_selected;
-static C2D_Image img_background;
 static InventoryMode inventory_mode = INVENTORY_NORMAL;
+static size_t columns = 6;
 
 // Looks an item up in the catalogue, whether the player holds it or not.
 static Item *inventory_find(const char *id) {
@@ -236,6 +225,10 @@ static bool load_inventory(const char *filename) {
     return true;
 }
 
+void inventory_set_columns(size_t value) {
+    columns = value;
+}
+
 bool inventory_update(u32 keys) {
     if (inventory_mode == INVENTORY_ACTION) {
 // While examining, every key is swallowed; only X or B leave the view.
@@ -269,7 +262,7 @@ bool inventory_update(u32 keys) {
 
 // Up/down move by one grid row, clamped to the first/last item.
     if (keys & KEY_DDOWN) {
-        selected += INVENTORY_COLUMNS;
+        selected += columns;
 
         if (selected >= inventory_count) {
             selected = inventory_count - 1;
@@ -278,10 +271,10 @@ bool inventory_update(u32 keys) {
     }
 
     if (keys & KEY_DUP) {
-        if (selected < INVENTORY_COLUMNS) {
+        if (selected < columns) {
             selected = 0;
         } else {
-            selected -= INVENTORY_COLUMNS;
+            selected -= columns;
         }
         return true;
     }
@@ -307,63 +300,30 @@ bool inventory_update(u32 keys) {
     return false;
 }
 
-void inventory_draw(void) {
-    if (inventory_count == 0) {
-        return;
-    }
-
-    if (inventory_mode == INVENTORY_ACTION) {
-        Item *item = inventory[selected];
-        C2D_DrawImageAt(img_background, 7.0f, 49.0f, 0.4f, NULL, 1.0f, 1.0f);
-        if (item->detail_image.tex) {
-            if (item->detail_fullscreen) {
-                C2D_DrawRectSolid(0.0f, 0.0f, 0.8f, 400.0f, 240.0f, C2D_Color32(0, 0, 0, 255));
-            }
-            C2D_DrawImageAt(item->detail_image, item->detail_x, item->detail_y, 0.9f, NULL, 1.0f, 1.0f);
-        }
-        if (item->examine_text) {
-            C2D_TextBufClear(text_buf);
-            C2D_TextParse(&text, text_buf, lang_get(item->examine_text));
-            C2D_TextOptimize(&text);
-            C2D_DrawText(&text, C2D_WithColor, 20.0f, 62.0f, 0.5f, 0.55f, 0.55f, C2D_Color32(192, 192, 192, 255));
-        }
-// Extra drawing provided by an extension, e.g. the generated secret code.
-        if (item->examine_callback) {
-            item->examine_callback();
-        }
-        return;
-    }
-// Only INVENTORY_ROWS rows fit: show the selected row and the one above it
-// (rows 0-1 while the selection is on the first row).
-    int selected_row = selected / INVENTORY_COLUMNS;
-    int first_row = selected_row > 0 ? selected_row - 1 : 0;
-    size_t first = first_row * INVENTORY_COLUMNS;
-    size_t last = first + INVENTORY_COLUMNS * INVENTORY_ROWS;
-
-    if (last > inventory_count) {
-        last = inventory_count;
-    }
-    for (size_t i = first; i < last; i++) {
-        size_t visible = i - first;
-
-        float x = ITEM_X + (visible % INVENTORY_COLUMNS) * (ITEM_SIZE + ITEM_OUTER_SPACING_X);
-        float y = ITEM_Y + (visible / INVENTORY_COLUMNS) * (ITEM_SIZE + ITEM_OUTER_SPACING_Y);
-        
-        if (i == selected) {
-            C2D_DrawImageAt(img_selected, x - ITEM_INNER_SPACING, y - ITEM_INNER_SPACING, 0.2f, NULL, 1.0f, 1.0f);
-        }
-
-        C2D_DrawImageAt(inventory[i]->image, x, y, 0.4f, NULL, ITEM_SIZE / 48, ITEM_SIZE / 48);
-    }
-}
-
-const Item *inventory_get_selected(void) {
+const Item *inventory_get_selected_item(void) {
     if (inventory_count == 0) {
         return NULL;
     }
     return inventory[selected];
 }
 
+const Item *inventory_get_item(size_t id) {
+    if (inventory_count == 0) {
+        return NULL;
+    }
+    if (id >= inventory_count) {
+        return NULL;
+    }
+    return inventory[id];
+}
+
+int inventory_get_selected(void) {
+    return selected;
+}
+
+int inventory_get_count(void) {
+    return inventory_count;
+}
 
 bool inventory_is_active(void) {
     return inventory_mode == INVENTORY_ACTION;
@@ -456,30 +416,7 @@ bool inventory_init(void) {
         return false;
     }
 
-// Looked up right after load_inventory, while gfxmap still holds the
-// inventory's gfx.h.
-    int img_idx = gfxmap_get_index("selected");
-    if (img_idx < 0) {
-        printf("unknown image: selected\n");
-        C2D_SpriteSheetFree(inventory_assets);
-        inventory_assets = NULL;
-        return false;
-    }
-    img_selected = C2D_SpriteSheetGetImage(inventory_assets, img_idx);
-
-    img_idx = gfxmap_get_index("background");
-    if (img_idx < 0) {
-        printf("unknown image: background\n");
-        C2D_SpriteSheetFree(inventory_assets);
-        inventory_assets = NULL;
-        return false;
-    }
-    img_background = C2D_SpriteSheetGetImage(inventory_assets, img_idx);
-
-    if (!text_buf) {
-        text_buf = C2D_TextBufNew(4096);
-    }
-
+    printf("Loaded %zu items\n", item_count);
     inventory_count = 0;
     selected = 0;
 
@@ -492,16 +429,11 @@ void inventory_close(void) {
         free(items[i].name_id);
         free(items[i].examine_text);
     }
-// Resetting item_count makes a second call harmless: hud_init closes the
-// inventory on failure, and game_close closes it again.
+// Resetting item_count makes a second call harmless.
     item_count = 0;
     if (inventory_assets) {
         C2D_SpriteSheetFree(inventory_assets);
         inventory_assets = NULL;
-    }
-    if (text_buf) {
-        C2D_TextBufDelete(text_buf);
-        text_buf = NULL;
     }
     inventory_count = 0;
     selected = 0;

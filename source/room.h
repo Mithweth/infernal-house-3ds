@@ -153,15 +153,6 @@ bool room_can_move_south(void);
 bool room_can_move_southwest(void);
 bool room_can_move_west(void);
 bool room_can_move_northwest(void);
-// Duplicates of the declarations above.
-bool room_can_move_north(void);
-bool room_can_move_south(void);
-bool room_can_move_east(void);
-bool room_can_move_west(void);
-bool room_can_move_northwest(void);
-bool room_can_move_southwest(void);
-bool room_can_move_northeast(void);
-bool room_can_move_southeast(void);
 // Load romfs:/rooms/<name>/ (gfx.t3x, gfx.h and the `room` script).
 // Returns false if a room is already loaded or on any load error; on error
 // everything allocated so far is freed. Call room_close() first.

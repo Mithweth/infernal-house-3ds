@@ -1,7 +1,7 @@
 // inventory.h
 // Item catalogue (loaded from romfs:/inventory/inventory) and the player's
-// inventory, drawn in the top-screen HUD. Driven by hud.c: inventory_init and
-// inventory_close are called from hud_init and hud_close.
+// inventory. Drawn by the HUD (hud.c). inventory_init is called once by
+// game_init, inventory_close by game_close.
 #pragma once
 
 #include <3ds.h>
@@ -48,9 +48,6 @@ void inventory_remove(const char *id);
 // keys were consumed, in which case the caller must not process them further.
 bool inventory_update(u32 keys);
 
-// Draws the item grid, or the examine view; call inside the top screen scene.
-void inventory_draw(void);
-
 // Returns true while an item is being examined.
 bool inventory_is_active(void);
 
@@ -59,4 +56,19 @@ void inventory_reset(void);
 
 // Returns the selected item, or NULL if the inventory is empty. The pointer
 // stays owned by the inventory module.
-const Item *inventory_get_selected(void);
+const Item *inventory_get_selected_item(void);
+
+// Returns the held item at position id (pickup order), or NULL if id is out
+// of range.
+const Item *inventory_get_item(size_t id);
+
+// Returns the position of the selected item among the held items (0 when the
+// inventory is empty).
+int inventory_get_selected(void);
+
+// Returns the number of items the player holds.
+int inventory_get_count(void);
+
+// Sets the grid width used by up/down navigation. Called by hud_init with the
+// HUD's COLUMNS value.
+void inventory_set_columns(size_t value);

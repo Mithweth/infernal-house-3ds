@@ -87,6 +87,7 @@ void game_close(void) {
         text_buf = NULL;
     }
     hud_close();
+    inventory_close();
 }
 
 // An action may have hidden the target since it was selected (its WHEN
@@ -107,23 +108,50 @@ const char *game_target_name(void) {
     return target->id;
 }
 
-void game_timeline_start(const char *name) {
+bool game_title_start(void) {
+    if (active_minigame && active_minigame->close) {
+        active_minigame->close();
+    }
+    active_minigame = NULL;
+    room_close();
+    active_hotspot = NULL;
+    target = NULL;
+    message_text = NULL;
+    game_busy_callback = NULL;
+    title_close();
+    timeline_close();
+    music_stop();
+    game_mode = GAME_TITLE;
+    examine_image = (C2D_Image){0};
+    if (!title_init()) {
+        printf("Cannot initialize title screen\n");
+        return false;
+    }
+    return true;
+}
+
+bool game_timeline_start(const char *name) {
     char path[256];
     snprintf(path, sizeof(path), "romfs:/timelines/%s", name);
     if (timeline_init(path)) {
         game_mode = GAME_TIMELINE;
-        return;
+        return true;
     }
-    game_init();
+    game_title_start();
+    return false;
 }
 
-void game_init(void) {
-    timeline_close();
-    music_stop();
+bool game_init(void) {
     callbacks_init();
-    game_mode = GAME_TITLE;
-    examine_image = (C2D_Image){0};
-    title_init();
+    if (!inventory_init()) {
+        printf("Cannot initialize inventory\n");
+        return false;
+    }
+    if (!hud_init()) {
+        printf("Cannot initialize HUD\n");
+        return false;
+    }
+    return game_title_start();
 }
 
 void game_start(void) {
@@ -131,6 +159,7 @@ void game_start(void) {
         text_buf = C2D_TextBufNew(4096);
     }
     title_close();
+    callbacks_reset();
     inventory_reset();
     gamestate_reset();
     hud_reset();
@@ -138,7 +167,6 @@ void game_start(void) {
     message_text = NULL;
     active_hotspot = NULL;
     music_play("romfs:/audio/background.ogg");
-    inventory_add("MEASURING_TAPE");
     game_set_room("hall");
 }
 
@@ -155,8 +183,7 @@ bool game_wait_for_sfx(const char *sfx, void (*callback)(void)) {
 void game_intro(void) {
     title_close();
     if (!timeline_init("romfs:/timelines/intro")) {
-        game_mode = GAME_TITLE;
-        title_init();
+        game_title_start();
         return;
     }
     game_mode = GAME_TIMELINE;

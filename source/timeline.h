@@ -10,11 +10,11 @@
 bool timeline_init(const char *directory);
 
 // Frees the events, the spritesheet and the text buffer, and stops the music.
-// Safe to call when no timeline is loaded (game_init always calls it).
+// Safe to call when no timeline is loaded (game_title_start always calls it).
 void timeline_close();
 
 // Advances the timeline by one frame. B aborts back to the title screen,
-// A skips the current TEXT or PAUSE. Reaching END calls game_init().
+// A skips the current TEXT or PAUSE. Reaching END calls game_title_start().
 void timeline_update(u32 keys);
 
 // Draw the current scene; must be called inside the matching C2D scene.

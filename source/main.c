@@ -82,12 +82,10 @@ int main(int argc, char **argv) {
     aptHook(&apt_cookie, apt_callback, NULL);
     // audio_init never fails: without a DSP firmware the game runs silently.
     audio_init();
-    // The HUD (and the inventory it owns) is loaded once for the whole run;
-    // game_init can then be called again on every return to the title screen.
-    if (hud_init()) {
-        game_init();
-    } else {
-        printf("Cannot initialize HUD\n");
+    // The inventory and the HUD are loaded once for the whole run; returns to
+    // the title screen go through game_title_start instead.
+    if (!game_init()) {
+        printf("Cannot initialize interface\n");
         ret = 1;
     }
     // ret != 0 means initialization failed: skip the loop and clean up.
