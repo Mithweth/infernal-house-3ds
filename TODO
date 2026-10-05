@@ -1,5 +1,6 @@
-custom hud
+custom title
 music/sound path absolute AND relative
+change hardcoded music
 add some comments
 add dev doc
 add some events

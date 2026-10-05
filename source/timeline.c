@@ -34,14 +34,6 @@ typedef enum {
     TIMELINE_END
 } TimelineEventType;
 
-typedef enum {
-    TIMELINE_COLOR_WHITE,
-    TIMELINE_COLOR_RED,
-    TIMELINE_COLOR_BLUE,
-    TIMELINE_COLOR_YELLOW,
-    TIMELINE_COLOR_GREEN
-} TimelineTextColor;
-
 typedef struct {
     C2D_Image image;
     float x;
@@ -52,7 +44,7 @@ typedef struct {
     TimelineEventType type;
     char *text;
     u32 duration;
-    TimelineTextColor color;
+    u32 color;
     C2D_Image image;
     TimelineSprite sprites[TIMELINE_MAX_SPRITES];
     size_t sprite_count;
@@ -87,26 +79,6 @@ static C2D_SpriteSheet timeline_assets;
 static TimelineEvent events[TIMELINE_MAX_EVENTS];
 static size_t event_count = 0;
 
-
-// Unknown color names fall back to white.
-static TimelineTextColor parse_color(const char *str) {
-    if (strcmp(str, "WHITE") == 0) {
-        return TIMELINE_COLOR_WHITE;
-    }
-    if (strcmp(str, "RED") == 0) {
-        return TIMELINE_COLOR_RED;
-    }
-    if (strcmp(str, "BLUE") == 0) {
-        return TIMELINE_COLOR_BLUE;
-    }
-    if (strcmp(str, "GREEN") == 0) {
-        return TIMELINE_COLOR_GREEN;
-    }
-    if (strcmp(str, "YELLOW") == 0) {
-        return TIMELINE_COLOR_YELLOW;
-    }
-    return TIMELINE_COLOR_WHITE;
-}
 
 // Appends a zeroed event; returns NULL when TIMELINE_MAX_EVENTS is reached.
 static TimelineEvent *add_event(TimelineEventType type) {
@@ -218,7 +190,7 @@ static bool load_timeline(const char *filename) {
                 event_count = 0;
                 return false;
             }
-            event->color = parse_color(color);
+            event->color = gfxmap_parse_color(color);
             event->text = strdup(text);
             continue;
         }
@@ -456,22 +428,7 @@ void timeline_update(u32 keys) {
     case TIMELINE_TEXT:
         if (now >= next_char_time) {
             const char *str = lang_get(event->text);
-            switch(event->color) {
-            case TIMELINE_COLOR_BLUE:
-                current_color = C2D_Color32(0, 0, 164, 255);
-                break;
-            case TIMELINE_COLOR_RED:
-                current_color = C2D_Color32(164, 0, 0, 255);
-                break;
-            case TIMELINE_COLOR_GREEN:
-                current_color = C2D_Color32(0, 164, 0, 255);
-                break;
-            case TIMELINE_COLOR_YELLOW:
-                current_color = C2D_Color32(164, 164, 0, 255);
-                break;
-            default:
-                current_color = C2D_Color32(164, 164, 164, 255);
-            }
+            current_color = event->color;
 
             if (str[event_pos] != '\0') {
                 size_t len = utf8_char_size(&str[event_pos]);

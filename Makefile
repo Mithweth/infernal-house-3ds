@@ -24,6 +24,7 @@ ASSETS				:= resources
 GRAPHICS			:= $(ASSETS)/gfx
 TIMELINES			:= $(ASSETS)/timelines
 INVENTORY			:= $(ASSETS)/inventory
+HUD					:= $(ASSETS)/hud
 MINIGAMES			:= $(ASSETS)/minigames
 ROOMS				:= $(ASSETS)/rooms
 ROMFS				:= romfs
@@ -49,12 +50,6 @@ CIA_BANNER_WAV 		:= $(CIA)/banner.wav
 
 # These directories are copied as-is from resources/ to romfs/.
 RAW_ASSET_DIRS		:=	audio lang states
-
-# The HUD is the only spritesheet linked directly into the executable.
-# Its gfx.t3s is generated like all the others.
-MEMGFX				:=	$(GRAPHICS)/hud/gfx.t3s
-MEM_T3XFILES		:=	gfx_hud.t3x
-MEM_HFILES			:=	gfx_hud.h
 
 #---------------------------------------------------------------------------------
 # options for code generation
@@ -111,7 +106,7 @@ GFXFILES			:=	$(shell if [ -d "$(ASSETS)" ]; then find "$(ASSETS)" -type f -name
 
 # Everything except MEMGFX goes to RomFS, preserving the directory hierarchy.
 # resources/gfx/hall/gfx.t3s -> romfs/gfx/hall/gfx.t3x + gfx.h
-ROMGFX				:=	$(filter-out $(MEMGFX),$(GFXFILES))
+ROMGFX				:=	$(GFXFILES)
 
 ROM_T3XFILES		:=	$(patsubst $(ASSETS)/%/gfx.t3s,$(ROMFS)/%/gfx.t3x,$(ROMGFX))
 ROM_HFILES			:=	$(patsubst $(ASSETS)/%/gfx.t3s,$(ROMFS)/%/gfx.h,$(ROMGFX))
@@ -128,6 +123,12 @@ TIMELINE_FILES 		:= $(patsubst $(TIMELINES)/%/timeline,$(ROMFS)/timelines/%/time
 #---------------------------------------------------------------------------------
 
 INVENTORY_FILES 	:= $(ROMFS)/inventory/inventory
+
+#---------------------------------------------------------------------------------
+# HUD
+#---------------------------------------------------------------------------------
+
+HUD_FILES := $(ROMFS)/hud/hud
 
 #---------------------------------------------------------------------------------
 # Minigames
@@ -264,12 +265,11 @@ generate-gfx:
 # Build assets, then run the usual inner Makefile from build/
 #---------------------------------------------------------------------------------
 build-project: $(BUILD) \
-	 $(MEM_T3XFILES:%=$(BUILD)/%) \
-	 $(MEM_HFILES:%=$(BUILD)/%) \
 	 $(ROM_T3XFILES) \
 	 $(ROM_HFILES) \
 	 $(TIMELINE_FILES) \
 	 $(INVENTORY_FILES) \
+	 $(HUD_FILES) \
 	 $(ROMFS_MINIGAME_RAW_FILES) \
 	 $(ROMFS_ROOM_FILES) \
 	 $(ROMFS_ROOM_RAW_FILES) \
@@ -353,17 +353,6 @@ $(ROMFS)/%: $(ASSETS)/%
 	@cp $< $@
 
 #---------------------------------------------------------------------------------
-# HUD graphics linked directly into the executable.
-#---------------------------------------------------------------------------------
-$(BUILD)/gfx_hud.t3x $(BUILD)/gfx_hud.h &: $(MEMGFX)
-	@echo hud/gfx.t3s
-	@mkdir -p $(BUILD)
-	@tex3ds -i $< \
-		-H $(BUILD)/gfx_hud.h \
-		-d $(DEPSDIR)/gfx_hud.d \
-		-o $(BUILD)/gfx_hud.t3x
-
-#---------------------------------------------------------------------------------
 # Runtime graphics
 # resources/<path>/gfx.t3s -> romfs/<path>/gfx.t3x + gfx.h
 #---------------------------------------------------------------------------------
@@ -387,6 +376,13 @@ $(ROMFS)/timelines/%/timeline: $(TIMELINES)/%/timeline
 #---------------------------------------------------------------------------------
 $(ROMFS)/inventory/inventory: $(INVENTORY)/inventory
 	@mkdir -p $(ROMFS)/inventory
+	@cp $< $@
+
+#---------------------------------------------------------------------------------
+# HUD
+#---------------------------------------------------------------------------------
+$(ROMFS)/hud/hud: $(HUD)/hud
+	@mkdir -p $(ROMFS)/hud
 	@cp $< $@
 
 #---------------------------------------------------------------------------------

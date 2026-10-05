@@ -84,10 +84,8 @@ int main(int argc, char **argv) {
     audio_init();
     // The HUD (and the inventory it owns) is loaded once for the whole run;
     // game_init can then be called again on every return to the title screen.
-    if (hud_init()) {
-        game_init();
-    } else {
-        printf("Cannot initialize HUD\n");
+    if (!game_init()) {
+        printf("Cannot initialize interface\n");
         ret = 1;
     }
     // ret != 0 means initialization failed: skip the loop and clean up.

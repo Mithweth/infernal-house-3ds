@@ -32,3 +32,4 @@ bool gfxmap_load(const char *filename);
 // On failure returns false and leaves *assets NULL. The caller owns the
 // spritesheet and frees it with C2D_SpriteSheetFree().
 bool gfxmap_load_assets(const char *path, C2D_SpriteSheet *assets);
+u32 gfxmap_parse_color(const char *name);

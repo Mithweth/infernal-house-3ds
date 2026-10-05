@@ -50,7 +50,7 @@ void game_draw(C3D_RenderTarget *top, C3D_RenderTarget *bottom);
 
 // Starts the timeline in romfs:/timelines/<name> and switches to
 // GAME_TIMELINE. If it cannot be loaded, falls back to the title screen.
-void game_timeline_start(const char *name);
+bool game_timeline_start(const char *name);
 
 // Releases the room, the message text buffer and the HUD. Called once by main
 // at exit.
@@ -60,7 +60,7 @@ void game_close(void);
 // regenerates the extensions' state (e.g. a new secret code). Called by main
 // at start-up and whenever a timeline ends. The HUD must already be
 // initialized (hud_init is called once by main).
-void game_init(void);
+bool game_init(void);
 
 // Leaves the title screen and plays the intro timeline. Returns to the title
 // screen if the intro cannot be loaded.

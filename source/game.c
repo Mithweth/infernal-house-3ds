@@ -87,6 +87,7 @@ void game_close(void) {
         text_buf = NULL;
     }
     hud_close();
+    inventory_close();
 }
 
 // An action may have hidden the target since it was selected (its WHEN
@@ -107,23 +108,41 @@ const char *game_target_name(void) {
     return target->id;
 }
 
-void game_timeline_start(const char *name) {
+static bool game_title_start(void) {
+    timeline_close();
+    music_stop();
+    game_mode = GAME_TITLE;
+    examine_image = (C2D_Image){0};
+
+    if (!title_init()) {
+        printf("Cannot initialize title screen\n");
+        return false;
+    }
+
+    return true;
+}
+
+bool game_timeline_start(const char *name) {
     char path[256];
     snprintf(path, sizeof(path), "romfs:/timelines/%s", name);
     if (timeline_init(path)) {
         game_mode = GAME_TIMELINE;
-        return;
+        return false;
     }
-    game_init();
+    return game_title_start();
 }
 
-void game_init(void) {
-    timeline_close();
-    music_stop();
+bool game_init(void) {
     callbacks_init();
-    game_mode = GAME_TITLE;
-    examine_image = (C2D_Image){0};
-    title_init();
+    if (!inventory_init()) {
+        printf("Cannot initialize inventory\n");
+        return false;
+    }
+    if (!hud_init()) {
+        printf("Cannot initialize HUD\n");
+        return false;
+    }
+    return game_title_start();
 }
 
 void game_start(void) {
@@ -138,7 +157,6 @@ void game_start(void) {
     message_text = NULL;
     active_hotspot = NULL;
     music_play("romfs:/audio/background.ogg");
-    inventory_add("MEASURING_TAPE");
     game_set_room("hall");
 }
 

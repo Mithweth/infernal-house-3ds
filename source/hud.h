@@ -1,7 +1,4 @@
 // hud.h
-// Top-screen HUD during gameplay: inventory panel, selected item and target
-// names, available directions and the countdown timer. Initialized once from
-// main(), closed from game_close().
 #pragma once
 
 #include <stdbool.h>

@@ -89,9 +89,9 @@ static Credit credits[] = {
     }
 };
 
-void title_init(void) {
+bool title_init(void) {
     if (!gfxmap_load_assets("romfs:/gfx/title", &assets)) {
-        return;
+        return false;
     }
     img_background = gfxmap_get_image(assets, "background");
     img_lankhor = gfxmap_get_image(assets, "lankhor");
@@ -102,6 +102,7 @@ void title_init(void) {
     img_touch = gfxmap_get_image(assets, "touch");
     selected = TITLE_GAME;
     text_buf = C2D_TextBufNew(4096);
+    return true;
 }
 
 void title_update(u32 keys) {

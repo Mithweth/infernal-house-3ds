@@ -48,9 +48,6 @@ void inventory_remove(const char *id);
 // keys were consumed, in which case the caller must not process them further.
 bool inventory_update(u32 keys);
 
-// Draws the item grid, or the examine view; call inside the top screen scene.
-void inventory_draw(void);
-
 // Returns true while an item is being examined.
 bool inventory_is_active(void);
 
@@ -59,4 +56,8 @@ void inventory_reset(void);
 
 // Returns the selected item, or NULL if the inventory is empty. The pointer
 // stays owned by the inventory module.
-const Item *inventory_get_selected(void);
+const Item *inventory_get_selected_item(void);
+const Item *inventory_get_item(int id);
+int inventory_get_selected(void);
+int inventory_get_count(void);
+void inventory_set_columns(size_t value);
