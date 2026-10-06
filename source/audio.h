@@ -6,6 +6,12 @@
 
 #include <stdbool.h>
 
+// Turns a script sound name into a file path. A name starting with "romfs:/"
+// is returned unchanged; any other name becomes <directory>/<path><extension>
+// (e.g. "door_open" in a room gives "romfs:/rooms/hall/door_open.raw").
+// Returns a malloc'd string the caller must free, or NULL if out of memory.
+char *audio_resolve_path(const char *directory, const char *path, const char *extension);
+
 // Stops the current music and loops the given .ogg file (mono or stereo).
 // Returns false if audio is unavailable or the file can't be opened/decoded.
 bool music_play(const char *filename);

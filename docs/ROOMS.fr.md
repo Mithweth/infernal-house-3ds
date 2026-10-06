@@ -448,14 +448,17 @@ Les actions sont valides dans les blocs `ACTION` et `USE`.
                                       la dernière action de son bloc.**
   -----------------------------------------------------------------------
 
-Les noms des sons sont spécifiés sans l'extension `.raw` :
+Les effets sonores peuvent être indiqués soit par un nom relatif au répertoire
+de la pièce, soit par un chemin absolu `romfs:/` :
 
-``` text
+```text
 SFX closet_open
 WAIT_SFX metal_ladder
+SFX romfs:/audio/title_choice.raw
 ```
 
-Les effets sonores sont résolus depuis le répertoire de la pièce.
+Les noms relatifs sont résolus depuis le répertoire de la pièce et reçoivent
+automatiquement l'extension `.raw`. Les chemins absolus sont utilisés tels quels.
 
 ### SET ne signifie pas nécessairement « mettre à true »
 

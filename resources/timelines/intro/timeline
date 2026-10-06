@@ -1,4 +1,7 @@
-MUSIC_START romfs:/audio/intro.ogg
+SFX floppy_disc
+PAUSE 2000
+
+MUSIC_START intro
 TEXT BLUE TITLE_INTRO_SCENE_1
 PAUSE 2000
 END_SCENE
@@ -83,7 +86,7 @@ FULL_SCREEN
 SPRITE bottom_background 0 240
 SPRITE top_background 0 0
 END_FULL_SCREEN
-PLAY_SOUND romfs:/audio/footsteps.raw
+SFX footsteps
 PAUSE 2000
 
 FULL_SCREEN

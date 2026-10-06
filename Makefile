@@ -117,6 +117,7 @@ ROM_HFILES			:=	$(patsubst $(ASSETS)/%/gfx.t3s,$(ROMFS)/%/gfx.h,$(ROMGFX))
 
 TIMELINE_SRC_FILES 	:= $(wildcard $(TIMELINES)/*/timeline)
 TIMELINE_FILES 		:= $(patsubst $(TIMELINES)/%/timeline,$(ROMFS)/timelines/%/timeline,$(TIMELINE_SRC_FILES))
+TIMELINE_AUDIO_FILES := $(patsubst $(ASSETS)/%,$(ROMFS)/%,$(wildcard $(TIMELINES)/*/*.raw $(TIMELINES)/*/*.ogg))
 
 #---------------------------------------------------------------------------------
 # Inventory
@@ -268,6 +269,7 @@ build-project: $(BUILD) \
 	 $(ROM_T3XFILES) \
 	 $(ROM_HFILES) \
 	 $(TIMELINE_FILES) \
+	 $(TIMELINE_AUDIO_FILES) \
 	 $(INVENTORY_FILES) \
 	 $(HUD_FILES) \
 	 $(ROMFS_MINIGAME_RAW_FILES) \

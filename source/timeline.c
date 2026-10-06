@@ -25,7 +25,7 @@ typedef enum {
     TIMELINE_PAUSE,
     TIMELINE_MUSIC_START,
     TIMELINE_MUSIC_STOP,
-    TIMELINE_PLAY_SOUND,
+    TIMELINE_SFX,
     TIMELINE_IMAGE_LEFT,
     TIMELINE_IMAGE_CENTER,
     TIMELINE_IMAGE_RIGHT,
@@ -50,6 +50,11 @@ typedef struct {
     size_t sprite_count;
     char *sound;
 } TimelineEvent;
+
+// Directory of the running timeline (e.g. "romfs:/timelines/intro"), owned by
+// timeline_init/timeline_close. Relative MUSIC_START and SFX names are
+// resolved against it at load time.
+static char *directory = NULL;
 
 // Typewriter state. event_pos is the byte offset reached in the current TEXT
 // string; text_position is the length of current_str, which accumulates every
@@ -94,7 +99,9 @@ static TimelineEvent *add_event(TimelineEventType type) {
 }
 
 // Parses the script into events[]. The script must end with END: a missing
-// END, an unknown command or a full event table makes the load fail.
+// END, an unknown command or a full event table makes the load fail. On
+// failure the events parsed so far stay in events[]; timeline_init frees them
+// with timeline_close.
 static bool load_timeline(const char *filename) {
     FILE *f = fopen(filename, "r");
 
@@ -134,7 +141,6 @@ static bool load_timeline(const char *filename) {
                 if (!image_name || !x_str || !y_str) {
                     printf( "%s:%zu: invalid SPRITE\n", filename, line_number);
                     fclose(f);
-                    event_count = 0;
                     return false;
                 }
 
@@ -142,7 +148,6 @@ static bool load_timeline(const char *filename) {
 
                     printf("%s:%zu: too many sprites\n", filename, line_number);
                     fclose(f);
-                    event_count = 0;
                     return false;
                 }
 
@@ -152,7 +157,6 @@ static bool load_timeline(const char *filename) {
                 if (!sprite->image.tex) {
                     printf("%s:%zu: unknown image %s\n", filename, line_number, image_name);
                     fclose(f);
-                    event_count = 0;
                     return false;
                 }
 
@@ -168,7 +172,6 @@ static bool load_timeline(const char *filename) {
             }
 
             fclose(f);
-            event_count = 0;
             return false;
         }
 
@@ -178,7 +181,6 @@ static bool load_timeline(const char *filename) {
             if (!color || !text) {
                 printf("%s:%zu: syntax error: %s\n", filename, line_number, command);
                 fclose(f);
-                event_count = 0;
                 return false;
             }
 
@@ -187,7 +189,6 @@ static bool load_timeline(const char *filename) {
             if (!event) {
                 printf("%s:%zu: too many timeline events\n", filename, line_number);
                 fclose(f);
-                event_count = 0;
                 return false;
             }
             event->color = gfxmap_parse_color(color);
@@ -200,7 +201,6 @@ static bool load_timeline(const char *filename) {
             if (!duration) {
                 printf("%s:%zu: syntax error: %s\n", filename, line_number, command);
                 fclose(f);
-                event_count = 0;
                 return false;
             }
 
@@ -209,7 +209,6 @@ static bool load_timeline(const char *filename) {
             if (!event) {
                 printf("%s:%zu: too many timeline events\n", filename, line_number);
                 fclose(f);
-                event_count = 0;
                 return false;
             }
             event->duration = (u32)atoi(duration);
@@ -221,7 +220,6 @@ static bool load_timeline(const char *filename) {
             if (!sound) {
                 printf("%s:%zu: syntax error: %s\n", filename, line_number, command);
                 fclose(f);
-                event_count = 0;
                 return false;
             }
 
@@ -230,10 +228,9 @@ static bool load_timeline(const char *filename) {
             if (!event) {
                 printf("%s:%zu: too many timeline events\n", filename, line_number);
                 fclose(f);
-                event_count = 0;
                 return false;
             }
-            event->sound = strdup(sound);
+            event->sound = audio_resolve_path(directory, sound, ".ogg");
             continue;
         }
 
@@ -242,31 +239,28 @@ static bool load_timeline(const char *filename) {
             if (!event) {
                 printf("%s:%zu: too many timeline events\n", filename, line_number);
                 fclose(f);
-                event_count = 0;
                 return false;
             }
             continue;
         }
 
-        if (strcmp(command, "PLAY_SOUND") == 0) {
+        if (strcmp(command, "SFX") == 0) {
             char *sound = strtok(NULL, " ");
             if (!sound) {
                 printf("%s:%zu: syntax error: %s\n", filename, line_number, command);
                 fclose(f);
-                event_count = 0;
                 return false;
             }
 
-            TimelineEvent *event = add_event(TIMELINE_PLAY_SOUND);
+            TimelineEvent *event = add_event(TIMELINE_SFX);
 
             if (!event) {
                 printf("%s:%zu: too many timeline events\n", filename, line_number);
                 fclose(f);
-                event_count = 0;
                 return false;
             }
 
-            event->sound = strdup(sound);
+            event->sound = audio_resolve_path(directory, sound, ".raw");
             continue;
         }
 
@@ -283,7 +277,6 @@ static bool load_timeline(const char *filename) {
             if (!image_name) {
                 printf("%s:%zu: syntax error: %s\n", filename, line_number, command);
                 fclose(f);
-                event_count = 0;
                 return false;
             }
 
@@ -292,7 +285,6 @@ static bool load_timeline(const char *filename) {
             if (!event) {
                 printf("%s:%zu: too many timeline events\n", filename, line_number);
                 fclose(f);
-                event_count = 0;
                 return false;
             }
 
@@ -303,7 +295,6 @@ static bool load_timeline(const char *filename) {
                 if (!event->image.tex) {
                     printf("%s:%zu: unknown image %s\n", filename, line_number, image_name);
                     fclose(f);
-                    event_count = 0;
                     return false;
                 }
             }
@@ -316,7 +307,6 @@ static bool load_timeline(const char *filename) {
             if (!event) {
                 printf("%s:%zu: too many timeline events\n", filename, line_number);
                 fclose(f);
-                event_count = 0;
                 return false;
             }
             continue;
@@ -327,7 +317,6 @@ static bool load_timeline(const char *filename) {
             if (!full_screen) {
                 printf("%s:%zu: too many timeline events\n", filename, line_number);
                 fclose(f);
-                event_count = 0;
                 return false;
             }
 
@@ -338,7 +327,6 @@ static bool load_timeline(const char *filename) {
             if (!event) {
                 printf("%s:%zu: too many timeline events\n", filename, line_number);
                 fclose(f);
-                event_count = 0;
                 return false;
             }
             fclose(f);
@@ -347,7 +335,6 @@ static bool load_timeline(const char *filename) {
 
         printf("%s:%zu: unknown command: %s\n", filename, line_number, command);
         fclose(f);
-        event_count = 0;
         return false;
     }
     fclose(f);
@@ -420,7 +407,7 @@ void timeline_update(u32 keys) {
         music_stop();
         current_event++;
         break;
-    case TIMELINE_PLAY_SOUND:
+    case TIMELINE_SFX:
         if (event->sound) {
             sfx_play(event->sound);
         }
@@ -547,11 +534,36 @@ void timeline_draw_top(void) {
     }
 }
 
-bool timeline_init(const char *directory) {
+void timeline_close(void) {
+    for (size_t i = 0; i < event_count; i++) {
+        free(events[i].text);
+        free(events[i].sound);
+    }
+    free(directory);
+    directory = NULL;
+    event_count = 0;
+    if (timeline_assets) {
+        C2D_SpriteSheetFree(timeline_assets);
+        timeline_assets = NULL;
+    }
+    if (text_buf) {
+        C2D_TextBufDelete(text_buf);
+        text_buf = NULL;
+    }
+    music_stop();
+}
+
+bool timeline_init(const char *d) {
     char script_path[256];
     char gfx_path[256];
     char header_path[256];
 
+    timeline_close();
+
+    directory = strdup(d);
+    if (!directory) {
+        return false;
+    }
     snprintf(script_path, sizeof(script_path), "%s/timeline", directory);
     snprintf(gfx_path, sizeof(gfx_path), "%s/gfx.t3x", directory);
     snprintf(header_path, sizeof(header_path), "%s/gfx.h", directory);
@@ -563,20 +575,19 @@ bool timeline_init(const char *directory) {
     }
     if (!timeline_assets) {
         printf("Cannot load: %s\n", gfx_path);
+        timeline_close();
         return false;
     }
 
     if (!gfxmap_load(header_path)) {
         printf("Cannot load gfx headers: %s\n", header_path);
-        C2D_SpriteSheetFree(timeline_assets);
-        timeline_assets = NULL;
+        timeline_close();
         return false;
     }
 
     if (!load_timeline(script_path)) {
         printf("Cannot load timeline: %s\n", script_path);
-        C2D_SpriteSheetFree(timeline_assets);
-        timeline_assets = NULL;
+        timeline_close();
         return false;
     }
 
@@ -594,22 +605,4 @@ bool timeline_init(const char *directory) {
     next_char_time = osGetTime();
     update_text();
     return true;
-}
-
-void timeline_close(void) {
-    for (size_t i = 0; i < event_count; i++) {
-        free(events[i].text);
-        free(events[i].sound);
-    }
-
-    event_count = 0;
-    if (timeline_assets) {
-        C2D_SpriteSheetFree(timeline_assets);
-        timeline_assets = NULL;
-    }
-    if (text_buf) {
-        C2D_TextBufDelete(text_buf);
-        text_buf = NULL;
-    }
-    music_stop();
 }

@@ -49,7 +49,7 @@ void game_minigame_start(const char *name) {
     if (active_minigame->init) {
         if (!active_minigame->init()) {
             printf("Fail loading mini-game\n");
-            active_minigame = NULL;
+            game_minigame_stop();
             return;
         }
     }
