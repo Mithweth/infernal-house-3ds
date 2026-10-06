@@ -82,7 +82,7 @@ bool gfxmap_load(const char *filename) {
         strcpy(entry->name, name);
         entry->index = index;
     }
-
+    printf("Loaded %zu images\n", image_index_count);
     fclose(f);
     return true;
 }
@@ -133,6 +133,14 @@ u32 gfxmap_parse_color(const char *name) {
 
     if (strcmp(name, "WHITE") == 0) {
         return C2D_Color32(164, 164, 164, 255);
+    }
+
+    if (strcmp(name, "GRAY") == 0) {
+        return C2D_Color32(64, 64, 64, 255);
+    }
+
+    if (strcmp(name, "LIGHTGRAY") == 0) {
+        return C2D_Color32(146, 146, 146, 255);
     }
 
     return C2D_Color32(164, 164, 164, 255);

@@ -762,11 +762,13 @@ bool room_init(const char *name) {
     snprintf(path, sizeof(path), "romfs:/rooms/%s", name);
     room->path = strdup(path);
     if (!gfxmap_load_assets(path, &room->assets)) {
+        printf("Cannot load room assets\n");
         room_close();
         return false;
     }
     snprintf(path, sizeof(path), "romfs:/rooms/%s/room", name);
     if (!load_room(path)) {
+        printf("Cannot load rooms: %s\n", room->path);
         room_close();
         return false;
     }
