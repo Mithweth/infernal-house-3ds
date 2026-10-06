@@ -6,6 +6,7 @@
 #include <3ds.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "game.h"
 #include "lang.h"
 #include "inventory.h"
@@ -16,9 +17,19 @@
 #include "title.h"
 #include "timeline.h"
 #include "callbacks.h"
+#include "str_utils.h"
 
-# define GAME_CALLBACK_MAX 8
+#define GAME_CALLBACK_MAX     8
+#define GAME_CONFIG_MAX_ITEMS 16
 
+typedef struct {
+    char *open;
+    char *music;
+    char *items[GAME_CONFIG_MAX_ITEMS];
+    size_t item_count;
+} GameConfig;
+
+static GameConfig game_config;
 static GameMode game_mode = GAME_NORMAL;
 // Circle pad must go back to the dead zone before the next move is accepted,
 // so holding the stick only moves one room.
@@ -38,6 +49,69 @@ static C2D_Text text;
 static void (*game_busy_callback)(void) = NULL;
 static MiniGame *active_minigame = NULL;
 static int game_busy_sfx_channel = -1;
+
+
+static bool game_config_load(const char *filename) {
+    FILE *file = fopen(filename, "r");
+    char line[512];
+
+    if (!file) {
+        return false;
+    }
+
+    while (fgets(line, sizeof(line), file)) {
+        char *key = str_trim(line);
+
+        if (!*key || *key == '#' || *key == ';' || *key == '[') {
+            continue;
+        }
+
+        char *value = strchr(key, '=');
+        if (!value) {
+            continue;
+        }
+
+        *value++ = '\0';
+        key = str_trim(key);
+        value = str_trim(value);
+
+        if (strcmp(key, "open") == 0) {
+            if (game_config.open) {
+                printf("Duplicate key: open\n");
+                fclose(file);
+                return false;
+            }
+            game_config.open = strdup(value);
+        } else if (strcmp(key, "music") == 0) {
+            if (game_config.music) {
+                printf("Duplicate key: music\n");
+                fclose(file);
+                return false;
+            }
+            game_config.music = strdup(value);
+        } else if (strcmp(key, "items") == 0) {
+            if (game_config.item_count) {
+                printf("Duplicate key: items\n");
+                fclose(file);
+                return false;
+            }
+            char *item = strtok(value, ",");
+            while (item && game_config.item_count < GAME_CONFIG_MAX_ITEMS) {
+                item = str_trim(item);
+                if (*item) {
+                    game_config.items[game_config.item_count++] = strdup(item);
+                }
+                item = strtok(NULL, ",");
+            }
+        }
+    }
+    fclose(file);
+    if (!game_config.open) {
+        printf("Missing open in game configuration\n");
+        return false;
+    }
+    return true;
+}
 
 void game_minigame_start(const char *name) {
     active_minigame = callbacks_minigame_find(name);
@@ -60,7 +134,9 @@ void game_minigame_stop(void) {
     if (active_minigame && active_minigame->close) {
         active_minigame->close();
     }
-    music_play("romfs:/audio/background.ogg");
+    if (game_config.music) {
+        music_play(game_config.music);
+    }
     active_minigame = NULL;
     game_mode = GAME_NORMAL;
 }
@@ -86,6 +162,12 @@ void game_close(void) {
         C2D_TextBufDelete(text_buf);
         text_buf = NULL;
     }
+    free(game_config.open);
+    free(game_config.music);
+    for (size_t i = 0; i < game_config.item_count; i++) {
+        free(game_config.items[i]);
+    }
+    memset(&game_config, 0, sizeof(game_config));
     hud_close();
     inventory_close();
 }
@@ -143,6 +225,10 @@ bool game_timeline_start(const char *name) {
 
 bool game_init(void) {
     callbacks_init();
+    if (!game_config_load("romfs:/game/autorun.inf")) {
+        printf("Cannot load game configuration\n");
+        return false;
+    }
     if (!inventory_init()) {
         printf("Cannot initialize inventory\n");
         return false;
@@ -166,8 +252,15 @@ void game_start(void) {
     game_mode = GAME_NORMAL;
     message_text = NULL;
     active_hotspot = NULL;
-    music_play("romfs:/audio/background.ogg");
-    game_set_room("hall");
+    if (game_config.music) {
+        music_play(game_config.music);
+    }
+
+    for (size_t i = 0; i < game_config.item_count; i++) {
+        inventory_add(game_config.items[i]);
+    }
+
+    game_set_room(game_config.open);
 }
 
 bool game_wait_for_sfx(const char *sfx, void (*callback)(void)) {
@@ -264,8 +357,6 @@ static void update_touch(touchPosition touch) {
     if (!hotspot) {
         return;
     }
-
-    printf("current hotspot: %s\n", hotspot->id);
 
     if (hotspot != active_hotspot) {
         active_hotspot = hotspot;

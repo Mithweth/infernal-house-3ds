@@ -111,6 +111,8 @@ ROMGFX				:=	$(GFXFILES)
 ROM_T3XFILES		:=	$(patsubst $(ASSETS)/%/gfx.t3s,$(ROMFS)/%/gfx.t3x,$(ROMGFX))
 ROM_HFILES			:=	$(patsubst $(ASSETS)/%/gfx.t3s,$(ROMFS)/%/gfx.h,$(ROMGFX))
 
+GAME_FILES			:=  $(patsubst $(ASSETS)/%,$(ROMFS)/%,$(wildcard $(ASSETS)/game/*))
+
 #---------------------------------------------------------------------------------
 # Timelines
 #---------------------------------------------------------------------------------
@@ -267,6 +269,7 @@ generate-gfx:
 #---------------------------------------------------------------------------------
 build-project: $(BUILD) \
 	 $(ROM_T3XFILES) \
+	 $(GAME_FILES) \
 	 $(ROM_HFILES) \
 	 $(TIMELINE_FILES) \
 	 $(TIMELINE_AUDIO_FILES) \
