@@ -1,5 +1,8 @@
 add some comments
-add dev doc
+doc DEVELOPING
+doc TRANSLATION
+doc BUILD
+doc HOWTOPLAY
 add some events
 ask for confirmation before quitting with START
 select title menu entries with the touch screen
