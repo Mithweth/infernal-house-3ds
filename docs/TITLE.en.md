@@ -1,0 +1,630 @@
+# Title screen description file
+
+This document describes the declarative format used to define the game
+title screen.
+
+A title description defines the top and bottom backgrounds, menu layout
+and order, title-screen sound effects, controls page and credits page.
+Menu behavior itself remains implemented by the game.
+
+## 1. Location and general structure
+
+The title description is loaded from:
+
+``` text
+romfs:/game/title
+```
+
+Its graphical assets are loaded from the sprite sheet in:
+
+``` text
+romfs:/game
+```
+
+The top screen uses a 400 × 240 coordinate space. The menu, controls and
+credits are displayed on the 320 × 240 bottom screen.
+
+A typical title description has the following structure:
+
+``` text
+BACKGROUND_TOP background_top
+BACKGROUND_BOTTOM background_bottom
+
+SFX_SELECT title_select
+SFX_CHOICE title_choice
+
+MENU
+    ORDER LANG,INTRO,GAME,CONTROLS,CREDITS
+    DEFAULT GAME
+    ...
+END_MENU
+
+CONTROLS
+    ...
+END_CONTROLS
+
+CREDITS
+    ...
+END_CREDITS
+```
+
+`MENU` defines the main menu and its order. `CONTROLS` and `CREDITS`
+define the two optional sub-pages opened by their corresponding menu
+entries.
+
+Blank lines are ignored. A line whose first non-whitespace character is
+`#` is a comment. Comments should be written on their own line; inline
+comments are not part of the format.
+
+Tokens are separated by spaces. Identifiers such as image names,
+localization keys and sound names therefore do not contain spaces and
+are not quoted. The exception is the person name in a `CREDIT`
+directive: everything after the role key belongs to the name and may
+contain spaces.
+
+Indentation is only for readability; block structure is determined by
+the `END_*` directives.
+
+## 2. Backgrounds
+
+Syntax:
+
+``` text
+BACKGROUND_TOP <image>
+BACKGROUND_BOTTOM <image>
+```
+
+Example:
+
+``` text
+BACKGROUND_TOP background_top
+BACKGROUND_BOTTOM background_bottom
+```
+
+`BACKGROUND_TOP` defines the image drawn at `(0, 0)` on the top screen.
+
+`BACKGROUND_BOTTOM` defines the image drawn at `(0, 0)` behind the main
+menu on the bottom screen. It is not drawn on the controls or credits
+pages.
+
+Both directives are optional. If a background is omitted, no image is
+drawn for that screen and the background remains black.
+
+Image names refer to images in the `romfs:/game` sprite sheet. Do not
+specify an image file extension.
+
+## 3. Sound effects
+
+Syntax:
+
+``` text
+SFX_SELECT <sound>
+SFX_CHOICE <sound>
+```
+
+Example:
+
+``` text
+SFX_SELECT title_select
+SFX_CHOICE title_choice
+```
+
+`SFX_SELECT` is played when the highlighted menu entry changes.
+
+`SFX_CHOICE` is played when a menu entry is activated and when the
+controls or credits page is closed with A or B.
+
+Both directives are optional.
+
+Relative sound names are resolved from `romfs:/game` and automatically
+receive the `.raw` extension:
+
+``` text
+SFX_SELECT title_select
+```
+
+resolves to:
+
+``` text
+romfs:/game/title_select.raw
+```
+
+An absolute `romfs:/` path is used unchanged.
+
+## 4. Menu
+
+The main menu is described by a `MENU` block:
+
+``` text
+MENU
+    ...
+END_MENU
+```
+
+The menu must contain an `ORDER` directive with at least one valid
+entry.
+
+### Order
+
+Syntax:
+
+``` text
+ORDER <entry>,<entry>,...
+```
+
+Example:
+
+``` text
+ORDER LANG,INTRO,GAME,CONTROLS,CREDITS
+```
+
+The supported entries are:
+
+  Entry        Displayed localization key   Action
+  ------------ ---------------------------- -----------------------------
+  `LANG`       `LANG_NAME`                  Switch to the next language
+  `INTRO`      `TITLE_INTRO`                Start the intro
+  `GAME`       `TITLE_GAME`                 Start the game
+  `CONTROLS`   `TITLE_CONTROLS`             Open the controls page
+  `CREDITS`    `TITLE_CREDITS`              Open the credits page
+
+The entries are displayed in exactly the order given by `ORDER`. Entries
+that are not listed are not displayed.
+
+Do not put spaces around the commas:
+
+``` text
+ORDER INTRO,GAME,CONTROLS,CREDITS,LANG
+```
+
+### Default selection
+
+Syntax:
+
+``` text
+DEFAULT <entry>
+```
+
+Example:
+
+``` text
+DEFAULT GAME
+```
+
+Defines the menu entry highlighted when the title screen is opened.
+
+`DEFAULT` may appear before or after `ORDER`; the selection is resolved
+after the complete description has been read.
+
+The selected entry should also be present in `ORDER`. If `DEFAULT` is
+omitted or does not designate an entry present in the menu, the first
+entry in `ORDER` is selected.
+
+### Position
+
+Syntax:
+
+``` text
+POSITION <x> <y>
+```
+
+Example:
+
+``` text
+POSITION 160 70
+```
+
+`x` is the horizontal center of every menu entry. `y` is the vertical
+position of the first entry.
+
+Default:
+
+``` text
+160 70
+```
+
+### Spacing
+
+Syntax:
+
+``` text
+SPACING <spacing>
+```
+
+Example:
+
+``` text
+SPACING 30
+```
+
+Defines the vertical distance between two consecutive menu entries.
+
+Default:
+
+``` text
+30
+```
+
+### Text size
+
+Syntax:
+
+``` text
+TEXT_SIZE <size>
+```
+
+Example:
+
+``` text
+TEXT_SIZE 0.65
+```
+
+Defines the rendering scale of the menu labels.
+
+Default:
+
+``` text
+0.65
+```
+
+### Colors
+
+Syntax:
+
+``` text
+COLOR <color>
+SELECTED_COLOR <color>
+```
+
+Example:
+
+``` text
+COLOR GRAY
+SELECTED_COLOR LIGHTGRAY
+```
+
+`COLOR` defines the color of normal menu entries. `SELECTED_COLOR`
+defines the color of the highlighted entry.
+
+Color names are resolved by the graphical color parser used by the game.
+
+Defaults:
+
+``` text
+COLOR GRAY
+SELECTED_COLOR LIGHTGRAY
+```
+
+### Version
+
+The game version is not configurable in the title description. It is
+always drawn by the game in the bottom-right corner of the menu.
+
+## 5. Controls page
+
+The controls page is described by a `CONTROLS` block:
+
+``` text
+CONTROLS
+    ...
+END_CONTROLS
+```
+
+It supports `IMAGE` and `TEXT` directives. The page is opened by the
+`CONTROLS` menu entry and closed with A or B.
+
+### Image
+
+Syntax:
+
+``` text
+IMAGE <image> <x> <y>
+```
+
+Example:
+
+``` text
+IMAGE analogpad 10 0
+```
+
+Draws an image from the `romfs:/game` sprite sheet at the specified
+position on the bottom screen.
+
+Do not specify an image file extension.
+
+A controls page can contain up to 8 `IMAGE` directives.
+
+### Text
+
+Syntax:
+
+``` text
+TEXT <localization_key> <x> <y> <size>
+```
+
+Example:
+
+``` text
+TEXT TITLE_CONTROLS_MOVE 90 15 0.55
+```
+
+Draws the localized text associated with `localization_key` at the
+specified position and scale.
+
+The text color is fixed by the title-screen implementation and is not
+part of the description format.
+
+A controls page can contain up to 8 `TEXT` directives.
+
+## 6. Credits page
+
+The credits page is described by a `CREDITS` block:
+
+``` text
+CREDITS
+    ...
+END_CREDITS
+```
+
+It supports `CREDIT` and `IMAGE` directives. The page is opened by the
+`CREDITS` menu entry and closed with A or B.
+
+### Credit line
+
+Syntax:
+
+``` text
+CREDIT <role_key> <name>
+```
+
+Example:
+
+``` text
+CREDIT TITLE_CREDITS_ORIGINAL_PROGRAM Christophe Lajoux
+```
+
+`role_key` is a localization key. `name` is literal, untranslated text
+and extends to the end of the line, so it may contain spaces:
+
+``` text
+CREDIT TITLE_CREDITS_ORIGINAL_GRAPHISM Thierry Port & Momo
+```
+
+Credit layout is fixed by the title-screen implementation: roles are
+drawn on the left, names on the right, and successive lines are
+vertically spaced automatically.
+
+A credits page can contain up to 11 `CREDIT` directives.
+
+### Image
+
+Syntax:
+
+``` text
+IMAGE <image> <x> <y>
+```
+
+Example:
+
+``` text
+IMAGE lankhor 85 160
+```
+
+Draws an image from the `romfs:/game` sprite sheet at the specified
+position on the bottom screen.
+
+A credits page can contain up to 8 `IMAGE` directives.
+
+## 7. Images
+
+Every image referenced by the title description must exist in the
+graphical asset set loaded from `romfs:/game`.
+
+Images are referenced by name:
+
+``` text
+BACKGROUND_TOP background_top
+BACKGROUND_BOTTOM background_bottom
+IMAGE analogpad 10 0
+IMAGE lankhor 85 160
+```
+
+Do not specify an image file extension.
+
+## 8. Text and localization
+
+Menu labels are associated with localization keys by the title-screen
+implementation. The description controls which entries are displayed and
+in which order; it does not redefine their labels.
+
+The mapping is:
+
+``` text
+LANG     -> LANG_NAME
+INTRO    -> TITLE_INTRO
+GAME     -> TITLE_GAME
+CONTROLS -> TITLE_CONTROLS
+CREDITS  -> TITLE_CREDITS
+```
+
+`TEXT` directives in the `CONTROLS` block and role identifiers in
+`CREDIT` directives are also localization keys.
+
+Credit names are deliberately not localized.
+
+Localization keys are resolved when the screen is drawn. Changing the
+language from the `LANG` entry therefore updates the visible title text
+immediately.
+
+## 9. Complete example
+
+The following example illustrates all supported directives:
+
+``` text
+BACKGROUND_TOP background_top
+BACKGROUND_BOTTOM background_bottom
+
+SFX_SELECT title_select
+SFX_CHOICE title_choice
+
+# ---------------------------------------------------------------------------
+# Menu
+# ---------------------------------------------------------------------------
+
+MENU
+    ORDER LANG,INTRO,GAME,CONTROLS,CREDITS
+    DEFAULT GAME
+    POSITION 160 70
+    SPACING 30
+    TEXT_SIZE 0.65
+    COLOR GRAY
+    SELECTED_COLOR LIGHTGRAY
+END_MENU
+
+# ---------------------------------------------------------------------------
+# Controls
+# ---------------------------------------------------------------------------
+
+CONTROLS
+    IMAGE analogpad 10 0
+    TEXT TITLE_CONTROLS_MOVE 90 15 0.55
+
+    IMAGE dpad 10 55
+    TEXT TITLE_CONTROLS_INVENTORY 90 70 0.55
+
+    IMAGE xbutton 18 110
+    TEXT TITLE_CONTROLS_EXAMINE 90 115 0.55
+
+    IMAGE abutton 18 150
+    TEXT TITLE_CONTROLS_USE 90 155 0.55
+
+    IMAGE touch 10 185
+    TEXT TITLE_CONTROLS_ACTION 90 200 0.55
+END_CONTROLS
+
+# ---------------------------------------------------------------------------
+# Credits
+# ---------------------------------------------------------------------------
+
+CREDITS
+    CREDIT TITLE_CREDITS_ORIGINAL_PROGRAM Christophe Lajoux
+    CREDIT TITLE_CREDITS_ORIGINAL_HELP Laurent Hiriart
+    CREDIT TITLE_CREDITS_ORIGINAL_GRAPHISM Thierry Port & Momo
+    CREDIT TITLE_CREDITS_SCENARIO Jérome Marlier
+    CREDIT TITLE_CREDITS_REMAKE_PROGRAMMER Jean-Baptiste Langlois
+    CREDIT TITLE_CREDITS_REMAKE_TESTER Akira Langlois
+    CREDIT TITLE_CREDITS_REMAKE_GRAPHISM ChatGPT & GIMP
+
+    IMAGE lankhor 85 160
+END_CREDITS
+```
+
+The asset and localization names in this example illustrate the format;
+they are not additional syntax.
+
+## 10. Optional components
+
+The following directives and blocks are optional:
+
+``` text
+BACKGROUND_TOP
+BACKGROUND_BOTTOM
+SFX_SELECT
+SFX_CHOICE
+DEFAULT
+POSITION
+SPACING
+TEXT_SIZE
+COLOR
+SELECTED_COLOR
+CONTROLS
+CREDITS
+```
+
+`ORDER` is required in practice because the title screen cannot be
+loaded with an empty menu.
+
+A `CONTROLS` or `CREDITS` block is only useful when the corresponding
+menu entry is present in `ORDER`.
+
+No `NONE`, `DISABLED` or `ENABLED` keyword is required. Omit an optional
+directive or block when it is not needed.
+
+## 11. Common mistakes
+
+### Adding an image extension
+
+Do not do this:
+
+``` text
+BACKGROUND_TOP background_top.png
+```
+
+Use the image name from the sprite sheet:
+
+``` text
+BACKGROUND_TOP background_top
+```
+
+### Adding spaces to ORDER
+
+Do not write:
+
+``` text
+ORDER LANG, INTRO, GAME
+```
+
+`ORDER` is a single comma-separated token. Write:
+
+``` text
+ORDER LANG,INTRO,GAME
+```
+
+### Using a localization key as an ORDER entry
+
+Do not write:
+
+``` text
+ORDER TITLE_INTRO,TITLE_GAME,TITLE_CREDITS
+```
+
+`ORDER` uses the title menu identifiers:
+
+``` text
+ORDER INTRO,GAME,CREDITS
+```
+
+### Localizing credit names
+
+The first argument of `CREDIT` is localized; the rest of the line is a
+literal name:
+
+``` text
+CREDIT TITLE_CREDITS_REMAKE_PROGRAMMER Jean-Baptiste Langlois
+```
+
+### Trying to configure the version
+
+The version position, size and color are intentionally hardcoded and are
+not part of the title description file.
+
+## 12. Recommended style
+
+For readability, the title description should normally be ordered as:
+
+``` text
+Backgrounds
+Sound effects
+Menu
+Controls
+Credits
+```
+
+Use section comments and indent nested directives consistently. Keep
+menu behavior in the game code and use the description only for
+title-screen content, order and layout.
+
+The title format is intentionally a small game-specific interface
+description, not a general menu scripting language. If the title screen
+requires behavior that cannot be expressed cleanly with the existing
+directives, prefer adding one small, reusable primitive to the format.

@@ -25,7 +25,7 @@ static size_t selected = 0;
 static Item *inventory[ITEM_MAX];
 static size_t inventory_count = 0;
 
-static C2D_SpriteSheet inventory_assets;
+static C2D_SpriteSheet assets;
 static InventoryMode inventory_mode = INVENTORY_NORMAL;
 static size_t columns = 6;
 
@@ -91,7 +91,7 @@ static bool load_inventory(const char *filename) {
                     item_count = 0;
                     return false;
                 }
-                item->image = gfxmap_get_image(inventory_assets, image_id);
+                item->image = gfxmap_get_image(assets, image_id);
                 if (!item->image.tex) {
                     printf("%s:%zu: unknown image: %s\n", filename, line_number, image_id);
                     fclose(f);
@@ -156,7 +156,7 @@ static bool load_inventory(const char *filename) {
                 if ((fmt) && (strcmp(fmt, "FULLSCREEN") == 0)) {
                     item->detail_fullscreen = true;
                 }
-                item->detail_image = gfxmap_get_image(inventory_assets, image_id);
+                item->detail_image = gfxmap_get_image(assets, image_id);
 
                 if (!item->detail_image.tex) {
                     printf("%s:%zu: unknown image: %s\n", filename, line_number, image_id);
@@ -397,22 +397,17 @@ void inventory_remove(const char *id) {
 }
 
 bool inventory_init(void) {
-    inventory_assets = C2D_SpriteSheetLoad("romfs:/inventory/gfx.t3x");
-    if (!inventory_assets) {
-        return false;
-    }
-
-    if (!gfxmap_load("romfs:/inventory/gfx.h")) {
-        printf("Cannot load gfx headers\n");
-        C2D_SpriteSheetFree(inventory_assets);
-        inventory_assets = NULL;
+    if (!gfxmap_load_assets("romfs:/inventory", &assets)) {
+        printf("Cannot load inventory\n");
+        C2D_SpriteSheetFree(assets);
+        assets = NULL;
         return false;
     }
 
     if (!load_inventory("romfs:/inventory/inventory")) {
         printf("Cannot load inventory\n");
-        C2D_SpriteSheetFree(inventory_assets);
-        inventory_assets = NULL;
+        C2D_SpriteSheetFree(assets);
+        assets = NULL;
         return false;
     }
 
@@ -431,9 +426,9 @@ void inventory_close(void) {
     }
 // Resetting item_count makes a second call harmless.
     item_count = 0;
-    if (inventory_assets) {
-        C2D_SpriteSheetFree(inventory_assets);
-        inventory_assets = NULL;
+    if (assets) {
+        C2D_SpriteSheetFree(assets);
+        assets = NULL;
     }
     inventory_count = 0;
     selected = 0;

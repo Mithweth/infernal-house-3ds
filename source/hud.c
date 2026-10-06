@@ -105,7 +105,7 @@ typedef struct {
 } HudConfig;
 
 
-static C2D_SpriteSheet hud_assets;
+static C2D_SpriteSheet assets;
 static C2D_TextBuf text_buf;
 static C2D_Text text;
 // Game time already spent, in milliseconds. last_time is the osGetTime() value
@@ -197,7 +197,7 @@ static bool load_hud(const char *filename) {
                     return false;
                 }
 
-                hud_config.background = gfxmap_get_image(hud_assets, image_name);
+                hud_config.background = gfxmap_get_image(assets, image_name);
 
                 if (!hud_config.background.tex) {
                     printf("%s:%zu: unknown image: %s\n", filename, line_number, image_name);
@@ -262,7 +262,7 @@ static bool load_hud(const char *filename) {
                     return false;
                 }
 
-                hud_config.inventory.background.image = gfxmap_get_image(hud_assets, image_name);
+                hud_config.inventory.background.image = gfxmap_get_image(assets, image_name);
 
                 if (!hud_config.inventory.background.image.tex) {
                     printf("%s:%zu: unknown image: %s\n", filename, line_number, image_name);
@@ -389,7 +389,7 @@ static bool load_hud(const char *filename) {
                     return false;
                 }
 
-                hud_config.inventory.selection.image = gfxmap_get_image(hud_assets, image_name);
+                hud_config.inventory.selection.image = gfxmap_get_image(assets, image_name);
 
                 if (!hud_config.inventory.selection.image.tex) {
                     printf("%s:%zu: unknown image: %s\n", filename, line_number, image_name);
@@ -431,7 +431,7 @@ static bool load_hud(const char *filename) {
                     return false;
                 }
 
-                hud_config.inventory.examine_background.image = gfxmap_get_image(hud_assets, image_name);
+                hud_config.inventory.examine_background.image = gfxmap_get_image(assets, image_name);
 
                 if (!hud_config.inventory.examine_background.image.tex) {
                     printf("%s:%zu: unknown image: %s\n", filename, line_number, image_name);
@@ -487,7 +487,7 @@ static bool load_hud(const char *filename) {
                     return false;
                 }
 
-                hud_config.compass.background.image = gfxmap_get_image(hud_assets, image_name);
+                hud_config.compass.background.image = gfxmap_get_image(assets, image_name);
 
                 if (!hud_config.compass.background.image.tex) {
                     printf("%s:%zu: unknown image: %s\n", filename, line_number, image_name);
@@ -515,7 +515,7 @@ static bool load_hud(const char *filename) {
 
                 HudElement *element = &hud_config.compass.directions[direction];
 
-                element->image = gfxmap_get_image(hud_assets, image_name);
+                element->image = gfxmap_get_image(assets, image_name);
 
                 if (!element->image.tex) {
                     printf("%s:%zu: unknown image: %s\n", filename, line_number, image_name);
@@ -556,7 +556,7 @@ static bool load_hud(const char *filename) {
                     return false;
                 }
 
-                panel->background.image = gfxmap_get_image(hud_assets, image_name);
+                panel->background.image = gfxmap_get_image(assets, image_name);
 
                 if (!panel->background.image.tex) {
                     printf("%s:%zu: unknown image: %s\n", filename, line_number, image_name);
@@ -633,7 +633,7 @@ static bool load_hud(const char *filename) {
                     return false;
                 }
 
-                hud_config.timer.background.image = gfxmap_get_image(hud_assets, image_name);
+                hud_config.timer.background.image = gfxmap_get_image(assets, image_name);
 
                 if (!hud_config.timer.background.image.tex) {
                     printf("%s:%zu: unknown image: %s\n", filename, line_number, image_name);
@@ -934,20 +934,13 @@ static void movement_draw(void) {
 }
 
 bool hud_init(void) {
-    hud_assets = C2D_SpriteSheetLoad("romfs:/hud/gfx.t3x");
-
-    if (!hud_assets) {
-        hud_close();
+    if (!gfxmap_load_assets("romfs:/hud", &assets)) {
+        printf("Cannot load hud assets\n");
         return false;
     }
 
     if (!text_buf) {
         text_buf = C2D_TextBufNew(1024);
-    }
-
-    if (!gfxmap_load("romfs:/hud/gfx.h")) {
-        hud_close();
-        return false;
     }
 
     if (!load_hud("romfs:/hud/hud")) {
@@ -987,9 +980,9 @@ void hud_close(void) {
         text_buf = NULL;
     }
 
-    if (hud_assets) {
-        C2D_SpriteSheetFree(hud_assets);
-        hud_assets = NULL;
+    if (assets) {
+        C2D_SpriteSheetFree(assets);
+        assets = NULL;
     }
 }
 
