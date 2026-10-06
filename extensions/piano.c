@@ -226,21 +226,29 @@ static bool piano_init(void) {
     }
     note_count = 0;
     if (!audio_is_available()) {
+        printf("audio hasn't been initialized\n");
         return true;
     }
-    FILE *f = fopen("romfs:/audio/piano_a4.raw", "rb");
+    FILE *f = fopen("romfs:/minigames/piano/piano_a4.raw", "rb");
     if (!f) {
-        printf("cannot load sample romfs:/audio/piano_a4.raw\n");
-        C2D_SpriteSheetFree(assets);
-        assets = NULL;
+        printf("cannot load sample romfs:/minigames/piano/piano_a4.raw\n");
+        return false;  // piano_close() frees the assets
+    }
+    fseek(f, 0, SEEK_END);
+    long size = ftell(f);
+    if (size <= 0) {
+        printf("invalid sample romfs:/minigames/piano/piano_a4.raw\n");
+        fclose(f);
         return false;
     }
-
-    fseek(f, 0, SEEK_END);
-    sample_size = ftell(f);
+    sample_size = size;
     rewind(f);
     sample = linearAlloc(sample_size);
-    fread(sample, 1, sample_size, f);
+    if (!sample || fread(sample, 1, sample_size, f) != sample_size) {
+        printf("cannot load sample romfs:/minigames/piano/piano_a4.raw\n");
+        fclose(f);
+        return false;  // piano_close() frees the sample if it was allocated
+    }
     fclose(f);
 
     DSP_FlushDataCache(sample, sample_size);
@@ -274,7 +282,6 @@ static void piano_close(void) {
             memset(&wavebuf[i], 0, sizeof(wavebuf[i]));
         }
     }
-
     if (sample) {
         linearFree(sample);
         sample = NULL;

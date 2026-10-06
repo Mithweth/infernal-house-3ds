@@ -25,7 +25,7 @@ correspondant à cette timeline.
 Une timeline simple peut ressembler à ceci :
 
 ``` text
-MUSIC_START romfs:/audio/intro.ogg
+MUSIC_START intro
 
 IMAGE_LEFT scene1
 TEXT RED TITLE_INTRO_SCENE_1
@@ -229,11 +229,17 @@ MUSIC_START <path>
 Exemple :
 
 ``` text
-MUSIC_START romfs:/audio/intro.ogg
+MUSIC_START intro
+MUSIC_START romfs:/audio/ending.ogg
 ```
 
 Démarre la musique indiquée et poursuit immédiatement avec l’événement
 suivant de la timeline.
+
+La musique peut être indiquée soit par un nom relatif au répertoire de
+la timeline, soit par un chemin absolu `romfs:/`. Les noms relatifs sont
+résolus depuis le répertoire de la timeline et reçoivent automatiquement
+l’extension `.ogg`. Les chemins absolus sont utilisés tels quels.
 
 La musique continue indépendamment des limites de scènes. `END_SCENE` ne
 l’arrête pas.
@@ -258,28 +264,35 @@ FULL_SCREEN
 END_FULL_SCREEN
 ```
 
-### PLAY_SOUND
+### SFX
 
 Syntaxe :
 
 ``` text
-PLAY_SOUND <path>
+SFX <path>
 ```
 
 Exemple :
 
 ``` text
-PLAY_SOUND romfs:/audio/footsteps.raw
+SFX footsteps
+SFX romfs:/audio/title_choice.raw
 ```
 
 Démarre un effet sonore et poursuit immédiatement avec l’événement
-suivant. `PLAY_SOUND` n’attend pas la fin du son.
+suivant. `SFX` n’attend pas la fin du son.
+
+Les effets sonores peuvent être indiqués soit par un nom relatif au
+répertoire de la timeline, soit par un chemin absolu `romfs:/`. Les noms
+relatifs sont résolus depuis le répertoire de la timeline et reçoivent
+automatiquement l’extension `.raw`. Les chemins absolus sont utilisés
+tels quels.
 
 Ajoutez un `PAUSE` lorsque la timeline doit rester sur la scène courante
 pendant une durée déterminée :
 
 ``` text
-PLAY_SOUND romfs:/audio/footsteps.raw
+SFX footsteps
 PAUSE 2000
 ```
 
@@ -431,7 +444,7 @@ phrase partiellement affichée à l’écran.
 | `PAUSE <milliseconds>`      | Attend avant de poursuivre.                             |
 | `MUSIC_START <path>`        | Démarre la musique et poursuit immédiatement.           |
 | `MUSIC_STOP`                | Arrête la musique en cours.                             |
-| `PLAY_SOUND <path>`         | Démarre un effet sonore et poursuit immédiatement.      |
+| `SFX <path>`                | Démarre un effet sonore et poursuit immédiatement.      |
 | `IMAGE_LEFT <image>`        | Définit l’image gauche de l’écran supérieur.            |
 | `IMAGE_CENTER <image>`      | Définit l’image centrale de l’écran supérieur.          |
 | `IMAGE_RIGHT <image>`       | Définit l’image droite de l’écran supérieur.            |
@@ -447,7 +460,7 @@ phrase partiellement affichée à l’écran.
 ``` text
 # Démarre la musique de l'introduction.
 
-MUSIC_START romfs:/audio/intro.ogg
+MUSIC_START intro
 
 # Scène standard : texte sur l'écran inférieur.
 
@@ -473,7 +486,7 @@ END_SCENE
 # Arrête la musique et passe aux compositions plein écran.
 
 MUSIC_STOP
-PLAY_SOUND romfs:/audio/footsteps.raw
+SFX footsteps
 
 FULL_SCREEN
     SPRITE bottom_background 0 240
@@ -513,7 +526,7 @@ Les règles principales sont :
     remplacées, supprimées avec `NONE` ou effacées par `END_SCENE`.
 4.  `PAUSE` conserve l’affichage courant pendant l’attente.
 5.  La musique est indépendante des limites de scènes.
-6.  `PLAY_SOUND` n’attend pas la fin du son.
+6.  `SFX` n’attend pas la fin du son.
 7.  Un bloc `FULL_SCREEN` décrit une composition complète.
 8.  Une composition plein écran reste visible après `END_FULL_SCREEN`.
 9.  Un nouveau `FULL_SCREEN` remplace la composition précédente.
@@ -578,12 +591,12 @@ FULL_SCREEN
 END_FULL_SCREEN
 ```
 
-### S’attendre à ce que PLAY_SOUND attende
+### S’attendre à ce que SFX attende
 
 Ceci :
 
 ``` text
-PLAY_SOUND romfs:/audio/footsteps.raw
+SFX footsteps
 FULL_SCREEN
     ...
 END_FULL_SCREEN

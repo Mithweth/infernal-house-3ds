@@ -6,6 +6,7 @@
 // channels 5-10 itself.
 #include <3ds.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
 #include <tremor/ivorbisfile.h>
@@ -44,6 +45,23 @@ static bool music_playing = false;
 // False when ndspInit failed: public functions then return early, so the game
 // runs silently and WAIT_SFX doesn't wait for a sound that never ends.
 static bool audio_available = false;
+
+char *audio_resolve_path(const char *directory, const char *path, const char *extension) {
+    if (strncmp(path, "romfs:/", 7) == 0) {
+        return strdup(path);
+    }
+
+    // +2 for the '/' separator and the terminating NUL.
+    size_t len = strlen(directory) + strlen(path) + strlen(extension) + 2;
+    char *resolved = malloc(len);
+
+    if (!resolved) {
+        return NULL;
+    }
+
+    snprintf(resolved, len, "%s/%s%s", directory, path, extension);
+    return resolved;
+}
 
 // Decodes up to SAMPLES_PER_BUFFER frames into buf, seeking back to the start
 // at end of stream so the music loops. Returns false if nothing was decoded.
@@ -181,7 +199,13 @@ int sfx_play(const char *filename) {
     }
 
     fseek(f, 0, SEEK_END);
-    size_t size = ftell(f);
+    long end = ftell(f);
+    if (end <= 0) {
+        printf("Invalid sound file: %s\n", filename);
+        fclose(f);
+        return -1;
+    }
+    size_t size = end;
     rewind(f);
 
     sfx->sample = linearAlloc(size);

@@ -479,7 +479,7 @@ static bool load_room(const char *filename) {
 // resume later through continue_actions(). Callers must then stop running
 // further blocks, since the game mode (and possibly the room) has changed.
 static bool execute_actions(RoomAction *actions, size_t count, size_t start) {
-    char path[256];
+    char *path;
     for (size_t c = start; c < count; c++) {
         RoomAction *action = &actions[c];
         switch (action->type) {
@@ -496,19 +496,26 @@ static bool execute_actions(RoomAction *actions, size_t count, size_t start) {
             game_show_message(action->argument);
             break;
         case ROOM_ACTION_SFX:
-            snprintf(path, sizeof(path), "%s/%s.raw", room->path, action->argument);
-            sfx_play(path);
+            path = audio_resolve_path(room->path, action->argument, ".raw");
+            if (path) {
+                sfx_play(path);
+                free(path);
+            }
             break;
         case ROOM_ACTION_WAIT_SFX:
-            snprintf(path, sizeof(path), "%s/%s.raw", room->path, action->argument);
+            // sfx_play() loads the whole sample, so the path can be freed as
+            // soon as game_wait_for_sfx() returns.
+            path = audio_resolve_path(room->path, action->argument, ".raw");
             pending_actions.actions = actions;
             pending_actions.count = count;
             pending_actions.next = c + 1;
             // Save where to resume before handing control to game.c; if the
             // sound can't be played, forget it and keep going immediately.
-            if (game_wait_for_sfx(path, continue_actions)) {
+            if (path && game_wait_for_sfx(path, continue_actions)) {
+                free(path);
                 return true;
             }
+            free(path);
             pending_actions.actions = NULL;
             pending_actions.count = 0;
             pending_actions.next = 0;

@@ -1,3 +1,5 @@
+SFX footsteps_inside
+PAUSE 2000
 MUSIC_START romfs:/audio/gameover_sad.ogg
 IMAGE_LEFT left
 IMAGE_CENTER center

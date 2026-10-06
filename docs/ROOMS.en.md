@@ -410,14 +410,17 @@ Actions are valid inside `ACTION` and `USE` blocks.
 | `TIMELINE <name>`         | Starts a timeline. **Terminates the current action flow and must be the last action in its block.**       |
 | `MINIGAME <name>`         | Starts a minigame. **Terminates the current action flow and must be the last action in its block.**       |
 
-Sound names are specified without the `.raw` extension:
+Sound effects can be specified either by a name relative to the room directory
+or by an absolute `romfs:/` path:
 
 ```text
 SFX closet_open
 WAIT_SFX metal_ladder
+SFX romfs:/audio/title_choice.raw
 ```
 
-Sound effects are resolved from the room directory.
+Relative sound names are resolved from the room directory and automatically
+receive the `.raw` extension. Absolute paths are used unchanged.
 
 ### SET does not necessarily mean “set to true”
 

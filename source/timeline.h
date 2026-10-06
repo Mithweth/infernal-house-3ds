@@ -6,6 +6,8 @@
 
 // Loads <directory>/timeline, <directory>/gfx.t3x and <directory>/gfx.h and
 // rewinds to the first event. Returns false if any of them fails to load.
+// Relative MUSIC_START (.ogg) and SFX (.raw) names are looked up in
+// <directory>; "romfs:/" paths are used as is.
 // Called by game.c, which then switches to GAME_TIMELINE.
 bool timeline_init(const char *directory);
 

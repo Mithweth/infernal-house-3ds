@@ -23,6 +23,8 @@ typedef struct {
 //   update: called every frame with the keys pressed this frame.
 //   draw:   called on the bottom screen, after the room has been drawn.
 //   close:  called by game_minigame_stop; must release what init allocated.
+//           Also called when init fails, so it must cope with a partial init
+//           (test every resource before freeing it).
 // A mini-game ends itself by calling game_minigame_stop() from update.
 typedef struct {
     bool (*init)(void);
