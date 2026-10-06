@@ -85,7 +85,8 @@ BACKGROUND_BOTTOM background_bottom
 
 `BACKGROUND_BOTTOM` defines the image drawn at `(0, 0)` behind the main
 menu on the bottom screen. It is not drawn on the controls or credits
-pages.
+pages, which have their own `BACKGROUND` directive (see sections 5 and
+6).
 
 Both directives are optional. If a background is omitted, no image is
 drawn for that screen and the background remains black.
@@ -310,8 +311,28 @@ CONTROLS
 END_CONTROLS
 ```
 
-It supports `IMAGE` and `TEXT` directives. The page is opened by the
-`CONTROLS` menu entry and closed with A or B.
+It supports `BACKGROUND`, `IMAGE` and `TEXT` directives. The page is
+opened by the `CONTROLS` menu entry and closed with A or B.
+
+### Background
+
+Syntax:
+
+``` text
+BACKGROUND <image>
+```
+
+Example:
+
+``` text
+BACKGROUND controls_background
+```
+
+Defines the image drawn at `(0, 0)` on the bottom screen while the
+controls page is open, behind its images and texts.
+
+This directive is optional. If it is omitted, the page has no
+background. If it appears several times, the last one is used.
 
 ### Image
 
@@ -339,17 +360,32 @@ A controls page can contain up to 8 `IMAGE` directives.
 Syntax:
 
 ``` text
-TEXT <localization_key> <x> <y> <size>
+TEXT <localization_key> <x> <y> <size> [alignment]
 ```
 
 Example:
 
 ``` text
-TEXT TITLE_CONTROLS_MOVE 90 15 0.55
+TEXT TITLE_CONTROLS_MOVE 36 15 0.55 CENTER
 ```
 
 Draws the localized text associated with `localization_key` at the
 specified position and scale.
+
+The optional `alignment` defines what `x` refers to:
+
+  Alignment    `x` is
+  ------------ ------------------------------
+  `LEFT`       the left edge of the text
+  `CENTER`     the horizontal center of the text
+  `RIGHT`      the right edge of the text
+
+If `alignment` is omitted, the text is aligned on the left. An unknown
+alignment makes the title screen fail to load, with
+`<file>:<line>: incorrect argument: <alignment>`. `y` is always the top
+of the text.
+
+A localized text may contain `\n` line breaks.
 
 The text color is fixed by the title-screen implementation and is not
 part of the description format.
@@ -366,8 +402,28 @@ CREDITS
 END_CREDITS
 ```
 
-It supports `CREDIT` and `IMAGE` directives. The page is opened by the
-`CREDITS` menu entry and closed with A or B.
+It supports `BACKGROUND`, `CREDIT` and `IMAGE` directives. The page is
+opened by the `CREDITS` menu entry and closed with A or B.
+
+### Background
+
+Syntax:
+
+``` text
+BACKGROUND <image>
+```
+
+Example:
+
+``` text
+BACKGROUND credits_background
+```
+
+Defines the image drawn at `(0, 0)` on the bottom screen while the
+credits page is open, behind its credit lines and images.
+
+This directive is optional. If it is omitted, the page has no
+background. If it appears several times, the last one is used.
 
 ### Credit line
 
@@ -425,7 +481,7 @@ Images are referenced by name:
 ``` text
 BACKGROUND_TOP background_top
 BACKGROUND_BOTTOM background_bottom
-IMAGE analogpad 10 0
+BACKGROUND controls_background
 IMAGE lankhor 85 160
 ```
 
@@ -486,20 +542,15 @@ END_MENU
 # ---------------------------------------------------------------------------
 
 CONTROLS
-    IMAGE analogpad 10 0
-    TEXT TITLE_CONTROLS_MOVE 90 15 0.55
+    BACKGROUND controls_background
 
-    IMAGE dpad 10 55
-    TEXT TITLE_CONTROLS_INVENTORY 90 70 0.55
-
-    IMAGE xbutton 18 110
-    TEXT TITLE_CONTROLS_EXAMINE 90 115 0.55
-
-    IMAGE abutton 18 150
-    TEXT TITLE_CONTROLS_USE 90 155 0.55
-
-    IMAGE touch 10 185
-    TEXT TITLE_CONTROLS_ACTION 90 200 0.55
+    TEXT TITLE_CONTROLS_MOVE 36 15 0.55 CENTER
+    TEXT TITLE_CONTROLS_INVENTORY 40 160 0.55 CENTER
+    TEXT TITLE_CONTROLS_EXAMINE 281 15 0.55 CENTER
+    TEXT TITLE_CONTROLS_USE 283 72 0.55 RIGHT
+    TEXT TITLE_CONTROLS_CANCEL 280 135 0.55 CENTER
+    TEXT TITLE_CONTROLS_ACTION 160 90 0.55 CENTER
+    TEXT TITLE_CONTROLS_QUIT 160 210 0.55 CENTER
 END_CONTROLS
 
 # ---------------------------------------------------------------------------
@@ -507,6 +558,8 @@ END_CONTROLS
 # ---------------------------------------------------------------------------
 
 CREDITS
+    BACKGROUND credits_background
+
     CREDIT TITLE_CREDITS_ORIGINAL_PROGRAM Christophe Lajoux
     CREDIT TITLE_CREDITS_ORIGINAL_HELP Laurent Hiriart
     CREDIT TITLE_CREDITS_ORIGINAL_GRAPHISM Thierry Port & Momo
@@ -539,7 +592,10 @@ COLOR
 SELECTED_COLOR
 CONTROLS
 CREDITS
+BACKGROUND (in CONTROLS and CREDITS)
 ```
+
+The `alignment` argument of `TEXT` is also optional.
 
 `ORDER` is required in practice because the title screen cannot be
 loaded with an empty menu.
@@ -602,6 +658,18 @@ literal name:
 ``` text
 CREDIT TITLE_CREDITS_REMAKE_PROGRAMMER Jean-Baptiste Langlois
 ```
+
+### Misspelling a TEXT alignment
+
+Do not write:
+
+``` text
+TEXT TITLE_CONTROLS_MOVE 36 15 0.55 CENTRE
+```
+
+Alignments are spelled in English and are case-sensitive. An unknown
+alignment makes the title screen fail to load. Use `LEFT`, `CENTER` or
+`RIGHT`.
 
 ### Trying to configure the version
 
