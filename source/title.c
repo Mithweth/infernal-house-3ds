@@ -58,6 +58,7 @@ typedef struct {
     float x;
     float y;
     float size;
+    u32 flags;
 } TitleText;
 
 // Credits line: a translated role and an untranslated name.
@@ -82,6 +83,8 @@ typedef struct {
 typedef struct {
     C2D_Image background_top;
     C2D_Image background_bottom;
+    C2D_Image background_controls;
+    C2D_Image background_credits;
     char *sfx_select;
     char *sfx_choice;
     TitleMenu menu;
@@ -132,6 +135,23 @@ static const TitleMenuEntry *find_menu_entry(const char *id) {
         }
     }
     return NULL;
+}
+
+// Returns the C2D_DrawText flags for a TEXT alignment (LEFT, CENTER or
+// RIGHT), C2D_WithColor alone (left-aligned) when the argument is omitted,
+// or 0 for an unknown alignment, which makes load_title fail.
+static u32 parse_alignment(const char *name) {
+    if (!name) {
+        return C2D_WithColor;
+    }
+    if (strcmp(name, "LEFT") == 0) {
+        return C2D_WithColor | C2D_AlignLeft;
+    } else if (strcmp(name, "CENTER") == 0) {
+        return C2D_WithColor | C2D_AlignCenter;
+    } else if (strcmp(name, "RIGHT") == 0) {
+        return C2D_WithColor | C2D_AlignRight;
+    }
+    return 0;
 }
 
 // Parses the title configuration file into title_config and choices[].
@@ -330,9 +350,16 @@ static bool load_title(const char *filename) {
                 char *x = strtok(NULL, " ");
                 char *y = strtok(NULL, " ");
                 char *size = strtok(NULL, " ");
+                char *flags = strtok(NULL, " ");
 
                 if (!id || !x || !y || !size) {
                     printf("%s:%zu: missing arguments\n", filename, line_number);
+                    fclose(file);
+                    return false;
+                }
+                u32 f = parse_alignment(flags);
+                if (!f) {
+                    printf("%s:%zu: incorrect argument: %s\n", filename, line_number, flags);
                     fclose(file);
                     return false;
                 }
@@ -341,6 +368,15 @@ static bool load_title(const char *filename) {
                 text->x = atof(x);
                 text->y = atof(y);
                 text->size = atof(size);
+                text->flags = f;
+            } else if (strcmp(command, "BACKGROUND") == 0) {
+                char *img = strtok(NULL, " ");
+                if (!img) {
+                    printf("%s:%zu: missing argument\n", filename, line_number);
+                    fclose(file);
+                    return false;
+                }
+                title_config.background_controls = gfxmap_get_image(assets, img);
             }
             continue;
         }
@@ -379,6 +415,14 @@ static bool load_title(const char *filename) {
                 image->image = gfxmap_get_image(assets, name);
                 image->x = atof(x);
                 image->y = atof(y);
+            } else if (strcmp(command, "BACKGROUND") == 0) {
+                char *img = strtok(NULL, " ");
+                if (!img) {
+                    printf("%s:%zu: missing argument\n", filename, line_number);
+                    fclose(file);
+                    return false;
+                }
+                title_config.background_credits = gfxmap_get_image(assets, img);
             }
             continue;
         }
@@ -497,6 +541,9 @@ static void title_draw_credits(void) {
     C2D_TextBufClear(text_buf);
     C2D_Text role;
     C2D_Text person;
+    if (title_config.background_credits.tex) {
+        C2D_DrawImageAt(title_config.background_credits, 0.0f, 0.0f, 0.1f, NULL, 1.0f, 1.0f);
+    }
     for (size_t i = 0; i < title_config.credit_count; i++) {
         float y = 20.0f + i * 20.0f;
         C2D_TextParse(&role, text_buf, lang_get(title_config.credits[i].role_id));
@@ -516,6 +563,9 @@ static void title_draw_credits(void) {
 
 static void title_draw_controls(void) {
     C2D_Text controls_text;
+    if (title_config.background_controls.tex) {
+        C2D_DrawImageAt(title_config.background_controls, 0.0f, 0.0f, 0.1f, NULL, 1.0f, 1.0f);
+    }
     for (size_t i = 0; i < title_config.controls_image_count; i++) {
         TitleImage *ctrl_img = &title_config.controls_images[i];
         if (ctrl_img->image.tex) {
@@ -527,7 +577,7 @@ static void title_draw_controls(void) {
         TitleText *ctrl_text = &title_config.controls_texts[i];
         C2D_TextParse(&controls_text, text_buf, lang_get(ctrl_text->id));
         C2D_TextOptimize(&controls_text);
-        C2D_DrawText(&controls_text, C2D_WithColor, ctrl_text->x, ctrl_text->y, 0.5f, ctrl_text->size, ctrl_text->size, C2D_Color32(224, 224, 224, 255));
+        C2D_DrawText(&controls_text, ctrl_text->flags, ctrl_text->x, ctrl_text->y, 0.5f, ctrl_text->size, ctrl_text->size, C2D_Color32(224, 224, 224, 255));
     }
 }
 
