@@ -204,7 +204,6 @@ bool game_title_start(void) {
     timeline_close();
     music_stop();
     game_mode = GAME_TITLE;
-    examine_image = (C2D_Image){0};
     if (!title_init()) {
         printf("Cannot initialize title screen\n");
         return false;
@@ -430,7 +429,7 @@ void game_show_image(C2D_Image image) {
 void game_update(u32 keys, circlePosition analog, touchPosition touch) {
     switch (game_mode) {
         case GAME_TITLE:
-            title_update(keys);
+            title_update(keys, touch);
             return;
 
         case GAME_TIMELINE:

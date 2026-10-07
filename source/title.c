@@ -41,9 +41,10 @@ static C2D_TextBuf text_buf;
 static C2D_SpriteSheet assets;
 
 // Capacity of the configuration arrays; extra lines are reported and ignored.
-#define TITLE_MAX_IMAGES   8
-#define TITLE_MAX_TEXTS    8
-#define TITLE_MAX_CREDITS 11
+#define TITLE_MAX_IMAGES       8
+#define TITLE_MAX_TEXTS        8
+#define TITLE_MAX_CREDITS      11
+#define TITLE_MENU_TOUCH_WIDTH 120
 
 // Image drawn at a fixed position on the controls or credits page.
 typedef struct {
@@ -269,6 +270,11 @@ static bool load_title(const char *filename) {
                     return false;
                 }
                 title_config.menu.spacing = atof(spacing);
+                if (title_config.menu.spacing <= 0.0f) {
+                    printf("%s:%zu: spacing must be positive\n", filename, line_number);
+                    fclose(file);
+                    return false;
+                }
             } else if (strcmp(command, "TEXT_SIZE") == 0) {
                 char *size = strtok(NULL, " ");
                 if (!size) {
@@ -465,10 +471,21 @@ bool title_init(void) {
     return true;
 }
 
-void title_update(u32 keys) {
-    // While the controls or credits page is open, A or B only closes it.
+static size_t find_touch_selection(int x, int y) {
+    int elem_x = title_config.menu.x - TITLE_MENU_TOUCH_WIDTH / 2;
+    for (size_t i = 0; i < choice_count; i++) {
+        int elem_y = (i * title_config.menu.spacing) + title_config.menu.y;
+        if (x >= elem_x && x <= elem_x + TITLE_MENU_TOUCH_WIDTH && y >= elem_y && y < elem_y + title_config.menu.spacing) {
+            return i;
+        }
+    }
+    return choice_count;
+}
+
+void title_update(u32 keys, touchPosition touch) {
+    // While the controls or credits page is open, A, B or a touch only closes it.
     if (option != OPTION_NONE) {
-        if (keys & (KEY_A | KEY_B)) {
+        if (keys & (KEY_A | KEY_B | KEY_TOUCH)) {
             if (title_config.sfx_choice) {
                 sfx_play(title_config.sfx_choice);
             }
@@ -499,7 +516,15 @@ void title_update(u32 keys) {
         }
     }
 
-    if (!(keys & KEY_A)) {
+    if (keys & KEY_TOUCH) {
+        size_t s = find_touch_selection(touch.px, touch.py);
+        if (s == choice_count) {
+            return;
+        }
+        selected = s;
+    }
+
+    if (!(keys & (KEY_A | KEY_TOUCH))) {
         return;
     }
 

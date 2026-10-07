@@ -82,7 +82,7 @@ bool gfxmap_load(const char *filename) {
         strcpy(entry->name, name);
         entry->index = index;
     }
-    printf("Loaded %zu images\n", image_index_count);
+    printf("%s: Loaded %zu images\n", filename, image_index_count);
     fclose(f);
     return true;
 }
