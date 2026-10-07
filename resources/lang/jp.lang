@@ -414,3 +414,6 @@ UNDERGROUND_X_FORM_EXAMINE=階段を支える柱に、\n「X」の形をした�
 UNDERGROUND_X_FORM=柱に刻まれた印
 USE_LIGHTBULB_WITH_LAMP=このランプにはもう電球がついている。
 USE_SCREWDRIVER_WITH_LAMP=本当にこのランプを分解して\n電球を取り出したいの？
+GAME_QUIT_CONFIRM=本当に終了しますか？
+GAME_QUIT_YES=はい
+GAME_QUIT_NO=いいえ

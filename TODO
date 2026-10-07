@@ -1,6 +1,5 @@
 doc DEVELOPING
 doc TRANSLATION
 doc BUILD
-add some events
-ask for confirmation before quitting with START
+implement save/load
 implement MESSAGE_IMAGE action in room.c (game_show_image)

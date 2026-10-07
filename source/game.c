@@ -21,6 +21,13 @@
 
 #define GAME_CALLBACK_MAX     8
 #define GAME_CONFIG_MAX_ITEMS 16
+#define QUIT_BOX_WIDTH      260.0f
+#define QUIT_BOX_HEIGHT     110.0f
+#define QUIT_TITLE_OFFSET    25.0f  // from the top of the box
+#define QUIT_BUTTON_OFFSET   65.0f  // from the top of the box
+#define QUIT_BUTTON_SPACING  40.0f  // from the center to each button
+#define QUIT_BUTTON_PADDING   5.0f
+#define QUIT_TEXT_SCALE       0.6f
 
 typedef struct {
     char *open;
@@ -49,6 +56,8 @@ static C2D_Text text;
 static void (*game_busy_callback)(void) = NULL;
 static MiniGame *active_minigame = NULL;
 static int game_busy_sfx_channel = -1;
+static bool quit_confirm;
+static bool quit_selected;
 
 
 static bool game_config_load(const char *filename) {
@@ -236,13 +245,17 @@ bool game_init(void) {
         printf("Cannot initialize HUD\n");
         return false;
     }
+    // Created here rather than in game_start: the quit confirmation also
+    // draws its text on the title screen, before any game has started.
+    text_buf = C2D_TextBufNew(4096);
+    if (!text_buf) {
+        printf("Cannot create game text buffer\n");
+        return false;
+    }
     return game_title_start();
 }
 
 void game_start(void) {
-    if (!text_buf) {
-        text_buf = C2D_TextBufNew(4096);
-    }
     title_close();
     callbacks_reset();
     inventory_reset();
@@ -371,6 +384,16 @@ static void update_touch(touchPosition touch) {
 }
 
 
+// Draws the golden-framed dark box used by the message box and the quit
+// confirmation, with a drop shadow. Uses depths z - 0.01 to z + 0.03.
+static void draw_framed_box(float x, float y, float w, float h, float z) {
+    C2D_DrawRectSolid(x + 3.0f, y + 3.0f, z - 0.01f, w, h, C2D_Color32(0, 0, 0, 150));
+    C2D_DrawRectSolid(x, y, z, w, h, C2D_Color32(150, 120, 55, 255));
+    C2D_DrawRectSolid(x + 2.0f, y + 2.0f, z + 0.01f, w - 4.0f, h - 4.0f, C2D_Color32(18, 24, 34, 235));
+    C2D_DrawRectSolid(x + 5.0f, y + 5.0f, z + 0.02f, w - 10.0f, h - 10.0f, C2D_Color32(105, 82, 40, 255));
+    C2D_DrawRectSolid(x + 6.0f, y + 6.0f, z + 0.03f, w - 12.0f, h - 12.0f, C2D_Color32(22, 28, 40, 245));
+}
+
 // Draws the room on the bottom screen, plus the examine image or the message
 // box when in GAME_MESSAGE. The text is parsed again on every frame.
 static void game_draw_room(void) {
@@ -389,14 +412,42 @@ static void game_draw_room(void) {
             C2D_TextGetDimensions(&text, 0.5f, 0.5f, &width, &height);
             float box_height = height + 20.0f;
             float box_y = 240.0f - box_height - 10.0f;
-            C2D_DrawRectSolid(13.0f, box_y + 3.0f, 0.79f, 300.0f, box_height, C2D_Color32(0, 0, 0, 150));
-            C2D_DrawRectSolid(10.0f, box_y, 0.80f, 300.0f, box_height, C2D_Color32(150, 120, 55, 255));
-            C2D_DrawRectSolid(12.0f, box_y + 2.0f, 0.81f, 296.0f, box_height - 4.0f, C2D_Color32(18, 24, 34, 235));
-            C2D_DrawRectSolid(15.0f, box_y + 5.0f, 0.82f, 290.0f, box_height - 10.0f, C2D_Color32(105, 82, 40, 255));
-            C2D_DrawRectSolid(16.0f, box_y + 6.0f, 0.83f, 288.0f, box_height - 12.0f, C2D_Color32(22, 28, 40, 245));
+            draw_framed_box(10.0f, box_y, 300.0f, box_height, 0.80f);
             C2D_DrawText(&text, C2D_WithColor, 22.0f, box_y + 10.0f, 0.9f, 0.5f, 0.5f, C2D_Color32(255, 255, 255, 255));
         }
     }
+}
+
+// Draws a centered label at (x, y), highlighted when selected. Appends to
+// text_buf without clearing it: the caller clears it first.
+static void draw_button(const char *label_id, float x, float y, bool selected) {
+    float width, height;
+    C2D_TextParse(&text, text_buf, lang_get(label_id));
+    C2D_TextOptimize(&text);
+    C2D_TextGetDimensions(&text, QUIT_TEXT_SCALE, QUIT_TEXT_SCALE, &width, &height);
+    if (selected) {
+        C2D_DrawRectSolid(x - width / 2.0f - QUIT_BUTTON_PADDING, y - QUIT_BUTTON_PADDING, 0.95f, width + 2.0f * QUIT_BUTTON_PADDING, height + 2.0f * QUIT_BUTTON_PADDING, C2D_Color32(105, 82, 40, 255));
+    }
+    C2D_DrawText(&text, C2D_WithColor | C2D_AlignCenter, x, y, 0.96f, QUIT_TEXT_SCALE, QUIT_TEXT_SCALE, C2D_Color32(255, 255, 255, 255));
+}
+
+// Draws the quit confirmation centered on the bottom screen: a dimmed
+// background, the question, and the No (left) / Yes (right) buttons.
+static void quit_confirm_draw(void) {
+    float box_x = (320.0f - QUIT_BOX_WIDTH) / 2.0f;
+    float box_y = (240.0f - QUIT_BOX_HEIGHT) / 2.0f;
+    float center_x = box_x + QUIT_BOX_WIDTH / 2.0f;
+    float button_y = box_y + QUIT_BUTTON_OFFSET;
+
+    C2D_DrawRectSolid(0.0f, 0.0f, 0.85f, 320.0f, 240.0f, C2D_Color32(0, 0, 0, 128));
+    draw_framed_box(box_x, box_y, QUIT_BOX_WIDTH, QUIT_BOX_HEIGHT, 0.90f);
+
+    C2D_TextBufClear(text_buf);
+    C2D_TextParse(&text, text_buf, lang_get("GAME_QUIT_CONFIRM"));
+    C2D_TextOptimize(&text);
+    C2D_DrawText(&text, C2D_WithColor | C2D_AlignCenter, center_x, box_y + QUIT_TITLE_OFFSET, 0.96f, QUIT_TEXT_SCALE, QUIT_TEXT_SCALE, C2D_Color32(255, 255, 255, 255));
+    draw_button("GAME_QUIT_NO", center_x - QUIT_BUTTON_SPACING, button_y, !quit_selected);
+    draw_button("GAME_QUIT_YES", center_x + QUIT_BUTTON_SPACING, button_y, quit_selected);
 }
 
 bool game_use_item(const char *id) {
@@ -426,22 +477,51 @@ void game_show_image(C2D_Image image) {
     game_mode = GAME_MESSAGE;
 }
 
-void game_update(u32 keys, circlePosition analog, touchPosition touch) {
+bool game_update(u32 keys, circlePosition analog, touchPosition touch) {
+    if (quit_confirm) {
+        if (keys & KEY_LEFT) {
+            quit_selected = false;
+        }
+        if (keys & KEY_RIGHT) {
+            quit_selected = true;
+        }
+        if (keys & (KEY_B | KEY_START)) {
+            quit_confirm = false;
+            timer_resume();
+            return true;
+        }
+        if (keys & KEY_A) {
+            if (quit_selected) {
+                return false;
+            }
+            quit_confirm = false;
+            timer_resume();
+        }
+
+        return true;
+    }
+
+    if (keys & KEY_START) {
+        quit_confirm = true;
+        quit_selected = false;
+        return true;
+    }
+
     switch (game_mode) {
         case GAME_TITLE:
             title_update(keys, touch);
-            return;
+            return true;
 
         case GAME_TIMELINE:
             timeline_update(keys);
-            return;
+            return true;
 
         case GAME_MINIGAME:
             hud_update();
             if (active_minigame && active_minigame->update) {
                 active_minigame->update(keys, touch);
             }
-            return;
+            return true;
 
         case GAME_MESSAGE:
             hud_update();
@@ -449,7 +529,7 @@ void game_update(u32 keys, circlePosition analog, touchPosition touch) {
                 game_mode = GAME_NORMAL;
                 examine_image = (C2D_Image){0};
             }
-            return;
+            return true;
 
         case GAME_BUSY:
             hud_update();
@@ -464,7 +544,7 @@ void game_update(u32 keys, circlePosition analog, touchPosition touch) {
                     callback();
                 }
             }
-            return;
+            return true;
 
         default:
             hud_update();
@@ -474,7 +554,7 @@ void game_update(u32 keys, circlePosition analog, touchPosition touch) {
     // GAME_NORMAL: the inventory gets the keys first (D-pad, A, X); when it
     // consumes them, no movement or touch is handled this frame.
     if ((inventory_is_active()) | (inventory_update(keys))) {
-        return;
+        return true;
     }
 
     update_movement(analog);
@@ -482,6 +562,7 @@ void game_update(u32 keys, circlePosition analog, touchPosition touch) {
     if (keys & KEY_TOUCH) {
         update_touch(touch);
     }
+    return true;
 }
 
 void game_draw(C3D_RenderTarget *top, C3D_RenderTarget *bottom) {
@@ -489,17 +570,17 @@ void game_draw(C3D_RenderTarget *top, C3D_RenderTarget *bottom) {
     C2D_TargetClear(bottom, C2D_Color32(0, 0, 0, 255));
     switch (game_mode) {
         case GAME_TITLE:
-            C2D_SceneBegin(top);
-            title_draw_top();
             C2D_SceneBegin(bottom);
             title_draw_bottom();
+            C2D_SceneBegin(top);
+            title_draw_top();
             break;
 
         case GAME_TIMELINE:
-            C2D_SceneBegin(top);
-            timeline_draw_top();
             C2D_SceneBegin(bottom);
             timeline_draw_bottom();
+            C2D_SceneBegin(top);
+            timeline_draw_top();
             break;
 
         case GAME_MINIGAME:
@@ -519,5 +600,9 @@ void game_draw(C3D_RenderTarget *top, C3D_RenderTarget *bottom) {
             C2D_SceneBegin(top);
             hud_draw();
             break;
+    }
+    if (quit_confirm) {
+        C2D_SceneBegin(bottom);
+        quit_confirm_draw();
     }
 }

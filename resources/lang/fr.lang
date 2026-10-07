@@ -414,3 +414,6 @@ UNDERGROUND_X_FORM_EXAMINE=Sur le pilier retenant l'escalier,\nil y a une gravur
 UNDERGROUND_X_FORM=Une gravure sur le pilier
 USE_LIGHTBULB_WITH_LAMP=Cette lampe a déjà une ampoule.
 USE_SCREWDRIVER_WITH_LAMP=Vous voulez vraiment dévisser cette\nlampe pour en récupérer l'ampoule ?
+GAME_QUIT_CONFIRM=Voulez-vous vraiment quitter ?
+GAME_QUIT_NO=Non
+GAME_QUIT_YES=Oui

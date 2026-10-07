@@ -28,6 +28,9 @@ void hud_close(void);
 
 // Countdown helpers. timer_resume must be called after the application was
 // suspended (home menu, sleep) so the suspended time isn't counted.
+// There is no timer_pause: the countdown only advances in hud_update, so
+// skipping hud_update pauses it (e.g. while game.c shows the quit confirmation)
+// and timer_resume must be called when hud_update runs again.
 void timer_start(void);
 void timer_update(void);
 void timer_resume(void);

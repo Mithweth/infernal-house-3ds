@@ -414,3 +414,6 @@ UNDERGROUND_X_FORM=An engraving on the pillar
 UNDERGROUND_X_FORM_EXAMINE=On the pillar supporting the stairs,\nthere is an engraving shaped like an 'X'
 USE_LIGHTBULB_WITH_LAMP=This lamp already has a bulb.
 USE_SCREWDRIVER_WITH_LAMP=Do you really want to take this\nlamp apart just to get the bulb?
+GAME_QUIT_CONFIRM=Are you sure you want to quit?
+GAME_QUIT_YES=Yes
+GAME_QUIT_NO=No
