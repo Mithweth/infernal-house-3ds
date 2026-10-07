@@ -1,10 +1,10 @@
 # Infernal House 3DS
 
-> 🇬🇧 [English](#-english) · 🇫🇷 [Français](#-français)
+> [English](#-english) · [Français](#-français)
 
 ------------------------------------------------------------------------
 
-## 🇬🇧 English
+## English
 
 ### The project
 
@@ -83,7 +83,7 @@ The clock is ticking. Good luck, detective… you'll need it. 🕰️
 
 ------------------------------------------------------------------------
 
-## 🇫🇷 Français
+## Français
 
 ### Le projet
 
