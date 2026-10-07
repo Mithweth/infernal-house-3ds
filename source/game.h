@@ -43,8 +43,10 @@ typedef enum {
 } GameMode;
 
 // Per-frame update, called by main. keys are the keys pressed this frame
-// (hidKeysDown); dispatches on the current GameMode.
-void game_update(u32 keys, circlePosition analog, touchPosition touch);
+// (hidKeysDown); dispatches on the current GameMode. START opens a quit
+// confirmation box that takes all the input until it is closed. Returns false
+// when the player confirmed quitting: main must then leave its loop.
+bool game_update(u32 keys, circlePosition analog, touchPosition touch);
 
 // Per-frame drawing on both screens, called by main between
 // C3D_FrameBegin and C3D_FrameEnd.

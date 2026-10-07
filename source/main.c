@@ -99,12 +99,10 @@ int main(int argc, char **argv) {
         touchPosition touch;
         hidTouchRead(&touch);
 
-        if (keys & KEY_START) {
+        audio_update();
+        if (!game_update(keys, analog, touch)) {
             break;
         }
-
-        audio_update();
-        game_update(keys, analog, touch);
         C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
         game_draw(top, bottom);
         C3D_FrameEnd(0);
