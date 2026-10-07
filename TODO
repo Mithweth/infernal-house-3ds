@@ -1,8 +1,6 @@
-add some comments
 doc DEVELOPING
 doc TRANSLATION
 doc BUILD
-doc HOWTOPLAY
 add some events
 ask for confirmation before quitting with START
 implement MESSAGE_IMAGE action in room.c (game_show_image)
