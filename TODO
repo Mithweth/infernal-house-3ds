@@ -5,4 +5,4 @@ doc BUILD
 doc HOWTOPLAY
 add some events
 ask for confirmation before quitting with START
-select title menu entries with the touch screen
+implement MESSAGE_IMAGE action in room.c (game_show_image)

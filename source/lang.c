@@ -117,7 +117,7 @@ static bool lang_load(void) {
         }
         translation_count++;
     }
-    printf("Loaded %zu translations\n", translation_count);
+    printf("%s: Loaded %zu translations\n", lang->filename, translation_count);
     fclose(file);
     return true;
 }
@@ -176,7 +176,7 @@ bool lang_init(void) {
                 continue;
             }
             if (strcmp(key, "ORDER") == 0) {
-// Only ORDER is needed here; lang_load parses the full file later.
+                // Only ORDER is needed here; lang_load parses the full file later.
                 lang->order = atoi(value);
                 break;
             }

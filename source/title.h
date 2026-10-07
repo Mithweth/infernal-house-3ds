@@ -11,7 +11,7 @@ bool title_init(void);
 
 // Handles menu navigation for this frame. Choosing "intro" or "new game" calls
 // game_intro / game_start, which close the title screen.
-void title_update(u32 keys);
+void title_update(u32 keys, touchPosition touch);
 
 // Draws the top screen artwork.
 void title_draw_top(void);
