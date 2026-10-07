@@ -133,7 +133,7 @@ static bool load_inventory(const char *filename) {
                 item->use_callback = callbacks_inventory_find(cb);
                 continue;
             }
-// DETAIL <image> <x> <y> [FULLSCREEN]
+            // DETAIL <image> <x> <y> [FULLSCREEN]
             if (strcmp(command, "DETAIL") == 0) {
                 char *image_id = strtok(NULL, " ");
                 if (!image_id) {
@@ -365,7 +365,7 @@ void inventory_add(const char *id) {
     if (inventory_has(id)) {
         return;
     }
-
+    printf("Inventory: add %s\n", id);
     inventory[inventory_count++] = item;
     selected = inventory_count - 1;
 }

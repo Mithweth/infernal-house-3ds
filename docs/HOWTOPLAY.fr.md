@@ -6,7 +6,7 @@ Pour l'installation du fichier `.cia` ou `.3dsx`, reportez-vous au [README du pr
 
 > **À savoir avant de commencer**
 >
-> Une partie dure au maximum **60 minutes** et la version actuelle ne comporte pas de système de sauvegarde. Quitter le jeu met donc fin à la partie en cours.
+> Une partie dure au maximum **60 minutes**. Vous pouvez sauvegarder à tout moment pendant l'exploration avec le bouton **START** (voir [Sauvegarder et reprendre une partie](#10-sauvegarder-et-reprendre-une-partie)). Quitter le jeu sans sauvegarder fait perdre la progression depuis la dernière sauvegarde.
 >
 > Certaines mauvaises décisions peuvent également être fatales. *Infernal House* est un jeu d'exploration et d'expérimentation : observez, essayez, et ne soyez pas surpris si une idée apparemment brillante se révèle finalement assez mauvaise.
 
@@ -14,11 +14,12 @@ Pour l'installation du fichier `.cia` ou `.3dsx`, reportez-vous au [README du pr
 
 ![Ecran titre](title.png "Ecran titre")
 
-L'écran titre propose cinq choix :
+L'écran titre propose les choix suivants :
 
 - **Langue** : passe à la langue suivante. Le changement est immédiat.
+- **Continuer** : reprend la partie sauvegardée. Ce choix n'apparaît que si une sauvegarde existe.
 - **Introduction** : raconte les événements qui précèdent le jeu. Il est vivement conseillé de la regarder au moins une fois.
-- **Jouer** : commence une nouvelle partie.
+- **Nouvelle partie** : commence une nouvelle partie. **Attention : la sauvegarde existante est alors effacée.**
 - **Commandes** : affiche un rappel des commandes principales.
 - **Crédits** : affiche les crédits du jeu original et du remake.
 
@@ -84,7 +85,7 @@ Le compteur en haut de l'écran indique le temps restant. Une nouvelle partie co
 
 Le temps continue de s'écouler pendant que vous explorez, lisez les messages, examinez vos objets ou résolvez les mini-jeux.
 
-En revanche, le temps passé dans le menu HOME ou lorsque la console est en veille n'est pas décompté.
+En revanche, le temps passé dans le menu HOME, dans le menu START ou lorsque la console est en veille n'est pas décompté.
 
 Lorsque le compteur atteint zéro, la partie est terminée.
 
@@ -162,9 +163,7 @@ Tous les objets n'ont pas forcément une vue détaillée. Si **X** ne montre rie
 | **A**                    | Utiliser l'objet sélectionné sur la cible |
 | **X**                    | Examiner l'objet sélectionné              |
 | **B**                    | Fermer / annuler / revenir en arrière     |
-| **START**                | Quitter immédiatement le jeu              |
-
-> **Attention à START :** il quitte le jeu. Comme il n'y a pas de sauvegarde, la partie en cours sera perdue.
+| **START**                | Ouvrir le menu : Retour, Sauvegarder, Quitter |
 
 ## 8. Les mini-jeux
 
@@ -190,17 +189,52 @@ Certaines actions affichent une image plutôt qu'un texte. Elle se ferme de la m
 
 Pendant l'examen détaillé d'un **objet de l'inventaire**, utilisez en revanche **X** ou **B** pour revenir au jeu.
 
-## 10. Mourir et recommencer
+## 10. Sauvegarder et reprendre une partie
+
+### Le menu START
+
+Appuyez sur **START** pendant la partie pour ouvrir le menu. Il propose trois choix :
+
+- **Retour** : ferme le menu et reprend la partie ;
+- **Sauvegarder** : enregistre votre progression ;
+- **Quitter** : quitte le jeu.
+
+Choisissez une option avec **haut/bas** puis validez avec **A**, ou touchez-la directement sur l'écran tactile. **B** ou **START** referment le menu.
+
+Le chronomètre est en pause tant que le menu est ouvert.
+
+### Sauvegarder
+
+Choisissez **Sauvegarder** dans le menu START. Le message **« Sauvegardé avec succès »** confirme que tout s'est bien passé.
+
+**Sauvegarder** n'apparaît pas dans le menu pendant un mini-jeu ou une séquence animée. Terminez ou quittez d'abord le mini-jeu, puis appuyez de nouveau sur START.
+
+### Reprendre une partie
+
+Sur l'écran titre, choisissez **Continuer**. Vous retrouvez la partie exactement où vous l'aviez sauvegardée, et le message **« Partie chargée avec succès »** s'affiche.
+
+### Quitter
+
+**Quitter** ferme immédiatement le jeu, **sans sauvegarder et sans confirmation**. Pensez à sauvegarder juste avant.
+
+### Quelques conseils
+
+- Sauvegardez régulièrement, et surtout **avant de tenter une action qui vous semble risquée**.
+- Le temps restant est sauvegardé lui aussi : une partie sauvegardée avec 2 minutes restantes reprendra avec 2 minutes restantes.
+- Pour reprendre votre partie, choisissez toujours **Continuer**. **Nouvelle partie** efface la sauvegarde dès que vous la choisissez.
+
+## 11. Mourir et recommencer
 
 La maison n'est pas totalement inoffensive.
 
 Certaines actions peuvent provoquer la mort du détective. Le temps peut également arriver à zéro.
 
-Après la séquence de fin de partie, le jeu revient à l'écran titre. Choisissez **Jouer** pour recommencer une nouvelle partie : l'état de la maison, l'inventaire et le chronomètre repartent alors de zéro.
+Après la séquence de fin de partie, le jeu revient à l'écran titre. Deux possibilités :
 
-Il n'y a pas de sauvegarde, donc une nouvelle partie recommence réellement depuis le début.
+- **Continuer** reprend depuis votre dernière sauvegarde, si vous en avez une ;
+- **Nouvelle partie** recommence depuis le début : l'état de la maison, l'inventaire et le chronomètre repartent de zéro, et la sauvegarde est effacée.
 
-## 11. Quelques conseils sans révéler les énigmes
+## 12. Quelques conseils sans révéler les énigmes
 
 Si vous êtes bloqué, commencez par vérifier les choses les plus simples :
 
@@ -214,7 +248,7 @@ Si vous êtes bloqué, commencez par vérifier les choses les plus simples :
 
 Et surtout : ne supposez pas qu'un objet n'est là que pour décorer. Dans une maison comme celle-ci, c'est une hypothèse dangereuse.
 
-## 12. Solution complète
+## 13. Solution complète
 
 Si vous préférez suivre une solution, ou si une énigme vous résiste vraiment, la solution du jeu original est disponible sur le site consacré à Lankhor :
 

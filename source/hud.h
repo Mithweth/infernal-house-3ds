@@ -34,3 +34,5 @@ void hud_close(void);
 void timer_start(void);
 void timer_update(void);
 void timer_resume(void);
+u64 timer_get_elapsed_time(void);
+void timer_set_elapsed_time(u64 e);

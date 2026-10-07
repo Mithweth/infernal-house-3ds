@@ -351,6 +351,17 @@ lint:
 
 
 #---------------------------------------------------------------------------------
+# Run in an emulator
+#---------------------------------------------------------------------------------
+
+run: $(TARGET).3dsx
+	@flatpak info org.azahar_emu.Azahar &>/dev/null || { \
+		echo "Azahar flatpak install is missing"; \
+		exit 1; \
+	}
+	@flatpak run --filesystem="$(CURDIR):ro" org.azahar_emu.Azahar "$(TARGET).3dsx"
+
+#---------------------------------------------------------------------------------
 # Assets copied directly to RomFS
 #---------------------------------------------------------------------------------
 $(ROMFS)/%: $(ASSETS)/%

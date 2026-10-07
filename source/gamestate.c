@@ -25,6 +25,17 @@ static GameState *gamestate_find(const char *name) {
     return NULL;
 }
 
+size_t gamestate_get_count(void) {
+    return state_count;
+}
+
+const GameState *gamestate_get_index(size_t index) {
+    if (index >= state_count) {
+        return NULL;
+    }
+    return &states[index];
+}
+
 bool gamestate_init(const char *filename) {
     FILE *file = fopen(filename, "r");
 
@@ -119,10 +130,10 @@ void gamestate_set(const char *name) {
     if (state->type == GAMESTATE_KEEP && state->value) {
         return;
     }
-
     // TOGGLE flags invert on every set, so scripts calling SET twice on the
     // same flag end up where they started.
     state->value = !state->value;
+    printf("State: %s is %s\n", name, state->value ? "true" : "false");
 }
 
 

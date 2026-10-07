@@ -16,11 +16,13 @@
 #include "gfxmap.h"
 #include "str_utils.h"
 #include "title.h"
+#include "save.h"
 
 // Action triggered by a menu entry.
 typedef enum {
     TITLE_LANG,
     TITLE_INTRO,
+    TITLE_CONTINUE,
     TITLE_GAME,
     TITLE_CONTROLS,
     TITLE_CREDITS,
@@ -111,6 +113,7 @@ static TitleConfig title_config;
 static const TitleMenuEntry menu_entries[] = {
     { "LANG",     "LANG_NAME",      TITLE_LANG },
     { "INTRO",    "TITLE_INTRO",    TITLE_INTRO },
+    { "CONTINUE", "TITLE_CONTINUE", TITLE_CONTINUE },
     { "GAME",     "TITLE_GAME",     TITLE_GAME },
     { "CONTROLS", "TITLE_CONTROLS", TITLE_CONTROLS },
     { "CREDITS",  "TITLE_CREDITS",  TITLE_CREDITS }
@@ -319,7 +322,7 @@ static bool load_title(const char *filename) {
                     const TitleMenuEntry *entry = find_menu_entry(item);
                     if (!entry) {
                         printf("%s:%zu: ORDER invalid argument: %s\n", filename, line_number, item);
-                    } else if (choice_count < TITLE_COUNT) {
+                    } else if (choice_count < TITLE_COUNT && (entry->choice != TITLE_CONTINUE || save_exists())) {
                         choices[choice_count++] = entry;
                     }
                     item = strtok(NULL, ",");
@@ -539,7 +542,12 @@ void title_update(u32 keys, touchPosition touch) {
             game_intro();
             break;
 
+        case TITLE_CONTINUE:
+            game_load();
+            break;
+
         case TITLE_GAME:
+            save_delete();
             game_start();
             break;
 

@@ -7,6 +7,7 @@
 #pragma once
 
 #include <stdbool.h>
+#include <stddef.h>
 
 // How gamestate_set() changes a flag.
 typedef enum {
@@ -34,3 +35,6 @@ bool gamestate_get(const char *name);
 void gamestate_set(const char *name);
 // Reset every flag to false (new game). Keeps the declarations.
 void gamestate_reset(void);
+
+size_t gamestate_get_count(void);
+const GameState *gamestate_get_index(size_t index);
