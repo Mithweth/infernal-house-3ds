@@ -120,6 +120,12 @@ static bool load_inventory(const char *filename) {
                     return false;
                 }
                 item->examine_callback = callbacks_inventory_find(cb);
+                if (!item->examine_callback) {
+                    printf("%s:%zu: unknown callback: %s\n", filename, line_number, cb);
+                    fclose(f);
+                    item_count = 0;
+                    return false;
+                }
                 continue;
             }
             if (strcmp(command, "USE_CALLBACK") == 0) {
@@ -131,6 +137,12 @@ static bool load_inventory(const char *filename) {
                     return false;
                 }
                 item->use_callback = callbacks_inventory_find(cb);
+                if (!item->use_callback) {
+                    printf("%s:%zu: unknown callback: %s\n", filename, line_number, cb);
+                    fclose(f);
+                    item_count = 0;
+                    return false;
+                }
                 continue;
             }
             // DETAIL <image> <x> <y> [FULLSCREEN]

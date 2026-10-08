@@ -13,6 +13,7 @@
 #include "gfxmap.h"
 #include "game.h"
 #include "audio.h"
+#include "callbacks.h"
 #include "str_utils.h"
 
 // The currently loaded room, or NULL.
@@ -470,6 +471,16 @@ static bool load_room(const char *filename) {
                     fclose(f);
                     return false;
                 }
+            }
+
+            // Checked here rather than when the action runs, so a typo fails
+            // the room load instead of making the hotspot silently do nothing.
+            if (action.type == ROOM_ACTION_MINIGAME &&
+                !callbacks_minigame_find(action.argument)) {
+                printf("%s:%zu: unknown mini-game %s\n", filename, line_number, action.argument);
+                free(action.argument);
+                fclose(f);
+                return false;
             }
 
             if (action_block) {
