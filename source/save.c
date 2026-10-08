@@ -139,9 +139,14 @@ bool save_read(void) {
 		} else if (strcmp(command, "CALLBACK") == 0) {
 			char *name = strtok(NULL, " ");
 			char *data = strtok(NULL, "\n");
-			if (!name || !data) {
+			if (!name) {
 				fclose(file);
 				return false;
+			}
+			// An empty serialize() result is a valid state: hand "" to the
+			// callback rather than rejecting the whole save.
+			if (!data) {
+				data = "";
 			}
 			// Data of an extension that no longer exists is ignored.
 			for (size_t i = 0; i < callbacks_get_count(); i++) {
