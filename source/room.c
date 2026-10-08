@@ -73,6 +73,8 @@ static RoomAction action_add(const char *command, const char *argument) {
         action.type = ROOM_ACTION_INVENTORY_REMOVE;
     } else if (strcmp(command, "MESSAGE") == 0) {
         action.type = ROOM_ACTION_MESSAGE;
+    } else if (strcmp(command, "MESSAGE_IMAGE") == 0) {
+        action.type = ROOM_ACTION_MESSAGE_IMAGE;
     } else if (strcmp(command, "SFX") == 0) {
         action.type = ROOM_ACTION_SFX;
     } else if (strcmp(command, "WAIT_SFX") == 0) {
@@ -416,10 +418,10 @@ static bool load_room(const char *filename) {
             continue;
         }
 
-        // MESSAGE directly inside a HOTSPOT (not in ACTION/USE) is the
-        // hotspot's first-touch message; elsewhere it is a regular action.
+        // MESSAGE or MESSAGE_IMAGE directly inside a HOTSPOT (not in
+        // ACTION/USE) is the hotspot's first-touch message (MESSAGE wins
+        // when both are set); elsewhere it is a regular action.
         if (strcmp(command, "MESSAGE") == 0 && hotspot && !action_block && !use) {
-
             char *message = strtok(NULL, " ");
 
             if (!message) {
@@ -428,6 +430,23 @@ static bool load_room(const char *filename) {
                 return false;
             }
             hotspot->message_id = strdup(message);
+            continue;
+        }
+        if (strcmp(command, "MESSAGE_IMAGE") == 0 && hotspot && !action_block && !use) {
+            char *image = strtok(NULL, " ");
+
+            if (!image) {
+                printf("%s:%zu: invalid MESSAGE_IMAGE\n", filename, line_number);
+                fclose(f);
+                return false;
+            }
+
+            hotspot->message_image = gfxmap_get_image(room->assets, image);
+            if (!hotspot->message_image.tex) {
+                printf("%s:%zu: unknown image %s\n", filename, line_number, image);
+                fclose(f);
+                return false;
+            }
             continue;
         }
 
@@ -441,6 +460,16 @@ static bool load_room(const char *filename) {
                 printf("%s:%zu: invalid action\n", filename, line_number);
                 fclose(f);
                 return false;
+            }
+
+            if (action.type == ROOM_ACTION_MESSAGE_IMAGE) {
+                action.image = gfxmap_get_image(room->assets, action.argument);
+                if (!action.image.tex) {
+                    printf("%s:%zu: unknown image %s\n", filename, line_number, action.argument);
+                    free(action.argument);
+                    fclose(f);
+                    return false;
+                }
             }
 
             if (action_block) {
@@ -494,6 +523,9 @@ static bool execute_actions(RoomAction *actions, size_t count, size_t start) {
             break;
         case ROOM_ACTION_MESSAGE:
             game_show_message(action->argument);
+            break;
+        case ROOM_ACTION_MESSAGE_IMAGE:
+            game_show_image(action->image);
             break;
         case ROOM_ACTION_SFX:
             path = audio_resolve_path(room->path, action->argument, ".raw");

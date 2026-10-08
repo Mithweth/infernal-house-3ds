@@ -134,6 +134,7 @@ Syntaxe :
 HOTSPOT <id> <x> <y> <width> <height>
     [WHEN ...]
     [MESSAGE <message_id>]
+    [MESSAGE_IMAGE <image>]
     [ACTION ... END_ACTION]
     [USE ... END_USE]
 END_HOTSPOT
@@ -206,6 +207,19 @@ END_ACTION
 
 Dans ce cas, le message est affiché lorsque le bloc d'action est
 exécuté.
+
+Un `MESSAGE_IMAGE` placé directement dans un `HOTSPOT` fonctionne de la
+même manière, mais affiche une image des ressources de la pièce, centrée
+au-dessus de la pièce, au lieu d'un texte :
+
+``` text
+HOTSPOT STUDY_PAINTING 120 40 60 45
+    MESSAGE_IMAGE painting_closeup
+END_HOTSPOT
+```
+
+Si un hotspot définit à la fois `MESSAGE` et `MESSAGE_IMAGE`, `MESSAGE`
+est prioritaire et l'image n'est jamais affichée.
 
 ## 6. Blocs ACTION
 
@@ -428,6 +442,10 @@ Les actions sont valides dans les blocs `ACTION` et `USE`.
 
   `MESSAGE <message_id>`              Affiche un message localisé du jeu.
 
+  `MESSAGE_IMAGE <image>`             Affiche une image des ressources de
+                                      la pièce, centrée au-dessus de la
+                                      pièce.
+
   `SFX <name>`                        Démarre un effet sonore et poursuit
                                       immédiatement l'exécution.
 
@@ -619,7 +637,8 @@ Lorsqu'une pièce est active :
 2.  La détection des hotspots parcourt les hotspots actifs dans leur
     ordre de déclaration et sélectionne le premier rectangle
     correspondant.
-3.  L'examen d'un hotspot utilise son `MESSAGE` direct, s'il existe.
+3.  L'examen d'un hotspot utilise son `MESSAGE` direct, s'il existe,
+    sinon son `MESSAGE_IMAGE` direct, s'il existe.
 4.  Les actions normales d'un hotspot parcourent tous les blocs `ACTION`
     dans leur ordre de déclaration. Chaque bloc correspondant est
     exécuté, sauf si le flux d'actions est suspendu par `WAIT_SFX` ou

@@ -127,6 +127,7 @@ Syntax:
 HOTSPOT <id> <x> <y> <width> <height>
     [WHEN ...]
     [MESSAGE <message_id>]
+    [MESSAGE_IMAGE <image>]
     [ACTION ... END_ACTION]
     [USE ... END_USE]
 END_HOTSPOT
@@ -195,6 +196,19 @@ END_ACTION
 ```
 
 In that case the message is displayed when the action block executes.
+
+A `MESSAGE_IMAGE` directly inside a `HOTSPOT` works the same way, but
+shows an image from the room's assets, centered over the room, instead
+of a text:
+
+```text
+HOTSPOT STUDY_PAINTING 120 40 60 45
+    MESSAGE_IMAGE painting_closeup
+END_HOTSPOT
+```
+
+If a hotspot defines both `MESSAGE` and `MESSAGE_IMAGE`, `MESSAGE` takes
+precedence and the image is never shown.
 
 ## 6. ACTION blocks
 
@@ -404,6 +418,7 @@ Actions are valid inside `ACTION` and `USE` blocks.
 | `INVENTORY_ADD <item>`    | Adds an item to the inventory.                                                                            |
 | `INVENTORY_REMOVE <item>` | Removes an item from the inventory.                                                                       |
 | `MESSAGE <message_id>`    | Displays a localized game message.                                                                        |
+| `MESSAGE_IMAGE <image>`   | Displays an image from the room's assets, centered over the room.                                         |
 | `SFX <name>`              | Starts a sound effect and continues immediately.                                                          |
 | `WAIT_SFX <name>`         | Starts a sound effect and pauses execution until it finishes.                                             |
 | `ROOM <room>`             | Changes to another room. **Terminates the current action flow and must be the last action in its block.** |
@@ -579,7 +594,8 @@ When a room is active:
 1.  Images whose conditions match are drawn.
 2.  Hotspot hit testing scans active hotspots in declaration order and
     selects the first matching rectangle.
-3.  Examining a hotspot uses its direct `MESSAGE`, if any.
+3.  Examining a hotspot uses its direct `MESSAGE`, if any, otherwise
+    its direct `MESSAGE_IMAGE`, if any.
 4.  Normal hotspot actions scan all `ACTION` blocks in declaration
     order. Every matching block executes unless the action flow is
     suspended by `WAIT_SFX` or terminated by `ROOM`, `TIMELINE` or

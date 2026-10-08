@@ -1,5 +1,3 @@
 doc DEVELOPING
 doc TRANSLATION
 doc BUILD
-implement save/load
-implement MESSAGE_IMAGE action in room.c (game_show_image)
