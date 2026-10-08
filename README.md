@@ -77,6 +77,8 @@ Once inside, *Infernal House* plays as a point-and-click adventure: explore the 
 | B            | Cancel / close                  |
 | START        | Quit the game                   |
 
+For a full guide to the controls and game mechanics, see [How to play](docs/HOWTOPLAY.en.md).
+
 And one last piece of advice: **try things**. *Infernal House* was built around interaction, secrets and the pleasure of discovering that, yes, somebody actually thought about what would happen if you did that.
 
 The clock is ticking. Good luck, detective… you'll need it. 🕰️
@@ -155,6 +157,8 @@ Une fois à l'intérieur, *Infernal House* se joue comme un point-and-click : ex
 | X                    | Examiner l'objet sélectionné |
 | B                    | Annuler / fermer             |
 | START                | Quitter le jeu               |
+
+Pour un guide complet des commandes et des mécaniques de jeu, consultez [Comment jouer](docs/HOWTOPLAY.fr.md).
 
 Et un dernier conseil : **essayez des choses**. *Infernal House* a été pensé autour de l'interaction, des secrets et du plaisir de découvrir que, oui, quelqu'un avait effectivement prévu ce qui se passerait si vous faisiez ça.
 
