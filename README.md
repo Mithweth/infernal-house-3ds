@@ -83,6 +83,13 @@ And one last piece of advice: **try things**. *Infernal House* was built around 
 
 The clock is ticking. Good luck, detective… you'll need it. 🕰️
 
+### Use of AI (LLMs)
+
+In the interest of transparency: **large language models (LLMs) were used in this project**, specifically to:
+
+- **generate the images** used in the game;
+- **perform code reviews** of the engine and extensions.
+
 ------------------------------------------------------------------------
 
 ## Français
@@ -163,3 +170,10 @@ Pour un guide complet des commandes et des mécaniques de jeu, consultez [Commen
 Et un dernier conseil : **essayez des choses**. *Infernal House* a été pensé autour de l'interaction, des secrets et du plaisir de découvrir que, oui, quelqu'un avait effectivement prévu ce qui se passerait si vous faisiez ça.
 
 Le temps presse. Bonne chance, détective… vous allez en avoir besoin. 🕰️
+
+### Utilisation de l'IA (LLM)
+
+Par souci de transparence : **des grands modèles de langage (LLM) ont été utilisés dans ce projet**, plus précisément pour :
+
+- **générer les images** utilisées dans le jeu ;
+- **réaliser les revues de code** du moteur et des extensions.
