@@ -43,9 +43,10 @@ typedef enum {
 } GameMode;
 
 // Per-frame update, called by main. keys are the keys pressed this frame
-// (hidKeysDown); dispatches on the current GameMode. START opens a quit
-// confirmation box that takes all the input until it is closed. Returns false
-// when the player confirmed quitting: main must then leave its loop.
+// (hidKeysDown); dispatches on the current GameMode. START opens the start
+// menu (Back, Save, Quit), which takes all the input until it is closed; Save
+// is only offered in GAME_NORMAL, and START dismisses a pending message first.
+// Returns false when the player chose Quit: main must then leave its loop.
 bool game_update(u32 keys, circlePosition analog, touchPosition touch);
 
 // Per-frame drawing on both screens, called by main between
@@ -75,15 +76,28 @@ bool game_title_start(void);
 // screen if the intro cannot be loaded.
 void game_intro(void);
 
+// Leaves the title screen and continues the saved game: resets the game like
+// game_start, then restores the save (see save_read). If the save cannot be
+// read, starts a new game instead. Either way, shows a message telling the
+// player whether loading succeeded.
+void game_load(void);
+
 // Leaves the title screen and starts a new game: resets the extensions (new
-// secret code), inventory, game states and timer, starts the music and enters
-// the hall.
+// secret code), inventory, game states and timer, starts the music, gives the
+// starting ITEMs and enters the ROOM set in romfs:/game/game.
 void game_start(void);
+
+// Name of the current room, as last passed to game_set_room (empty before the
+// first room). Used by save_write. Points to a static buffer overwritten by
+// the next game_set_room.
+const char *game_get_room(void);
 
 // Leaves the current room and loads romfs:/rooms/<name>. Clears the target,
 // any pending message and switches to GAME_NORMAL. name may point into the
 // current room's data: it is copied before the room is freed.
-void game_set_room(const char *name);
+// Returns false if the room cannot be loaded: the screen is then left empty
+// and game_get_room keeps naming the previous room.
+bool game_set_room(const char *name);
 
 // Id of the hotspot currently targeted (shown in the HUD), or NULL.
 // Revalidates the target first, since an action may have hidden it.

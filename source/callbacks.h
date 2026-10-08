@@ -7,6 +7,15 @@
 
 #include "game.h"
 
+typedef struct {
+    const char *name;
+    void (*init)(void);     // once per session (allocations)
+    void (*reset)(void);    // at the start of every game (game state)
+    void (*callback)(void);
+    char* (*serialize)(void);
+    void (*deserialize)(const char*);
+} InventoryCallback;
+
 // Runs the init function of every inventory callback that has one (one-time
 // allocations). Called once by game_init.
 void callbacks_init(void);
@@ -22,3 +31,6 @@ void (*callbacks_inventory_find(const char *name))(void);
 // Returns the mini-game registered under name, or NULL (and logs it) if there
 // is none. The returned pointer refers to a static object: do not free it.
 MiniGame *callbacks_minigame_find(const char *name);
+
+size_t callbacks_get_count(void);
+const InventoryCallback *callbacks_get_index(size_t index);

@@ -18,22 +18,32 @@
 #include "timeline.h"
 #include "callbacks.h"
 #include "str_utils.h"
+#include "save.h"
 
 #define GAME_CALLBACK_MAX     8
 #define GAME_CONFIG_MAX_ITEMS 16
-#define QUIT_BOX_WIDTH      260.0f
-#define QUIT_BOX_HEIGHT     110.0f
-#define QUIT_TITLE_OFFSET    25.0f  // from the top of the box
-#define QUIT_BUTTON_OFFSET   65.0f  // from the top of the box
-#define QUIT_BUTTON_SPACING  40.0f  // from the center to each button
-#define QUIT_BUTTON_PADDING   5.0f
-#define QUIT_TEXT_SCALE       0.6f
+#define START_BOX_WIDTH      260.0f
+#define START_BOX_HEIGHT     110.0f
+#define START_BUTTON_SPACING  30.0f
+#define START_BUTTON_PADDING   5.0f
 
 typedef struct {
-    char *open;
-    char *music;
-    char *items[GAME_CONFIG_MAX_ITEMS];
-    size_t item_count;
+	u32 shadow;
+	u32 outer_border;
+	u32 outer_background;
+	u32 inner_border;
+	u32 inner_background;
+} FrameStyle;
+
+typedef struct {
+	char *room;
+	char *music;
+	char *items[GAME_CONFIG_MAX_ITEMS];
+	size_t item_count;
+	FrameStyle frame;
+	u32 text_color;
+	float text_size;
+	u32 button_color;
 } GameConfig;
 
 static GameConfig game_config;
@@ -56,129 +66,240 @@ static C2D_Text text;
 static void (*game_busy_callback)(void) = NULL;
 static MiniGame *active_minigame = NULL;
 static int game_busy_sfx_channel = -1;
-static bool quit_confirm;
-static bool quit_selected;
+static bool start_menu;
+static size_t start_selected;
+static char current_room_name[64];
 
+
+// Parses value as "R G B A" into color. Returns false if value is NULL or
+// one of the four components is missing.
+static bool parse_color(char *value, u32 *color) {
+	if (!value) {
+		return false;
+	}
+	char *r = strtok(value, " ");
+	char *g = strtok(NULL, " ");
+	char *b = strtok(NULL, " ");
+	char *a = strtok(NULL, " ");
+	if (!r || !g || !b || !a) {
+		return false;
+	}
+	*color = C2D_Color32(atoi(r), atoi(g), atoi(b), atoi(a));
+	return true;
+}
 
 static bool game_config_load(const char *filename) {
-    FILE *file = fopen(filename, "r");
-    char line[512];
+	FILE *file = fopen(filename, "r");
+	char line[512];
 
-    if (!file) {
-        return false;
-    }
+	if (!file) {
+		printf("Cannot open %s\n", filename);
+		return false;
+	}
 
-    while (fgets(line, sizeof(line), file)) {
-        char *key = str_trim(line);
+	bool frame_colors = false;
+	bool has_frame_colors_block = false;
+	size_t line_number = 0;
 
-        if (!*key || *key == '#' || *key == ';' || *key == '[') {
-            continue;
-        }
+	game_config.text_color = C2D_Color32(255, 255, 255, 255);
+	game_config.button_color = C2D_Color32(105, 82, 40, 255);
+	game_config.text_size = 0.6f;
 
-        char *value = strchr(key, '=');
-        if (!value) {
-            continue;
-        }
+	while (fgets(line, sizeof(line), file)) {
+		line_number++;
+		char *p = str_trim(line);
 
-        *value++ = '\0';
-        key = str_trim(key);
-        value = str_trim(value);
+		if (*p == '\0' || *p == '#') {
+			continue;
+		}
 
-        if (strcmp(key, "open") == 0) {
-            if (game_config.open) {
-                printf("Duplicate key: open\n");
-                fclose(file);
-                return false;
-            }
-            game_config.open = strdup(value);
-        } else if (strcmp(key, "music") == 0) {
-            if (game_config.music) {
-                printf("Duplicate key: music\n");
-                fclose(file);
-                return false;
-            }
-            game_config.music = strdup(value);
-        } else if (strcmp(key, "items") == 0) {
-            if (game_config.item_count) {
-                printf("Duplicate key: items\n");
-                fclose(file);
-                return false;
-            }
-            char *item = strtok(value, ",");
-            while (item && game_config.item_count < GAME_CONFIG_MAX_ITEMS) {
-                item = str_trim(item);
-                if (*item) {
-                    game_config.items[game_config.item_count++] = strdup(item);
-                }
-                item = strtok(NULL, ",");
-            }
-        }
-    }
-    fclose(file);
-    if (!game_config.open) {
-        printf("Missing open in game configuration\n");
-        return false;
-    }
-    return true;
+		char *command = strtok(p, " ");
+
+		if (!command) {
+			continue;
+		}
+		if (frame_colors) {
+			bool valid;
+			if (strcmp(command, "END_FRAME_COLORS") == 0) {
+				frame_colors = false;
+				continue;
+			} else if (strcmp(command, "SHADOW") == 0) {
+				valid = parse_color(strtok(NULL, "\n"), &game_config.frame.shadow);
+			} else if (strcmp(command, "OUTER_BORDER") == 0) {
+				valid = parse_color(strtok(NULL, "\n"), &game_config.frame.outer_border);
+			} else if (strcmp(command, "OUTER_BACKGROUND") == 0) {
+				valid = parse_color(strtok(NULL, "\n"), &game_config.frame.outer_background);
+			} else if (strcmp(command, "INNER_BORDER") == 0) {
+				valid = parse_color(strtok(NULL, "\n"), &game_config.frame.inner_border);
+			} else if (strcmp(command, "INNER_BACKGROUND") == 0) {
+				valid = parse_color(strtok(NULL, "\n"), &game_config.frame.inner_background);
+			} else {
+				printf("%s:%zu: unknown command: %s\n", filename, line_number, command);
+				fclose(file);
+				return false;
+			}
+			if (!valid) {
+				printf("%s:%zu: invalid %s\n", filename, line_number, command);
+				fclose(file);
+				return false;
+			}
+			continue;
+		}
+
+		if (strcmp(command, "ROOM") == 0) {
+			char *value = strtok(NULL, " ");
+			if (!value) {
+				printf( "%s:%zu: invalid %s\n", filename, line_number, command);
+				fclose(file);
+				return false;
+			}
+			if (game_config.room) {
+				printf("%s:%zu: duplicate %s\n", filename, line_number, command);
+				fclose(file);
+				return false;
+			}
+			game_config.room = strdup(value);
+			continue;
+		} else if (strcmp(command, "TEXT_COLOR") == 0) {
+			if (!parse_color(strtok(NULL, "\n"), &game_config.text_color)) {
+				printf("%s:%zu: invalid %s\n", filename, line_number, command);
+				fclose(file);
+				return false;
+			}
+			continue;
+		} else if (strcmp(command, "TEXT_SIZE") == 0) {
+			char *s = strtok(NULL, " ");
+			if (!s) {
+				printf( "%s:%zu: invalid %s\n", filename, line_number, command);
+				fclose(file);
+				return false;
+			}
+			game_config.text_size = atof(s);
+			continue;
+		} else if (strcmp(command, "BUTTON_COLOR") == 0) {
+			if (!parse_color(strtok(NULL, "\n"), &game_config.button_color)) {
+				printf("%s:%zu: invalid %s\n", filename, line_number, command);
+				fclose(file);
+				return false;
+			}
+			continue;
+		} else if (strcmp(command, "MUSIC") == 0) {
+			char *value = strtok(NULL, " ");
+			if (!value) {
+				printf( "%s:%zu: invalid %s\n", filename, line_number, command);
+				fclose(file);
+				return false;
+			}
+			if (game_config.music) {
+				printf("%s:%zu: duplicate %s\n", filename, line_number, command);
+				fclose(file);
+				return false;
+			}
+			game_config.music = strdup(value);
+			continue;
+		} else if (strcmp(command, "ITEM") == 0) {
+			char *value = strtok(NULL, " ");
+			if (!value) {
+				printf("%s:%zu: invalid %s\n", filename, line_number, command);
+				fclose(file);
+				return false;
+			}
+			if (game_config.item_count >= GAME_CONFIG_MAX_ITEMS) {
+				printf("%s:%zu: too many ITEM (max %d)\n", filename, line_number, GAME_CONFIG_MAX_ITEMS);
+				fclose(file);
+				return false;
+			}
+			game_config.items[game_config.item_count++] = strdup(value);
+			continue;
+		} else if (strcmp(command, "FRAME_COLORS") == 0) {
+			frame_colors = true;
+			has_frame_colors_block = true;
+			continue;
+		}
+		printf("%s:%zu: unknown command: %s\n", filename, line_number, command);
+		fclose(file);
+		return false;
+	}
+	fclose(file);
+	if (frame_colors) {
+		printf("%s: missing END_FRAME_COLORS\n", filename);
+		return false;
+	}
+	if (!has_frame_colors_block) {
+		printf("%s: missing FRAME_COLORS block\n", filename);
+		return false;
+	}
+	if (!game_config.room) {
+		printf("%s: Missing ROOM\n", filename);
+		return false;
+	}
+	return true;
 }
 
 void game_minigame_start(const char *name) {
-    active_minigame = callbacks_minigame_find(name);
-    if (!active_minigame) {
-        printf("Unknown mini-game: %s\n", name);
-        return;
-    }
-    music_stop();
-    if (active_minigame->init) {
-        if (!active_minigame->init()) {
-            printf("Fail loading mini-game\n");
-            game_minigame_stop();
-            return;
-        }
-    }
-    game_mode = GAME_MINIGAME;
+	active_minigame = callbacks_minigame_find(name);
+	if (!active_minigame) {
+		printf("Unknown mini-game: %s\n", name);
+		return;
+	}
+	music_stop();
+	if (active_minigame->init) {
+		if (!active_minigame->init()) {
+			printf("Fail loading mini-game\n");
+			game_minigame_stop();
+			return;
+		}
+	}
+	game_mode = GAME_MINIGAME;
 }
 
 void game_minigame_stop(void) {
-    if (active_minigame && active_minigame->close) {
-        active_minigame->close();
-    }
-    if (game_config.music) {
-        music_play(game_config.music);
-    }
-    active_minigame = NULL;
-    game_mode = GAME_NORMAL;
+	if (active_minigame && active_minigame->close) {
+		active_minigame->close();
+	}
+	if (game_config.music) {
+		music_play(game_config.music);
+	}
+	active_minigame = NULL;
+	game_mode = GAME_NORMAL;
 }
 
-void game_set_room(const char *name) {
-    // name usually comes from a ROOM action owned by the current room, which
-    // room_close is about to free: copy it first.
-    char room_name[64];
-    snprintf(room_name, sizeof(room_name), "%s", name);
-    room_close();
-    active_hotspot = NULL;
-    target = NULL;
-    game_mode = GAME_NORMAL;
-    message_text = NULL;
-    if (!room_init(room_name)) {
-        printf("Cannot enter room: %s\n", room_name);
-    }
+const char *game_get_room(void) {
+	return current_room_name;
+}
+
+bool game_set_room(const char *name) {
+	// name usually comes from a ROOM action owned by the current room, which
+	// room_close is about to free: copy it first.
+	char room_name[64];
+	snprintf(room_name, sizeof(room_name), "%s", name);
+	room_close();
+	active_hotspot = NULL;
+	target = NULL;
+	game_mode = GAME_NORMAL;
+	message_text = NULL;
+	if (!room_init(room_name)) {
+		printf("Cannot enter room: %s\n", room_name);
+		return false;
+	}
+	snprintf(current_room_name, sizeof(current_room_name), "%s", room_name);
+	return true;
 }
 
 void game_close(void) {
-    room_close();
-    if (text_buf) {
-        C2D_TextBufDelete(text_buf);
-        text_buf = NULL;
-    }
-    free(game_config.open);
-    free(game_config.music);
-    for (size_t i = 0; i < game_config.item_count; i++) {
-        free(game_config.items[i]);
-    }
-    memset(&game_config, 0, sizeof(game_config));
-    hud_close();
-    inventory_close();
+	room_close();
+	if (text_buf) {
+		C2D_TextBufDelete(text_buf);
+		text_buf = NULL;
+	}
+	free(game_config.room);
+	free(game_config.music);
+	for (size_t i = 0; i < game_config.item_count; i++) {
+		free(game_config.items[i]);
+	}
+	memset(&game_config, 0, sizeof(game_config));
+	hud_close();
+	inventory_close();
 }
 
 // An action may have hidden the target since it was selected (its WHEN
@@ -186,174 +307,186 @@ void game_close(void) {
 // id, e.g. an open door replacing a closed one, or to no target at all.
 // Called lazily wherever target is read, so every path is covered.
 static void refresh_target(void) {
-    if (target && !room_hotspot_is_available(target)) {
-        target = room_find_hotspot_by_id(target->id);
-    }
+	if (target && !room_hotspot_is_available(target)) {
+		target = room_find_hotspot_by_id(target->id);
+	}
 }
 
 const char *game_target_name(void) {
-    refresh_target();
-    if (!target) {
-        return NULL;
-    }
-    return target->id;
+	refresh_target();
+	if (!target) {
+		return NULL;
+	}
+	return target->id;
 }
 
 bool game_title_start(void) {
-    if (active_minigame && active_minigame->close) {
-        active_minigame->close();
-    }
-    active_minigame = NULL;
-    room_close();
-    active_hotspot = NULL;
-    target = NULL;
-    message_text = NULL;
-    game_busy_callback = NULL;
-    title_close();
-    timeline_close();
-    music_stop();
-    game_mode = GAME_TITLE;
-    if (!title_init()) {
-        printf("Cannot initialize title screen\n");
-        return false;
-    }
-    return true;
+	if (active_minigame && active_minigame->close) {
+		active_minigame->close();
+	}
+	active_minigame = NULL;
+	room_close();
+	active_hotspot = NULL;
+	target = NULL;
+	message_text = NULL;
+	game_busy_callback = NULL;
+	title_close();
+	timeline_close();
+	music_stop();
+	game_mode = GAME_TITLE;
+	if (!title_init()) {
+		printf("Cannot initialize title screen\n");
+		return false;
+	}
+	return true;
 }
 
 bool game_timeline_start(const char *name) {
-    char path[256];
-    snprintf(path, sizeof(path), "romfs:/timelines/%s", name);
-    if (timeline_init(path)) {
-        game_mode = GAME_TIMELINE;
-        return true;
-    }
-    game_title_start();
-    return false;
+	char path[256];
+	snprintf(path, sizeof(path), "romfs:/timelines/%s", name);
+	if (timeline_init(path)) {
+		game_mode = GAME_TIMELINE;
+		return true;
+	}
+	game_title_start();
+	return false;
 }
 
 bool game_init(void) {
-    callbacks_init();
-    if (!game_config_load("romfs:/game/autorun.inf")) {
-        printf("Cannot load game configuration\n");
-        return false;
-    }
-    if (!inventory_init()) {
-        printf("Cannot initialize inventory\n");
-        return false;
-    }
-    if (!hud_init()) {
-        printf("Cannot initialize HUD\n");
-        return false;
-    }
-    // Created here rather than in game_start: the quit confirmation also
-    // draws its text on the title screen, before any game has started.
-    text_buf = C2D_TextBufNew(4096);
-    if (!text_buf) {
-        printf("Cannot create game text buffer\n");
-        return false;
-    }
-    return game_title_start();
+	callbacks_init();
+	if (!game_config_load("romfs:/game/game")) {
+		printf("Cannot load game configuration\n");
+		return false;
+	}
+	if (!inventory_init()) {
+		printf("Cannot initialize inventory\n");
+		return false;
+	}
+	if (!hud_init()) {
+		printf("Cannot initialize HUD\n");
+		return false;
+	}
+	// Created here rather than in game_start: the quit confirmation also
+	// draws its text on the title screen, before any game has started.
+	text_buf = C2D_TextBufNew(4096);
+	if (!text_buf) {
+		printf("Cannot create game text buffer\n");
+		return false;
+	}
+	return game_title_start();
+}
+
+static void game_reset(void) {
+	title_close();
+	callbacks_reset();
+	inventory_reset();
+	gamestate_reset();
+	hud_reset();
+	game_mode = GAME_NORMAL;
+	message_text = NULL;
+	active_hotspot = NULL;
+	if (game_config.music) {
+		music_play(game_config.music);
+	}
+}
+
+void game_load(void) {
+	game_reset();
+	if (!save_read()) {
+		game_start();
+		game_show_message("SAVE_LOADING_ERROR");
+	} else {
+		game_show_message("SAVE_LOADING_SUCCESS");
+	}
 }
 
 void game_start(void) {
-    title_close();
-    callbacks_reset();
-    inventory_reset();
-    gamestate_reset();
-    hud_reset();
-    game_mode = GAME_NORMAL;
-    message_text = NULL;
-    active_hotspot = NULL;
-    if (game_config.music) {
-        music_play(game_config.music);
-    }
-
-    for (size_t i = 0; i < game_config.item_count; i++) {
-        inventory_add(game_config.items[i]);
-    }
-
-    game_set_room(game_config.open);
+	game_reset();
+	for (size_t i = 0; i < game_config.item_count; i++) {
+		inventory_add(game_config.items[i]);
+	}
+	game_set_room(game_config.room);
 }
 
 bool game_wait_for_sfx(const char *sfx, void (*callback)(void)) {
-    game_busy_sfx_channel = sfx_play(sfx);
-    if (game_busy_sfx_channel < 0) {
-        return false;
-    }
-    game_busy_callback = callback;
-    game_mode = GAME_BUSY;
-    return true;
+	game_busy_sfx_channel = sfx_play(sfx);
+	if (game_busy_sfx_channel < 0) {
+		return false;
+	}
+	game_busy_callback = callback;
+	game_mode = GAME_BUSY;
+	return true;
 }
 
 void game_intro(void) {
-    title_close();
-    if (!timeline_init("romfs:/timelines/intro")) {
-        game_title_start();
-        return;
-    }
-    game_mode = GAME_TIMELINE;
+	title_close();
+	if (!timeline_init("romfs:/timelines/intro")) {
+		game_title_start();
+		return;
+	}
+	game_mode = GAME_TIMELINE;
 }
 
 // Turns the circle pad position into one of eight directions. A direction is
 // a cardinal one when one axis is more than twice the other, otherwise a
 // diagonal. Only one move is made per push of the stick.
 static void update_movement(circlePosition analog) {
-    const int DEADZONE = 60;
+	const int DEADZONE = 60;
 
-    int x = analog.dx;
-    int y = analog.dy;
+	int x = analog.dx;
+	int y = analog.dy;
 
-    if (abs(x) < DEADZONE && abs(y) < DEADZONE) {
-        circle_ready = true;
-        return;
-    }
+	if (abs(x) < DEADZONE && abs(y) < DEADZONE) {
+		circle_ready = true;
+		return;
+	}
 
-    if (!circle_ready) {
-        return;
-    }
+	if (!circle_ready) {
+		return;
+	}
 
-    int ax = abs(x);
-    int ay = abs(y);
+	int ax = abs(x);
+	int ay = abs(y);
 
-    if (ay > ax * 2) {
-        if (y > 0) {
-            circle_ready = false;
-            room_move_north();
-            return;
-        } else if (y < 0) {
-            circle_ready = false;
-            room_move_south();
-            return;
-        }
-    } else if (ax > ay * 2) {
-        if (x > 0) {
-            circle_ready = false;
-            room_move_east();
-            return;
-        } else if (x < 0) {
-            circle_ready = false;
-            room_move_west();
-            return;
-        }
-    } else {
-        if (x > 0 && y > 0) {
-            circle_ready = false;
-            room_move_northeast();
-            return;
-        } else if (x < 0 && y > 0) {
-            circle_ready = false;
-            room_move_northwest();
-            return;
-        } else if (x > 0 && y < 0) {
-            circle_ready = false;
-            room_move_southeast();
-            return;
-        } else if (x < 0 && y < 0) {
-            circle_ready = false;
-            room_move_southwest();
-            return;
-        }
-    }
+	if (ay > ax * 2) {
+		if (y > 0) {
+			circle_ready = false;
+			room_move_north();
+			return;
+		} else if (y < 0) {
+			circle_ready = false;
+			room_move_south();
+			return;
+		}
+	} else if (ax > ay * 2) {
+		if (x > 0) {
+			circle_ready = false;
+			room_move_east();
+			return;
+		} else if (x < 0) {
+			circle_ready = false;
+			room_move_west();
+			return;
+		}
+	} else {
+		if (x > 0 && y > 0) {
+			circle_ready = false;
+			room_move_northeast();
+			return;
+		} else if (x < 0 && y > 0) {
+			circle_ready = false;
+			room_move_northwest();
+			return;
+		} else if (x > 0 && y < 0) {
+			circle_ready = false;
+			room_move_southeast();
+			return;
+		} else if (x < 0 && y < 0) {
+			circle_ready = false;
+			room_move_southwest();
+			return;
+		}
+	}
 }
 
 // Handles a tap on the room. The first tap on a hotspot selects it as target
@@ -361,248 +494,295 @@ static void update_movement(circlePosition analog) {
 // again runs its ACTION blocks. Hotspots without a MESSAGE run their actions
 // on the first tap.
 static void update_touch(touchPosition touch) {
-    if (active_hotspot && !room_hotspot_is_available(active_hotspot)) {
-        active_hotspot = NULL;
-    }
+	if (active_hotspot && !room_hotspot_is_available(active_hotspot)) {
+		active_hotspot = NULL;
+	}
 
-    Hotspot *hotspot = room_find_hotspot(touch.px, touch.py);
-    if (!hotspot) {
-        return;
-    }
+	Hotspot *hotspot = room_find_hotspot(touch.px, touch.py);
+	if (!hotspot) {
+		return;
+	}
 
-    if (hotspot != active_hotspot) {
-        active_hotspot = hotspot;
-        target = hotspot;
+	if (hotspot != active_hotspot) {
+		active_hotspot = hotspot;
+		target = hotspot;
 
-        if (hotspot->message_id) {
-            game_show_message(hotspot->message_id);
-            return;
-        }
-    }
+		if (hotspot->message_id) {
+			game_show_message(hotspot->message_id);
+			return;
+		}
+	}
 
-    room_execute_hotspot_action(hotspot);
+	room_execute_hotspot_action(hotspot);
 }
 
 
 // Draws the golden-framed dark box used by the message box and the quit
 // confirmation, with a drop shadow. Uses depths z - 0.01 to z + 0.03.
 static void draw_framed_box(float x, float y, float w, float h, float z) {
-    C2D_DrawRectSolid(x + 3.0f, y + 3.0f, z - 0.01f, w, h, C2D_Color32(0, 0, 0, 150));
-    C2D_DrawRectSolid(x, y, z, w, h, C2D_Color32(150, 120, 55, 255));
-    C2D_DrawRectSolid(x + 2.0f, y + 2.0f, z + 0.01f, w - 4.0f, h - 4.0f, C2D_Color32(18, 24, 34, 235));
-    C2D_DrawRectSolid(x + 5.0f, y + 5.0f, z + 0.02f, w - 10.0f, h - 10.0f, C2D_Color32(105, 82, 40, 255));
-    C2D_DrawRectSolid(x + 6.0f, y + 6.0f, z + 0.03f, w - 12.0f, h - 12.0f, C2D_Color32(22, 28, 40, 245));
+	C2D_DrawRectSolid(x + 3.0f, y + 3.0f, z - 0.01f, w, h, game_config.frame.shadow);
+	C2D_DrawRectSolid(x, y, z, w, h, game_config.frame.outer_border);
+	C2D_DrawRectSolid(x + 2.0f, y + 2.0f, z + 0.01f, w - 4.0f, h - 4.0f, game_config.frame.outer_background);
+	C2D_DrawRectSolid(x + 5.0f, y + 5.0f, z + 0.02f, w - 10.0f, h - 10.0f, game_config.frame.inner_border);
+	C2D_DrawRectSolid(x + 6.0f, y + 6.0f, z + 0.03f, w - 12.0f, h - 12.0f, game_config.frame.inner_background);
 }
 
 // Draws the room on the bottom screen, plus the examine image or the message
 // box when in GAME_MESSAGE. The text is parsed again on every frame.
 static void game_draw_room(void) {
-    room_draw();
-    if (game_mode == GAME_MESSAGE) {
-        if (examine_image.tex) {
-            float x = (320 - examine_image.subtex->width) / 2;
-            float y = (240 - examine_image.subtex->height) / 2;
-            C2D_DrawRectSolid(0.0f, 0.0f, 0.8f, 320, 240, C2D_Color32(0, 0, 0, 180));
-            C2D_DrawImageAt(examine_image, x, y, 0.9f, NULL, 1.0f, 1.0f);
-        } else {
-            C2D_TextBufClear(text_buf);
-            C2D_TextParse(&text, text_buf, message_text);
-            C2D_TextOptimize(&text);
-            float width, height;
-            C2D_TextGetDimensions(&text, 0.5f, 0.5f, &width, &height);
-            float box_height = height + 20.0f;
-            float box_y = 240.0f - box_height - 10.0f;
-            draw_framed_box(10.0f, box_y, 300.0f, box_height, 0.80f);
-            C2D_DrawText(&text, C2D_WithColor, 22.0f, box_y + 10.0f, 0.9f, 0.5f, 0.5f, C2D_Color32(255, 255, 255, 255));
-        }
-    }
+	room_draw();
+	if (game_mode == GAME_MESSAGE) {
+		if (examine_image.tex) {
+			float x = (320 - examine_image.subtex->width) / 2;
+			float y = (240 - examine_image.subtex->height) / 2;
+			C2D_DrawRectSolid(0.0f, 0.0f, 0.8f, 320, 240, C2D_Color32(0, 0, 0, 180));
+			C2D_DrawImageAt(examine_image, x, y, 0.9f, NULL, 1.0f, 1.0f);
+		} else {
+			C2D_TextBufClear(text_buf);
+			C2D_TextParse(&text, text_buf, message_text);
+			C2D_TextOptimize(&text);
+			float width, height;
+			C2D_TextGetDimensions(&text, 0.5f, 0.5f, &width, &height);
+			float box_height = height + 20.0f;
+			float box_y = 240.0f - box_height - 10.0f;
+			draw_framed_box(10.0f, box_y, 300.0f, box_height, 0.80f);
+			C2D_DrawText(&text, C2D_WithColor, 22.0f, box_y + 10.0f, 0.9f, 0.5f, 0.5f, game_config.text_color);
+		}
+	}
 }
 
 // Draws a centered label at (x, y), highlighted when selected. Appends to
 // text_buf without clearing it: the caller clears it first.
 static void draw_button(const char *label_id, float x, float y, bool selected) {
-    float width, height;
-    C2D_TextParse(&text, text_buf, lang_get(label_id));
-    C2D_TextOptimize(&text);
-    C2D_TextGetDimensions(&text, QUIT_TEXT_SCALE, QUIT_TEXT_SCALE, &width, &height);
-    if (selected) {
-        C2D_DrawRectSolid(x - width / 2.0f - QUIT_BUTTON_PADDING, y - QUIT_BUTTON_PADDING, 0.95f, width + 2.0f * QUIT_BUTTON_PADDING, height + 2.0f * QUIT_BUTTON_PADDING, C2D_Color32(105, 82, 40, 255));
-    }
-    C2D_DrawText(&text, C2D_WithColor | C2D_AlignCenter, x, y, 0.96f, QUIT_TEXT_SCALE, QUIT_TEXT_SCALE, C2D_Color32(255, 255, 255, 255));
+	float width, height;
+	C2D_TextParse(&text, text_buf, lang_get(label_id));
+	C2D_TextOptimize(&text);
+	C2D_TextGetDimensions(&text, game_config.text_size, game_config.text_size, &width, &height);
+	if (selected) {
+		C2D_DrawRectSolid(x - width / 2.0f - START_BUTTON_PADDING, y - height / 2.0f - START_BUTTON_PADDING, 0.95f, width + 2.0f * START_BUTTON_PADDING, height + 2.0f * START_BUTTON_PADDING, game_config.button_color);
+	}
+	C2D_DrawText(&text, C2D_WithColor | C2D_AlignCenter, x, y - height / 2.0f, 0.96f, game_config.text_size, game_config.text_size, game_config.text_color);
 }
 
 // Draws the quit confirmation centered on the bottom screen: a dimmed
 // background, the question, and the No (left) / Yes (right) buttons.
-static void quit_confirm_draw(void) {
-    float box_x = (320.0f - QUIT_BOX_WIDTH) / 2.0f;
-    float box_y = (240.0f - QUIT_BOX_HEIGHT) / 2.0f;
-    float center_x = box_x + QUIT_BOX_WIDTH / 2.0f;
-    float button_y = box_y + QUIT_BUTTON_OFFSET;
+static void start_menu_draw(void) {
+	float box_x = (320.0f - START_BOX_WIDTH) / 2.0f;
+	float box_y = (240.0f - START_BOX_HEIGHT) / 2.0f;
+	C2D_DrawRectSolid(0.0f, 0.0f, 0.85f, 320.0f, 240.0f, C2D_Color32(0, 0, 0, 128));
+	draw_framed_box(box_x, box_y, START_BOX_WIDTH, START_BOX_HEIGHT, 0.90f);
+	C2D_TextBufClear(text_buf);
+	float center_y = box_y + START_BOX_HEIGHT / 2.0f;
 
-    C2D_DrawRectSolid(0.0f, 0.0f, 0.85f, 320.0f, 240.0f, C2D_Color32(0, 0, 0, 128));
-    draw_framed_box(box_x, box_y, QUIT_BOX_WIDTH, QUIT_BOX_HEIGHT, 0.90f);
-
-    C2D_TextBufClear(text_buf);
-    C2D_TextParse(&text, text_buf, lang_get("GAME_QUIT_CONFIRM"));
-    C2D_TextOptimize(&text);
-    C2D_DrawText(&text, C2D_WithColor | C2D_AlignCenter, center_x, box_y + QUIT_TITLE_OFFSET, 0.96f, QUIT_TEXT_SCALE, QUIT_TEXT_SCALE, C2D_Color32(255, 255, 255, 255));
-    draw_button("GAME_QUIT_NO", center_x - QUIT_BUTTON_SPACING, button_y, !quit_selected);
-    draw_button("GAME_QUIT_YES", center_x + QUIT_BUTTON_SPACING, button_y, quit_selected);
+	draw_button("GAME_OPTION_BACK", 160.0f, center_y - START_BUTTON_SPACING, (start_selected == 0));
+	if (game_mode == GAME_NORMAL) {
+		draw_button("GAME_OPTION_SAVE", 160.0f, center_y, (start_selected == 1));
+	}
+	draw_button("GAME_OPTION_QUIT", 160.0f, center_y + START_BUTTON_SPACING, (start_selected == 2));
 }
 
+
 bool game_use_item(const char *id) {
-    refresh_target();
-    if (!target) {
-        return false;
-    }
-    
-    printf("Use item: %s\n", id);
+	refresh_target();
+	if (!target) {
+		return false;
+	}
+	
+	printf("Use item: %s\n", id);
 
-    if (room_execute_hotspot_use(target, id)) {
-        return true;
-    }
+	if (room_execute_hotspot_use(target, id)) {
+		return true;
+	}
 
-    game_show_message("GAME_CANNOT_USE_MESSAGE");
-    return false;
+	game_show_message("GAME_CANNOT_USE_MESSAGE");
+	return false;
 }
 
 void game_show_message(const char *message_id) {
-    message_text = lang_get(message_id);
-    printf("Print: %s\n", message_id);
-    game_mode = GAME_MESSAGE;
+	message_text = lang_get(message_id);
+	printf("Print: %s\n", message_id);
+	game_mode = GAME_MESSAGE;
 }
 
 void game_show_image(C2D_Image image) {
-    examine_image = image;
-    game_mode = GAME_MESSAGE;
+	examine_image = image;
+	game_mode = GAME_MESSAGE;
 }
 
 bool game_update(u32 keys, circlePosition analog, touchPosition touch) {
-    if (quit_confirm) {
-        if (keys & KEY_LEFT) {
-            quit_selected = false;
-        }
-        if (keys & KEY_RIGHT) {
-            quit_selected = true;
-        }
-        if (keys & (KEY_B | KEY_START)) {
-            quit_confirm = false;
-            timer_resume();
-            return true;
-        }
-        if (keys & KEY_A) {
-            if (quit_selected) {
-                return false;
-            }
-            quit_confirm = false;
-            timer_resume();
-        }
+	if (start_menu) {
+		bool activate = (keys & KEY_A);
 
-        return true;
-    }
+		if (keys & KEY_UP) {
+			if (start_selected > 0) {
+				start_selected--;
+			}
+			if (game_mode != GAME_NORMAL && start_selected == 1) {
+				start_selected--;
+			}
+		}
 
-    if (keys & KEY_START) {
-        quit_confirm = true;
-        quit_selected = false;
-        return true;
-    }
+		if (keys & KEY_DOWN) {
+			if (start_selected < 2) {
+				start_selected++;
+			}
+			if (game_mode != GAME_NORMAL && start_selected == 1) {
+				start_selected++;
+			}
+		}
+		if (keys & KEY_TOUCH) {
+			float box_x = (320.0f - START_BOX_WIDTH) / 2.0f;
+			float box_y = (240.0f - START_BOX_HEIGHT) / 2.0f;
+			float center_y = box_y + START_BOX_HEIGHT / 2.0f;
+			float button_y[] = {center_y - START_BUTTON_SPACING, center_y, center_y + START_BUTTON_SPACING};
 
-    switch (game_mode) {
-        case GAME_TITLE:
-            title_update(keys, touch);
-            return true;
+			if (touch.px >= box_x && touch.px <= box_x + START_BOX_WIDTH) {
+				for (int i = 0; i < 3; i++) {
+					if (game_mode != GAME_NORMAL && i == 1) {
+						continue;
+					}
+					if (touch.py >= button_y[i] - START_BUTTON_SPACING / 2.0f && touch.py < button_y[i] + START_BUTTON_SPACING / 2.0f) {
+						start_selected = i;
+						activate = true;
+						break;
+					}
+				}
+			}
+		}
 
-        case GAME_TIMELINE:
-            timeline_update(keys);
-            return true;
+		if (keys & (KEY_B | KEY_START)) {
+			start_menu = false;
+			timer_resume();
+			return true;
+		}
 
-        case GAME_MINIGAME:
-            hud_update();
-            if (active_minigame && active_minigame->update) {
-                active_minigame->update(keys, touch);
-            }
-            return true;
+		if (activate) {
+			switch (start_selected) {
+			case 0:
+				start_menu = false;
+				break;
+			case 1:
+				start_menu = false;
+				if (!save_write()) {
+					game_show_message("SAVE_SAVING_ERROR");
+				} else {
+					game_show_message("SAVE_SAVING_SUCCESS");
+				}
+				break;
+			case 2:
+				return false;
+			}
+			timer_resume();
+		}
+		return true;
+	}
 
-        case GAME_MESSAGE:
-            hud_update();
-            if (keys & (KEY_A | KEY_B | KEY_TOUCH)) {
-                game_mode = GAME_NORMAL;
-                examine_image = (C2D_Image){0};
-            }
-            return true;
+	if (keys & KEY_START) {
+		start_menu = true;
+		start_selected = 0;
+		if (game_mode == GAME_MESSAGE) {
+			game_mode = GAME_NORMAL;
+			examine_image = (C2D_Image){0};
+		}
+		return true;
+	}
 
-        case GAME_BUSY:
-            hud_update();
-            // The callback is cleared before being called because it may
-            // start a new wait (e.g. the next WAIT_SFX of a room action list).
-            if (!sfx_is_playing(game_busy_sfx_channel)) {
-                game_mode = GAME_NORMAL;
-                if (game_busy_callback) {
-                    void (*callback)(void) = game_busy_callback;
-                    game_busy_callback = NULL;
-                    game_busy_sfx_channel = -1;
-                    callback();
-                }
-            }
-            return true;
+	switch (game_mode) {
+		case GAME_TITLE:
+			title_update(keys, touch);
+			return true;
 
-        default:
-            hud_update();
-            break;
-    }
+		case GAME_TIMELINE:
+			timeline_update(keys);
+			return true;
 
-    // GAME_NORMAL: the inventory gets the keys first (D-pad, A, X); when it
-    // consumes them, no movement or touch is handled this frame.
-    if ((inventory_is_active()) | (inventory_update(keys))) {
-        return true;
-    }
+		case GAME_MINIGAME:
+			hud_update();
+			if (active_minigame && active_minigame->update) {
+				active_minigame->update(keys, touch);
+			}
+			return true;
 
-    update_movement(analog);
+		case GAME_MESSAGE:
+			hud_update();
+			if (keys & (KEY_A | KEY_B | KEY_TOUCH)) {
+				game_mode = GAME_NORMAL;
+				examine_image = (C2D_Image){0};
+			}
+			return true;
 
-    if (keys & KEY_TOUCH) {
-        update_touch(touch);
-    }
-    return true;
+		case GAME_BUSY:
+			hud_update();
+			// The callback is cleared before being called because it may
+			// start a new wait (e.g. the next WAIT_SFX of a room action list).
+			if (!sfx_is_playing(game_busy_sfx_channel)) {
+				game_mode = GAME_NORMAL;
+				if (game_busy_callback) {
+					void (*callback)(void) = game_busy_callback;
+					game_busy_callback = NULL;
+					game_busy_sfx_channel = -1;
+					callback();
+				}
+			}
+			return true;
+
+		default:
+			hud_update();
+			break;
+	}
+
+	// GAME_NORMAL: the inventory gets the keys first (D-pad, A, X); when it
+	// consumes them, no movement or touch is handled this frame.
+	if ((inventory_is_active()) | (inventory_update(keys))) {
+		return true;
+	}
+
+	update_movement(analog);
+
+	if (keys & KEY_TOUCH) {
+		update_touch(touch);
+	}
+	return true;
 }
 
 void game_draw(C3D_RenderTarget *top, C3D_RenderTarget *bottom) {
-    C2D_TargetClear(top, C2D_Color32(0, 0, 0, 255));
-    C2D_TargetClear(bottom, C2D_Color32(0, 0, 0, 255));
-    switch (game_mode) {
-        case GAME_TITLE:
-            C2D_SceneBegin(bottom);
-            title_draw_bottom();
-            C2D_SceneBegin(top);
-            title_draw_top();
-            break;
+	C2D_TargetClear(top, C2D_Color32(0, 0, 0, 255));
+	C2D_TargetClear(bottom, C2D_Color32(0, 0, 0, 255));
+	switch (game_mode) {
+		case GAME_TITLE:
+			C2D_SceneBegin(bottom);
+			title_draw_bottom();
+			C2D_SceneBegin(top);
+			title_draw_top();
+			break;
 
-        case GAME_TIMELINE:
-            C2D_SceneBegin(bottom);
-            timeline_draw_bottom();
-            C2D_SceneBegin(top);
-            timeline_draw_top();
-            break;
+		case GAME_TIMELINE:
+			C2D_SceneBegin(bottom);
+			timeline_draw_bottom();
+			C2D_SceneBegin(top);
+			timeline_draw_top();
+			break;
 
-        case GAME_MINIGAME:
-            // The mini-game draws over the room, with a higher depth.
-            C2D_SceneBegin(bottom);
-            room_draw();
-            if (active_minigame && active_minigame->draw) {
-                active_minigame->draw();
-            }
-            C2D_SceneBegin(top);
-            hud_draw();
-            break;
+		case GAME_MINIGAME:
+			// The mini-game draws over the room, with a higher depth.
+			C2D_SceneBegin(bottom);
+			room_draw();
+			if (active_minigame && active_minigame->draw) {
+				active_minigame->draw();
+			}
+			C2D_SceneBegin(top);
+			hud_draw();
+			break;
 
-        default:
-            C2D_SceneBegin(bottom);
-            game_draw_room();
-            C2D_SceneBegin(top);
-            hud_draw();
-            break;
-    }
-    if (quit_confirm) {
-        C2D_SceneBegin(bottom);
-        quit_confirm_draw();
-    }
+		default:
+			C2D_SceneBegin(bottom);
+			game_draw_room();
+			C2D_SceneBegin(top);
+			hud_draw();
+			break;
+	}
+	if (start_menu) {
+		C2D_SceneBegin(bottom);
+		start_menu_draw();
+	}
 }

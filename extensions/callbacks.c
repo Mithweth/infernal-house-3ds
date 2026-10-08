@@ -11,14 +11,6 @@
 #include "measure.h"
 #include "digicode.h"
 
-
-typedef struct {
-    const char *name;
-    void (*init)(void);     // once per session (allocations)
-    void (*reset)(void);    // at the start of every game (game state)
-    void (*callback)(void);
-} InventoryCallback;
-
 typedef struct {
     const char *name;
     MiniGame *minigame;
@@ -36,7 +28,9 @@ static InventoryCallback inventory_callbacks[] = {
         .name = "secret_code",
         .init = secret_code_init,
         .reset = secret_code_reset,
-        .callback = secret_code_draw
+        .callback = secret_code_draw,
+        .serialize = secret_code_serialize,
+        .deserialize = secret_code_deserialize
     },
     {
         .name = "inject_syringe",
@@ -46,6 +40,16 @@ static InventoryCallback inventory_callbacks[] = {
 
 static const size_t minigame_callback_count = sizeof(minigame_callbacks) / sizeof(minigame_callbacks[0]);
 static const size_t inventory_callback_count = sizeof(inventory_callbacks) / sizeof(inventory_callbacks[0]);
+
+size_t callbacks_get_count(void) {
+    return inventory_callback_count;
+}
+const InventoryCallback *callbacks_get_index(size_t index) {
+    if (index >= inventory_callback_count) {
+        return NULL;
+    }
+    return &inventory_callbacks[index];
+}
 
 void (*callbacks_inventory_find(const char *name))(void) {
     for (size_t i = 0; i < inventory_callback_count; i++) {

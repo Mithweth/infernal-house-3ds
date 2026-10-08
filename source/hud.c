@@ -770,6 +770,14 @@ void timer_resume(void) {
     }
 }
 
+u64 timer_get_elapsed_time(void) {
+    return elapsed_time;
+}
+
+void timer_set_elapsed_time(u64 e) {
+    elapsed_time = e;
+}
+
 // Fake bold: draws the text twice, one pixel apart.
 static void draw_bold_text(C2D_Text *text, float x, float y, float z, float s, u32 color) {
     C2D_DrawText(text, C2D_WithColor, x, y, z, s, s, color);

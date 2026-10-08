@@ -6,7 +6,7 @@ For instructions on installing the `.cia` or `.3dsx` file, see the [project READ
 
 > **Before you start**
 >
-> A game lasts at most **60 minutes**, and the current version has no save system. Quitting the game therefore ends the current playthrough.
+> A game lasts at most **60 minutes**. You can save at any time while exploring with the **START** button (see [Saving and resuming a game](#10-saving-and-resuming-a-game)). Quitting the game without saving loses your progress since the last save.
 >
 > Some bad decisions can also be fatal. *Infernal House* is a game of exploration and experimentation: observe, try things, and don't be surprised if an apparently brilliant idea turns out to be a rather bad one.
 
@@ -14,11 +14,12 @@ For instructions on installing the `.cia` or `.3dsx` file, see the [project READ
 
 ![Title screen](title.png "Title")
 
-The title screen offers five choices:
+The title screen offers the following choices:
 
 - **Language**: switches to the next language. The change is immediate.
+- **Continue**: resumes the saved game. This choice only appears if a save exists.
 - **Introduction**: tells the events leading up to the game. Watching it at least once is strongly recommended.
-- **Play**: starts a new game.
+- **New game**: starts a new game. **Warning: the existing save is then erased.**
 - **Controls**: displays a reminder of the main controls.
 - **Credits**: displays the credits for the original game and the remake.
 
@@ -83,7 +84,7 @@ The counter at the top of the screen shows the remaining time. A new game starts
 
 Time continues to pass while you explore, read messages, examine your items or solve mini-games.
 
-However, time spent in the HOME Menu or while the console is in sleep mode is not counted.
+However, time spent in the HOME Menu, in the START menu or while the console is in sleep mode is not counted.
 
 When the timer reaches zero, the game is over.
 
@@ -160,9 +161,7 @@ Not every item necessarily has a detailed view. If **X** does not show anything 
 | **A**            | Use the selected item on the target   |
 | **X**            | Examine the selected item             |
 | **B**            | Close / cancel / go back              |
-| **START**        | Quit the game immediately             |
-
-> **Be careful with START:** it quits the game. Since there is no save system, the current playthrough will be lost.
+| **START**        | Open the menu: Back, Save, Quit       |
 
 ## 8. Mini-games
 
@@ -188,17 +187,52 @@ Some actions display an image instead of text. It can be closed in the same way.
 
 When examining an **inventory item** in detail, however, use **X** or **B** to return to the game.
 
-## 10. Dying and starting over
+## 10. Saving and resuming a game
+
+### The START menu
+
+Press **START** during the game to open the menu. It offers three choices:
+
+- **Back**: closes the menu and resumes the game;
+- **Save**: saves your progress;
+- **Quit**: quits the game.
+
+Pick an option with **up/down** and confirm with **A**, or touch it directly on the touch screen. **B** or **START** close the menu.
+
+The timer is paused while the menu is open.
+
+### Saving
+
+Choose **Save** in the START menu. The message **"Saved successfully"** confirms that everything went well.
+
+**Save** does not appear in the menu during a mini-game or an animated sequence. Finish or leave the mini-game first, then press START again.
+
+### Resuming a game
+
+On the title screen, choose **Continue**. You find the game exactly where you saved it, and the message **"Game loaded successfully"** is displayed.
+
+### Quitting
+
+**Quit** closes the game immediately, **without saving and without confirmation**. Remember to save just before.
+
+### A few tips
+
+- Save regularly, and above all **before trying an action that seems risky**.
+- The remaining time is saved too: a game saved with 2 minutes left will resume with 2 minutes left.
+- To resume your game, always choose **Continue**. **New game** erases the save as soon as you choose it.
+
+## 11. Dying and starting over
 
 The house is not entirely harmless.
 
 Some actions can cause the detective's death. The timer can also reach zero.
 
-After the game-over sequence, the game returns to the title screen. Choose **Play** to start a new game: the state of the house, the inventory and the timer all start again from scratch.
+After the game-over sequence, the game returns to the title screen. Two options:
 
-There is no save system, so a new game really does start again from the beginning.
+- **Continue** resumes from your last save, if you have one;
+- **New game** starts again from the beginning: the state of the house, the inventory and the timer all start from scratch, and the save is erased.
 
-## 11. A few tips without revealing the puzzles
+## 12. A few tips without revealing the puzzles
 
 If you are stuck, start by checking the simplest things:
 
@@ -212,7 +246,7 @@ If you are stuck, start by checking the simplest things:
 
 Above all, do not assume that an object is there merely for decoration. In a house like this, that is a dangerous assumption.
 
-## 12. Full walkthrough
+## 13. Full walkthrough
 
 If you would rather follow a walkthrough, or if a puzzle is really giving you trouble, a walkthrough for the original game is available on the website dedicated to Lankhor:
 
