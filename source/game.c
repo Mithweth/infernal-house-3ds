@@ -490,9 +490,9 @@ static void update_movement(circlePosition analog) {
 }
 
 // Handles a tap on the room. The first tap on a hotspot selects it as target
-// and, if it has a MESSAGE, only shows that message; tapping the same hotspot
-// again runs its ACTION blocks. Hotspots without a MESSAGE run their actions
-// on the first tap.
+// and, if it has a MESSAGE or a MESSAGE_IMAGE, only shows it (MESSAGE wins
+// when both are set); tapping the same hotspot again runs its ACTION blocks.
+// Hotspots with neither run their actions on the first tap.
 static void update_touch(touchPosition touch) {
 	if (active_hotspot && !room_hotspot_is_available(active_hotspot)) {
 		active_hotspot = NULL;
@@ -509,6 +509,11 @@ static void update_touch(touchPosition touch) {
 
 		if (hotspot->message_id) {
 			game_show_message(hotspot->message_id);
+			return;
+		}
+
+		if (hotspot->message_image.tex) {
+			game_show_image(hotspot->message_image);
 			return;
 		}
 	}

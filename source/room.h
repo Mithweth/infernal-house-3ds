@@ -40,6 +40,7 @@ typedef enum {
     ROOM_ACTION_INVENTORY_ADD,
     ROOM_ACTION_INVENTORY_REMOVE,
     ROOM_ACTION_MESSAGE,
+    ROOM_ACTION_MESSAGE_IMAGE,
     ROOM_ACTION_SFX,
     ROOM_ACTION_WAIT_SFX,
     ROOM_ACTION_ROOM,
@@ -50,6 +51,8 @@ typedef enum {
 typedef struct {
     RoomActionType type;
     char *argument;  // single argument of the directive (owned, strdup'd)
+    C2D_Image image; // MESSAGE_IMAGE only: resolved while parsing, because
+                     // the gfxmap table is replaced by later loads
 } RoomAction;
 
 // ACTION block of a hotspot or path: its actions run when all its
@@ -89,6 +92,7 @@ typedef struct {
     int height;
     char *id;          // also used as the lang key of the HUD target name
     char *message_id;  // optional lang key shown on the first touch, or NULL
+    C2D_Image message_image;  // optional image shown on the first touch, ignored if message_id is set
     RoomCondition conditions[ROOM_MAX_CONDITIONS];
     size_t condition_count;
     RoomActionBlock action_blocks[ROOM_MAX_ACTION_BLOCKS];
